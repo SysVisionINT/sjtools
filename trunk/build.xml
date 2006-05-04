@@ -1,0 +1,39 @@
+<project name="LIB" default="all" basedir=".">
+
+	<property name="src" value="SRC" />
+	<property name="build" value="BUILD" />
+	<property name="dist" value="${build}/DIST" />
+	<property name="classes" value="${build}/CLASSES" />
+
+	<path id="classpath">
+		<fileset dir="LIB">
+			<include name="*.jar"/>
+		</fileset>
+	</path>
+
+	<target name="all" depends="jar" />
+
+	<target name="init">
+		<tstamp />
+		<mkdir dir="${build}" />
+		<mkdir dir="${dist}" />
+		<mkdir dir="${classes}" />
+	</target>
+
+	<target name="compile" depends="init">
+		<javac classpathref="classpath" srcdir="${src}" destdir="${classes}" debug="true" />
+	</target>
+
+	<target name="jar" depends="compile">
+		<jar jarfile="${dist}/sjtools.jar">
+			<fileset dir="${classes}">
+				<exclude name="test/**"/>
+			</fileset>
+		</jar>
+	</target>
+
+	<target name="clean_all">
+		<delete dir="${build}" />
+	</target>
+
+</project>
