@@ -17,53 +17,36 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA
  */
-package net.java.sjtools.util;
+package net.java.sjtools.db.pk;
 
 import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.sql.SQLException;
 
-import javax.naming.NamingException;
-import javax.sql.DataSource;
+import net.java.sjtools.db.DBMS;
+import net.java.sjtools.db.DBMSUtil;
 
-public class DBUtil {
-	public static Connection getConnection(String jndiName) throws NamingException, SQLException {
-		Connection connection = null;
+public class NativePrimaryKeyUtil {
+	public static final long KEY_NOT_FOUND = -1;
 
-		DataSource dataSource = (DataSource) JNDIUtil.getJNDIObject(jndiName);
-
-		if (dataSource != null) {
-			connection = dataSource.getConnection();
-		}
-
-		return connection;
+	public static long getPrimaryKey(Connection con) throws SQLException {
+		return getPrimaryKey(con, DBMSUtil.getDBMS(con));
 	}
 
-	public static void close(Connection con) {
-		if (con != null) {
-			try {
-				con.close();
-			} catch (Exception e) {
-			}
-		}
-	}
+	public static long getPrimaryKey(Connection con, DBMS dbms) throws SQLException {
+		long ret = KEY_NOT_FOUND;
 
-	public static void close(ResultSet rs) {
-		if (rs != null) {
-			try {
-				rs.close();
-			} catch (Exception e) {
-			}
-		}
-	}
+		NativePrimaryKeyReader reader = null;
 
-	public static void close(PreparedStatement ps) {
-		if (ps != null) {
-			try {
-				ps.close();
-			} catch (Exception e) {
-			}
+		if (dbms.equals(DBMS.DBMS_INFORMIX)) {
+			reader = new InformixPrimaryKeyReader();
+		} else if (dbms.equals(DBMS.DBMS_MYSQL)) { 
+			reader = new MySQLPrimaryKeyReader();
 		}
+
+		if (reader != null) {
+			ret = reader.getKey(con);
+		}
+
+		return ret;
 	}
 }

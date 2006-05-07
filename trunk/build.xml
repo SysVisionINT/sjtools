@@ -1,4 +1,4 @@
-<project name="LIB" default="all" basedir=".">
+<project name="SJTools" default="all" basedir=".">
 
 	<property name="src" value="SRC" />
 	<property name="build" value="BUILD" />

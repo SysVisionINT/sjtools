@@ -17,8 +17,12 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA
  */
-package net.java.sjtools.thread;
+package net.java.sjtools.db.connection;
 
-public interface ThreadNotifier {
-	public void done(SuperThread thread);
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+
+public interface PreparedStatementCache {
+	public PreparedStatement getPreparedStatement(Connection connection, String sql);
+	public void registerPreparedStatement(Connection connection, String sql, PreparedStatement ps);
 }
