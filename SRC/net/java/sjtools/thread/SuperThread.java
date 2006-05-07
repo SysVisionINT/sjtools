@@ -29,7 +29,7 @@ public class SuperThread extends Thread {
 
     private int status = WAITING;
     private Runnable task = null;
-    private ThreadNotifier notifier = null;
+    private ThreadListener listener = null;
     private ThreadContext context = null;
 
     private static synchronized String getThreadName() {
@@ -40,9 +40,9 @@ public class SuperThread extends Thread {
         return "SuperThread_".concat(String.valueOf(threadNumber++));
     }
 
-    public SuperThread(ThreadNotifier boss) {
+    public SuperThread(ThreadListener boss) {
         this();
-        notifier = boss;
+        listener = boss;
     }
 
     public SuperThread() {
@@ -66,8 +66,8 @@ public class SuperThread extends Thread {
                     status = WAITING;
                 }
 
-                if (notifier != null) {
-                    notifier.done(this);
+                if (listener != null) {
+                    listener.done(this);
                 }
 
                 if (context != null) {
@@ -77,7 +77,7 @@ public class SuperThread extends Thread {
             }
         }
 
-        notifier = null;
+        listener = null;
         status = STOP;
     }
 

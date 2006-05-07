@@ -17,23 +17,11 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA
  */
-package net.java.sjtools.thread;
+package net.java.sjtools.db.pk;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.sql.Connection;
+import java.sql.SQLException;
 
-public class ThreadContext {
-	private Map context = new HashMap();
-	
-	public void clearContext() {
-		context.clear();
-	}
-	
-	public void put(String name, Object obj) {
-		context.put(name, obj);
-	}
-	
-	public Object get(String name) {
-		return context.get(name);
-	}	
+public interface NativePrimaryKeyReader {
+	public long getKey(Connection con) throws SQLException;
 }

@@ -17,23 +17,38 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA
  */
-package net.java.sjtools.thread;
+package net.java.sjtools.db.pk;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 
-public class ThreadContext {
-	private Map context = new HashMap();
+import net.java.sjtools.db.DBUtil;
+
+public class MySQLPrimaryKeyReader implements NativePrimaryKeyReader {
 	
-	public void clearContext() {
-		context.clear();
+	private static final String SQL_GENERATED_ID = "SELECT LAST_INSERT_ID()";
+
+	public long getKey(Connection con) throws SQLException {
+		long ret = 0;
+		
+        PreparedStatement ps = null;
+        ResultSet rs = null;
+
+       try {
+            ps = con.prepareStatement(SQL_GENERATED_ID);
+
+            rs = ps.executeQuery();
+        
+            if (rs.next()) {
+                ret = rs.getLong(1);
+            }
+        } finally {
+            DBUtil.close(rs);
+            DBUtil.close(ps);
+        }
+		
+		return ret;
 	}
-	
-	public void put(String name, Object obj) {
-		context.put(name, obj);
-	}
-	
-	public Object get(String name) {
-		return context.get(name);
-	}	
 }

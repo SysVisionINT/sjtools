@@ -22,9 +22,9 @@ package net.java.sjtools.thread.pool;
 import net.java.sjtools.pool.Pool;
 import net.java.sjtools.pool.PoolFactory;
 import net.java.sjtools.thread.SuperThread;
-import net.java.sjtools.thread.ThreadNotifier;
+import net.java.sjtools.thread.ThreadListener;
 
-public class ThreadFactory implements PoolFactory, ThreadNotifier {
+public class ThreadFactory implements PoolFactory, ThreadListener {
 	private Pool pool = null;
 
 	public Object createObject() {

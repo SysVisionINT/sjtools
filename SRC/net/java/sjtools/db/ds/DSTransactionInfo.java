@@ -17,23 +17,31 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA
  */
-package net.java.sjtools.thread;
+package net.java.sjtools.db.ds;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.io.Serializable;
 
-public class ThreadContext {
-	private Map context = new HashMap();
+import net.java.sjtools.db.connection.PoolableConnection;
+
+public class DSTransactionInfo implements Serializable {
+	private static final long serialVersionUID = -2360908238066227384L;
 	
-	public void clearContext() {
-		context.clear();
+	private boolean inTransaction = false;
+	private PoolableConnection connection = null;
+	
+	public PoolableConnection getConnection() {
+		return connection;
 	}
 	
-	public void put(String name, Object obj) {
-		context.put(name, obj);
+	public void setConnection(PoolableConnection connection) {
+		this.connection = connection;
 	}
 	
-	public Object get(String name) {
-		return context.get(name);
-	}	
+	public boolean isInTransaction() {
+		return inTransaction;
+	}
+	
+	public void setInTransaction(boolean inTransaction) {
+		this.inTransaction = inTransaction;
+	}
 }

@@ -19,21 +19,6 @@
  */
 package net.java.sjtools.thread;
 
-import java.util.HashMap;
-import java.util.Map;
-
-public class ThreadContext {
-	private Map context = new HashMap();
-	
-	public void clearContext() {
-		context.clear();
-	}
-	
-	public void put(String name, Object obj) {
-		context.put(name, obj);
-	}
-	
-	public Object get(String name) {
-		return context.get(name);
-	}	
+public interface ThreadListener {
+	public void done(SuperThread thread);
 }
