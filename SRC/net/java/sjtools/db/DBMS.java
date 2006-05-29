@@ -75,7 +75,7 @@ public class DBMS implements Serializable {
 			return false;
 		}
 		
-		if (! (obj instanceof Level)) {
+		if (! (obj instanceof DBMS)) {
 			return false;
 		}
 		
