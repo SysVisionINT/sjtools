@@ -19,15 +19,17 @@
  */
 package net.java.sjtools.pool;
 
-public class ObjectCreationException extends Exception {
-	private static final long serialVersionUID = 1268448672969653221L;
+import net.java.sjtools.error.ApplicationError;
+
+public class ObjectCreationException extends ApplicationError {
+	private static final long serialVersionUID = -8142567157451320799L;
 
 	public ObjectCreationException() {
 		super("Error while creating object pool object");
 	}
 
-	public ObjectCreationException(String arg0) {
-		super(arg0);
+	public ObjectCreationException(String message) {
+		super(message);
 	}
 
 }

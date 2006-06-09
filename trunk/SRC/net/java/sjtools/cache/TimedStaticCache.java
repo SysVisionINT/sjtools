@@ -19,7 +19,6 @@
  */
 package net.java.sjtools.cache;
 
-
 public class TimedStaticCache {
 	public static Object getObject(Object request, TimedStaticCacheHelper helper) {
 		long timeout = helper.getTimeout();

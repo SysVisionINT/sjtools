@@ -17,19 +17,37 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA
  */
-package net.java.sjtools.cache;
+package net.java.sjtools.util;
 
-import net.java.sjtools.error.ApplicationError;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Properties;
 
-public class ObjectNotFound extends ApplicationError {
-	private static final long serialVersionUID = 6411841232842211197L;
+public class PropertyReader {
 
-	public ObjectNotFound() {
-		super("Object not found");
+	public static Properties getProperties(String file) throws IOException {
+		return getProperties(new FileInputStream(file));
+	}
+	
+	public static Properties getProperties(File file) throws IOException {
+		return getProperties(new FileInputStream(file));
 	}
 
-	public ObjectNotFound(String message) {
-		super(message);
-	}
+	public static Properties getProperties(InputStream is) throws IOException {
+		Properties p = null;
 
+		if (is != null) {
+			p = new Properties();
+
+			try {
+				p.load(is);
+			} finally {
+				StreamUtil.close(is);
+			}
+		}
+
+		return p;
+	}
 }

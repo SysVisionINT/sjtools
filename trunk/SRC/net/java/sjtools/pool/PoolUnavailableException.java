@@ -19,15 +19,17 @@
  */
 package net.java.sjtools.pool;
 
-public class PoolUnavailableException extends Exception {
-	private static final long serialVersionUID = -3162882838922367698L;
+import net.java.sjtools.error.ApplicationError;
+
+public class PoolUnavailableException extends ApplicationError {
+	private static final long serialVersionUID = -8881041146539686642L;
 
 	public PoolUnavailableException() {
 		super("The pool is no longer available");
 	}
 
-	public PoolUnavailableException(String arg0) {
-		super(arg0);
+	public PoolUnavailableException(String message) {
+		super(message);
 	}
 
 }

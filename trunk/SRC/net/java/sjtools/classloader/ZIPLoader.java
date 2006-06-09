@@ -26,6 +26,8 @@ import java.net.URL;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
+import net.java.sjtools.util.StreamUtil;
+
 public class ZIPLoader implements Loader {
    private String zipName = null;
 
@@ -64,9 +66,7 @@ public class ZIPLoader implements Loader {
 
             }
         } catch (Exception e) {} finally {
-            try {
-                is.close();
-            } catch (Exception e1) {}
+        	StreamUtil.close(is);
 
             try {
                 zf.close();

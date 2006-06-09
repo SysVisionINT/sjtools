@@ -34,7 +34,7 @@ public class SuperThread extends Thread {
 
     private static synchronized String getThreadName() {
         if (threadNumber == Integer.MAX_VALUE) {
-            threadNumber = 0;
+            threadNumber = Integer.MIN_VALUE;
         }
 
         return "SuperThread_".concat(String.valueOf(threadNumber++));

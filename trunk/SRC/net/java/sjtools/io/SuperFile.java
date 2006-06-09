@@ -23,6 +23,8 @@ import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 
+import net.java.sjtools.util.StreamUtil;
+
 public class SuperFile extends File {
 	private static final long serialVersionUID = -615070155290162604L;
 
@@ -76,13 +78,8 @@ public class SuperFile extends File {
 		} catch (Exception e) {
 			ret = false;
 		} finally {
-			try {
-				in.close();
-			} catch (Exception el) {}
-
-			try {
-				out.close();
-			} catch (Exception el) {}
+			StreamUtil.close(in);
+			StreamUtil.close(out);
 		}
 
 		return ret;
