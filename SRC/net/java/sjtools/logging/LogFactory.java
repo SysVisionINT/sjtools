@@ -19,13 +19,13 @@
  */
 package net.java.sjtools.logging;
 
-import java.io.InputStream;
 import java.util.Properties;
 
 import net.java.sjtools.logging.api.Factory;
 import net.java.sjtools.logging.error.LogConfigurationError;
 import net.java.sjtools.logging.impl.DefaultFactory;
 import net.java.sjtools.logging.impl.Level;
+import net.java.sjtools.util.PropertyReader;
 
 public class LogFactory {
 	private static final String LOGGER_FACTORY_PROPERTY = "sjtools.logging.factory";
@@ -56,22 +56,14 @@ public class LogFactory {
 		}
 
 		String factoryName = System.getProperty(LOGGER_FACTORY_PROPERTY);
-		String defaultLogLevel = System.getProperty(DEFAULT_LOGGER_LEVEL_PROPERTY);;
+		String defaultLogLevel = System.getProperty(DEFAULT_LOGGER_LEVEL_PROPERTY);
 		ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
 
 		if (factoryName == null) {
 			Properties props = null;
 
 			try {
-				InputStream is = classLoader.getResourceAsStream(LOGGER_CONFIG_FILE);
-
-				if (is != null) {
-					props = new Properties();
-
-					props.load(is);
-
-					is.close();
-				}
+				props = PropertyReader.getProperties(classLoader.getResourceAsStream(LOGGER_CONFIG_FILE));
 			} catch (Exception e) {
 			}
 
@@ -96,7 +88,7 @@ public class LogFactory {
 		} else {
 			try {
 				Class factoryClass = classLoader.loadClass(factoryName);
-				
+
 				factory = (Factory) factoryClass.newInstance();
 			} catch (ClassNotFoundException e) {
 				throw new LogConfigurationError("Factory class " + factoryName + " not found!", e);

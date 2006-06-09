@@ -25,8 +25,7 @@ import java.util.Date;
 import net.java.sjtools.time.SuperDate;
 import net.java.sjtools.time.TimeConst;
 
-public class DateUtil {
-
+public class DateUtil {	
 	public static boolean isValidDate(String inputDate, String format) {
 		try {
 			SuperDate date = new SuperDate(inputDate, format);

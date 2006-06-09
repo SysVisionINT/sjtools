@@ -17,19 +17,29 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA
  */
-package net.java.sjtools.cache;
+package net.java.sjtools.util;
 
-import net.java.sjtools.error.ApplicationError;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 
-public class ObjectNotFound extends ApplicationError {
-	private static final long serialVersionUID = 6411841232842211197L;
+public class StreamUtil {
 
-	public ObjectNotFound() {
-		super("Object not found");
+	public static void close(InputStream inputStream) {
+		if (inputStream != null) {
+			try {
+				inputStream.close();
+			} catch (IOException e) {
+			}
+		}
 	}
 
-	public ObjectNotFound(String message) {
-		super(message);
+	public static void close(OutputStream outputStream) {
+		if (outputStream != null) {
+			try {
+				outputStream.close();
+			} catch (IOException e) {
+			}
+		}
 	}
-
 }

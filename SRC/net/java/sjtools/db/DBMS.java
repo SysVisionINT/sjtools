@@ -21,8 +21,6 @@ package net.java.sjtools.db;
 
 import java.io.Serializable;
 
-import net.java.sjtools.logging.impl.Level;
-
 public class DBMS implements Serializable {
 	private static final long serialVersionUID = -538091222823564956L;
 

@@ -19,29 +19,38 @@
  */
 package net.java.sjtools.util;
 
+import java.io.File;
+import java.io.IOException;
+import java.util.Hashtable;
+
 import javax.naming.Context;
+import javax.naming.InitialContext;
 import javax.naming.NamingException;
-import javax.rmi.PortableRemoteObject;
 
-public class JNDIUtil {
-	public static Object getJNDIObject(String jndiName) throws NamingException  {
-		Context ctx = null;
-		Object obj = null;
+public class ContextUtil {
 
-		try {
-			ctx = ContextUtil.getInitialContext();
-
-			obj = ctx.lookup(jndiName);
-		} finally {
-			ContextUtil.close(ctx);
-		}
-
-		return obj;
+	public static Context getInitialContext() throws NamingException {
+		return new InitialContext();
 	}
 	
-	public static Object getJNDIRemoteObject(String jndiName, Class clazz) throws NamingException {
-		Object object = getJNDIObject(jndiName);
-		
-		return PortableRemoteObject.narrow(object, clazz);
+	public static Context getInitialContext(Hashtable map) throws NamingException {
+		return new InitialContext(map);
+	}
+	
+	public static Context getInitialContext(File propertyFile) throws NamingException, IOException {
+		return new InitialContext(PropertyReader.getProperties(propertyFile));
+	}	
+	
+	public static Context getInitialContext(String propertyFileName) throws NamingException, IOException {
+		return new InitialContext(PropertyReader.getProperties(propertyFileName));
+	}	
+	
+	public static void close(Context ctx) {
+		if (ctx != null) {
+			try {
+				ctx.close();
+			} catch (NamingException e) {
+			}
+		}
 	}
 }

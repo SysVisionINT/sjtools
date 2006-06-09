@@ -161,6 +161,10 @@ public class TextUtil {
     }
 
     public static String toString(Object obj) {
+        if (obj == null) {
+            return "null";
+        }
+        
         return (new BeanUtil(obj)).toString();
     }
 

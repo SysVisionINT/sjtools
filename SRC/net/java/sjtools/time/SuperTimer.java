@@ -33,11 +33,11 @@ import net.java.sjtools.thread.pool.ThreadPool;
 public class SuperTimer implements Runnable {
 	private static SuperTimer realTimer = null;
 
-	private Thread myThread = null;
+	private Thread thread = null;
 	private boolean run = true;
 	private long sleep = Long.MAX_VALUE;
-	private SortedMap myTasks = new TreeMap();
-	private Lock lock = new Lock(myTasks);
+	private SortedMap tasks = new TreeMap();
+	private Lock lock = new Lock(tasks);
 
 	public synchronized static SuperTimer getInstance() {
 		if (realTimer == null) {
@@ -52,16 +52,16 @@ public class SuperTimer implements Runnable {
 	}
 
 	private void start() {
-		myThread = new Thread(Thread.currentThread().getThreadGroup(), this);
-		myThread.setDaemon(false);
-		myThread.setName("SuperTimer(" + myThread.getName() + ")");
-		myThread.start();
+		thread = new Thread(Thread.currentThread().getThreadGroup(), this);
+		thread.setDaemon(false);
+		thread.setName("SuperTimer(" + thread.getName() + ")");
+		thread.start();
 		run = true;
 	}
 
 	public void cancel() {
 		lock.getWriteLock();
-		myTasks.clear();
+		tasks.clear();
 		lock.releaseLock();
 
 		updateClock();
@@ -69,7 +69,7 @@ public class SuperTimer implements Runnable {
 
 	private void stop() {
 		run = false;
-		myThread.interrupt();
+		thread.interrupt();
 	}
 
 	public void schedule(Runnable task, Timestamp time) {
@@ -77,11 +77,11 @@ public class SuperTimer implements Runnable {
 
 		lock.getReadLock();
 
-		if (!myTasks.isEmpty()) {
-			first = myTasks.firstKey();
+		if (!tasks.isEmpty()) {
+			first = tasks.firstKey();
 		}
 
-		List list = (List) myTasks.get(time);
+		List list = (List) tasks.get(time);
 
 		lock.releaseLock();
 
@@ -92,7 +92,7 @@ public class SuperTimer implements Runnable {
 		list.add(task);
 
 		lock.getWriteLock();
-		myTasks.put(time, list);
+		tasks.put(time, list);
 		lock.releaseLock();
 
 		if (first == null || time.before((Timestamp) first)) {
@@ -106,10 +106,7 @@ public class SuperTimer implements Runnable {
 
 	public void run() {
 		while (run) {
-			try {
-				Thread.sleep(sleep);
-			} catch (InterruptedException e) {
-			}
+			Sleep.milliSeconds(sleep);
 
 			if (run) {
 				runTasks();
@@ -122,7 +119,7 @@ public class SuperTimer implements Runnable {
 
 		lock.getReadLock();
 
-		for (Iterator i = myTasks.values().iterator(); i.hasNext();) {
+		for (Iterator i = tasks.values().iterator(); i.hasNext();) {
 			count = count + ((List) i.next()).size();
 		}
 
@@ -133,14 +130,14 @@ public class SuperTimer implements Runnable {
 
 	public Timestamp getNextExecution() {
 		lock.getReadLock();
-		Timestamp time = (Timestamp) myTasks.firstKey();
+		Timestamp time = (Timestamp) tasks.firstKey();
 		lock.releaseLock();
 
 		return time;
 	}
 
 	private void runTasks() {
-		Timestamp now = new Timestamp(System.currentTimeMillis());
+		Timestamp now = new SuperDate();
 		List scheduleTasks = new ArrayList();
 		List removeList = new ArrayList();
 		Timestamp date = null;
@@ -149,11 +146,11 @@ public class SuperTimer implements Runnable {
 
 		lock.getReadLock();
 
-		for (Iterator i = myTasks.keySet().iterator(); i.hasNext();) {
+		for (Iterator i = tasks.keySet().iterator(); i.hasNext();) {
 			date = (Timestamp) i.next();
 
 			if (now.after(date) || now.equals(date)) {
-				scheduleTasks.addAll((List) myTasks.get(date));
+				scheduleTasks.addAll((List) tasks.get(date));
 				removeList.add(date);
 				count++;
 			} else {
@@ -167,7 +164,7 @@ public class SuperTimer implements Runnable {
 			lock.getWriteLock();
 
 			for (Iterator i = removeList.iterator(); i.hasNext();) {
-				myTasks.remove(i.next());
+				tasks.remove(i.next());
 			}
 
 			lock.releaseLock();
@@ -184,8 +181,8 @@ public class SuperTimer implements Runnable {
 	private void updateClock() {
 		lock.getReadLock();
 
-		if (!myTasks.isEmpty()) {
-			Timestamp first = (Timestamp) myTasks.firstKey();
+		if (!tasks.isEmpty()) {
+			Timestamp first = (Timestamp) tasks.firstKey();
 			sleep = first.getTime() - System.currentTimeMillis();
 
 			if (sleep < 0) {
@@ -201,7 +198,7 @@ public class SuperTimer implements Runnable {
 			stop();
 		} else {
 			if (run) {
-				myThread.interrupt();
+				thread.interrupt();
 			} else {
 				start();
 			}

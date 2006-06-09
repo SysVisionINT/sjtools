@@ -17,19 +17,20 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA
  */
-package net.java.sjtools.cache;
+package net.java.sjtools.error;
 
-import net.java.sjtools.error.ApplicationError;
+public class UnexpectedError extends ApplicationError {
+	private static final long serialVersionUID = 6597900656057594358L;
 
-public class ObjectNotFound extends ApplicationError {
-	private static final long serialVersionUID = 6411841232842211197L;
-
-	public ObjectNotFound() {
-		super("Object not found");
+	public UnexpectedError(Throwable throwable) {
+		super(throwable);
 	}
-
-	public ObjectNotFound(String message) {
-		super(message);
-	}
-
+	
+	public UnexpectedError(String errorMsg, Throwable throwable) {
+		super(errorMsg, throwable);
+	}	
+	
+	public UnexpectedError(String errorMsg) {
+		super(errorMsg);
+	}	
 }

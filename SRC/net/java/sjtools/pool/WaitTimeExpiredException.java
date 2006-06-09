@@ -19,15 +19,17 @@
  */
 package net.java.sjtools.pool;
 
-public class WaitTimeExpiredException extends Exception {
-	private static final long serialVersionUID = -6826445723093511437L;
+import net.java.sjtools.error.ApplicationError;
+
+public class WaitTimeExpiredException extends ApplicationError {
+	private static final long serialVersionUID = 7922261241408097664L;
 
 	public WaitTimeExpiredException() {
 		super("The waiting time for an object expired");
 	}
 
-	public WaitTimeExpiredException(String arg0) {
-		super(arg0);
+	public WaitTimeExpiredException(String message) {
+		super(message);
 	}
 
 }

@@ -205,7 +205,7 @@ public class BeanUtil {
 		return name;
 	}
 
-	public List getMethods(String methodName) {
+	private List getMethods(String methodName) {
 		List ret = new ArrayList();
 
 		Method[] methods = obj.getClass().getMethods();
@@ -219,7 +219,7 @@ public class BeanUtil {
 		return ret;
 	}
 
-	public String getMethodName(String prefix, String propertyName) {
+	private String getMethodName(String prefix, String propertyName) {
 		StringBuffer buffer = new StringBuffer();
 
 		buffer.append(prefix);

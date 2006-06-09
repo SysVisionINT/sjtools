@@ -26,71 +26,72 @@ import java.net.URL;
 import java.util.Iterator;
 import java.util.List;
 
+import net.java.sjtools.util.StreamUtil;
 import net.java.sjtools.util.TextUtil;
 
 public class DirectoryLoader implements Loader {
-    private String directoryName = null;
+	private String directoryName = null;
 
-    public DirectoryLoader(String directory) {
-        directoryName = directory;
+	public DirectoryLoader(String directory) {
+		directoryName = directory;
 
-        if (!directoryName.endsWith(System.getProperty("file.separator"))) {
-            directoryName += System.getProperty("file.separator");
-        }
-    }
+		if (!directoryName.endsWith(System.getProperty("file.separator"))) {
+			directoryName += System.getProperty("file.separator");
+		}
+	}
 
-    public byte[] loadClassBytes(String className) {
-        FileInputStream is = null;
-        byte[] classBytes = null;
+	public byte[] loadClassBytes(String className) {
+		FileInputStream is = null;
+		byte[] classBytes = null;
 
-        try {
-            String classPath = convertClassName(className);
+		try {
+			String classPath = convertClassName(className);
 
-            is = new FileInputStream(directoryName + classPath + ".class");
+			is = new FileInputStream(directoryName + classPath + ".class");
 
-            if (is.available() > 0) {
-                classBytes = new byte[is.available()];
-                is.read(classBytes);
-            }
-        } catch (Exception e) {} finally {
-            try {
-                is.close();
-            } catch (Exception e1) {}
-        }
+			if (is.available() > 0) {
+				classBytes = new byte[is.available()];
+				is.read(classBytes);
+			}
+		} catch (Exception e) {
+		} finally {
+			StreamUtil.close(is);
+		}
 
-        return classBytes;
-    }
+		return classBytes;
+	}
 
-    private String convertClassName(String className) {
-        List classPackages = TextUtil.split(className, ".");
-        StringBuffer buffer = new StringBuffer();
+	private String convertClassName(String className) {
+		List classPackages = TextUtil.split(className, ".");
+		StringBuffer buffer = new StringBuffer();
 
-        String separator = System.getProperty("file.separator");
+		String separator = System.getProperty("file.separator");
 
-        for (Iterator i = classPackages.iterator(); i.hasNext();) {
-            if (buffer.length() != 0) {
-                buffer.append(separator);
-            }
+		for (Iterator i = classPackages.iterator(); i.hasNext();) {
+			if (buffer.length() != 0) {
+				buffer.append(separator);
+			}
 
-            buffer.append(i.next());
-        }
+			buffer.append(i.next());
+		}
 
-        return buffer.toString();
-    }
-    
-    public URL findResource(String resourceName) {
-        File file = new File(directoryName + resourceName);
-        
-        if (file.exists()) {
-            try {
-                return file.toURL();
-            } catch (MalformedURLException e) {}
-        }
-        
-        return null;
-    }
+		return buffer.toString();
+	}
 
-    public String getName() {
-        return directoryName;
-    }    
+	public URL findResource(String resourceName) {
+		File file = new File(directoryName + resourceName);
+
+		if (file.exists()) {
+			try {
+				return file.toURL();
+			} catch (MalformedURLException e) {
+			}
+		}
+
+		return null;
+	}
+
+	public String getName() {
+		return directoryName;
+	}
 }

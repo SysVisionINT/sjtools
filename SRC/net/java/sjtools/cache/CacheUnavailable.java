@@ -19,15 +19,17 @@
  */
 package net.java.sjtools.cache;
 
-public class CacheUnavailable extends Exception {
-	private static final long serialVersionUID = -4887128422987289633L;
+import net.java.sjtools.error.ApplicationError;
+
+public class CacheUnavailable extends ApplicationError {
+	private static final long serialVersionUID = 4632554419785590558L;
 
 	public CacheUnavailable() {
 		super("The cache is no longer available");
 	}
 
-	public CacheUnavailable(String arg0) {
-		super(arg0);
+	public CacheUnavailable(String message) {
+		super(message);
 	}
 
 }

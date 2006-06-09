@@ -90,6 +90,10 @@ public class Cache implements Runnable {
 	}
 
 	private void schedule() {
+		if (!running) {
+			return;
+		}
+		
 		if (myConfig.getExpireTime() != CacheConfig.NEVER_EXPIRE) {
 			SuperTimer.getInstance().schedule(this, System.currentTimeMillis() + myConfig.getExpireTime());
 		}

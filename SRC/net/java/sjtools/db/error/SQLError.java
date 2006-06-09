@@ -17,19 +17,16 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA
  */
-package net.java.sjtools.cache;
+package net.java.sjtools.db.error;
+
+import java.sql.SQLException;
 
 import net.java.sjtools.error.ApplicationError;
 
-public class ObjectNotFound extends ApplicationError {
-	private static final long serialVersionUID = 6411841232842211197L;
+public class SQLError extends ApplicationError {
+	private static final long serialVersionUID = -1773781004539682300L;
 
-	public ObjectNotFound() {
-		super("Object not found");
+	public SQLError(SQLException e) {
+		super(e);
 	}
-
-	public ObjectNotFound(String message) {
-		super(message);
-	}
-
 }
