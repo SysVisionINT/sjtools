@@ -17,16 +17,24 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA
  */
-package net.java.sjtools.messaging.error;
+package net.java.sjtools.messaging.model;
 
-public class MessageBrokerClosedException extends Exception {
-	private static final long serialVersionUID = 1675438466539374570L;
+import net.java.sjtools.messaging.Message;
 
-	public MessageBrokerClosedException() {
-		super("The message broker is no longer available");
-	}
+public class StorageRecord {
+    private Message message = null;
+    private String recordKey = null;
 
-	public MessageBrokerClosedException(String arg0) {
-		super(arg0);
-	}
+    public StorageRecord(String recordKey, Message message) {
+        this.recordKey = recordKey;
+        this.message = message;
+    }
+
+    public Message getMessage() {
+        return message;
+    }
+
+    public String getRecordKey() {
+        return recordKey;
+    }
 }

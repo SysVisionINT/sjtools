@@ -20,73 +20,74 @@
 package net.java.sjtools.messaging.impl;
 
 import net.java.sjtools.messaging.Message;
+import net.java.sjtools.messaging.MessageBroker;
 import net.java.sjtools.messaging.model.Listener;
-import net.java.sjtools.messaging.model.MessageRecord;
+import net.java.sjtools.messaging.model.StorageRecord;
 import net.java.sjtools.messaging.model.MessageStorage;
 import net.java.sjtools.thread.SuperThread;
+import net.java.sjtools.time.Sleep;
 
-public class ListenerFeeder implements Listener, Runnable {
-    private MessageStorage storage = null;
-    private String storageKey = null;
-    private Listener listener = null;
-    private SuperThread thread = null;
-    private int topicCount = 0;
-    
-    public int getTopicCount() {
-        return topicCount;
-    }
-    
-    public void incTopicCount() {
-        topicCount++;
-    }
-    
-    public void decTopicCount() {
-        topicCount--;
-    }    
-    
-    public ListenerFeeder(Listener listener, MessageStorage messageStorage) {
-        this.listener = listener;
-        storageKey = listener.getClass().getName();
-        this.storage = messageStorage;
-        
-        thread = new SuperThread();
-        thread.setDaemon(false);
-        thread.setName("ListenerFeeder(" + thread.getName() + ")");
-        thread.start();
-    }
+public class ListenerFeeder implements Runnable {
+	private String storageKey = null;
+	private Listener listener = null;
+	private SuperThread thread = null;
+	private int topicCount = 1;
+	private boolean run = true;
 
-    public void process(Message message) {
-        storage.store(storageKey, message);
+	public int getTopicCount() {
+		return topicCount;
+	}
 
-        if (thread.getStatus() == SuperThread.WAITING) {
-            thread.start(this);
-        }
-    }
+	public void incTopicCount() {
+		topicCount++;
+	}
 
-    public void run() {
-        MessageRecord message = null;
-        
-        while (!storage.isEmpty(storageKey)) {
-            message = storage.getNextMessage(storageKey);
-            
-            try {
-                listener.process(message.getMessage());
-                storage.deleteMessage(storageKey, message.getRecordKey());
-            } catch (Exception e) {
-            }
-        }
-    }
-    
-    public void stop() {
-        thread.die();
-    }
-    
-    public void clean() {
-        stop();
-        storage.clean(storageKey);
-    }    
+	public void decTopicCount() {
+		topicCount--;
+	}
 
-    public Listener getListener() {
-        return listener;
-    }
+	public ListenerFeeder(String listenerName, Listener listener) {
+		this.listener = listener;
+		storageKey = listenerName;
+
+		thread = new SuperThread();
+		thread.setDaemon(false);
+		thread.setName("ListenerFeeder(" + thread.getName() + ")");
+		thread.start();
+	}
+
+	public void delivery(Message message) {
+		MessageBroker.getInstance().getMessageStorage().store(storageKey, message);
+
+		if (thread.getStatus() == SuperThread.WAITING) {
+			thread.start(this);
+		}
+	}
+
+	public void run() {
+		MessageStorage storage = MessageBroker.getInstance().getMessageStorage();
+
+		StorageRecord message = null;
+
+		while (run) {
+			if (!storage.hasMessages(storageKey)) {
+				Sleep.seconds(1);
+			} else {
+				message = storage.getNextMessage(storageKey);
+
+				try {
+					listener.process(message.getMessage());
+					storage.deleteMessage(storageKey, message.getRecordKey());
+				} catch (Exception e) {
+					Sleep.seconds(5);
+				}
+			}
+		}
+	}
+
+	public void stop() {
+		run = false;
+		thread.interrupt();
+		MessageBroker.getInstance().getMessageStorage().clean(storageKey);
+	}
 }
