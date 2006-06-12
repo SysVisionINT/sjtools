@@ -23,115 +23,85 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import net.java.sjtools.messaging.error.TopicClosedException;
+import net.java.sjtools.messaging.impl.ListenerFeeder;
 import net.java.sjtools.messaging.model.Listener;
 import net.java.sjtools.thread.Lock;
 
 public class Topic {
-    private List listenerList = null;
-    private Lock listenerLock = null;
-    private String name = null;
-    private MessageBroker broker = null;
-    private boolean closed = false;
+	private List listenerList = null;
+	private Lock listenerLock = null;
+	private String name = null;
 
-    protected Topic(String name) {
-        listenerList = new ArrayList();
-        listenerLock = new Lock(listenerList);
+	protected Topic(String name) {
+		listenerList = new ArrayList();
+		listenerLock = new Lock(listenerList);
 
-        this.name = name;
-    }
+		this.name = name;
+	}
 
-    protected void setBroker(MessageBroker broker) {
-        this.broker = broker;
-    }
+	public String getName() {
+		return name;
+	}
 
-    public String getName() {
-        return name;
-    }
+	public void sendMessage(Message msg) {
+		MessageBroker broker = MessageBroker.getInstance();
 
-    public boolean isClosed() {
-        return closed;
-    }
-    
-    public void sendMessage(Message msg) throws TopicClosedException {
-        if (closed) {
-            throw new TopicClosedException();
-        }
+		ListenerFeeder feeder = null;
 
-        Listener listener = null;
+		listenerLock.getReadLock();
 
-        listenerLock.getReadLock();
+		for (Iterator i = listenerList.iterator(); i.hasNext();) {
+			feeder = broker.getListenerFeeder((String) i.next());
 
-        for (Iterator i = listenerList.iterator(); i.hasNext();) {
-            listener = (Listener) i.next();
+			feeder.delivery(msg);
+		}
 
-            listener.process(msg);
-        }
+		listenerLock.releaseLock();
+	}
 
-        listenerLock.releaseLock();
-    }
+	public void subscribe(Listener listener) {
+		subscribe(listener.getClass().getName(), listener);
+	}
 
-    public void subscribe(Listener listener) throws TopicClosedException {
-        if (closed) {
-            throw new TopicClosedException();
-        }
+	public void subscribe(String listenerName, Listener listener) {
+		listenerLock.getWriteLock();
+		listenerList.add(listenerName);
+		listenerLock.releaseLock();
 
-        listenerLock.getWriteLock();
-        listenerList.add(broker.register(listener));
-        listenerLock.releaseLock();
-    }
+		MessageBroker.getInstance().register(listenerName, listener);
+	}
 
-    protected void close() {
-        listenerLock.getWriteLock();
-        
-        for (Iterator i = listenerList.iterator(); i.hasNext();) {
-            broker.stop((Listener) i.next());
-        }
-        
-        listenerList.clear();
-        
-        listenerLock.releaseLock();
-        
-        broker.removeTopic(this);
-        
-        closed = true;
-    }
+	public void unsubscribe(Listener listener) {
+		unsubscribe(listener.getClass().getName(), listener);
+	}
 
-    public void unsubscribe(Listener listener) throws TopicClosedException {
-        if (closed) {
-            throw new TopicClosedException();
-        }
+	public void unsubscribe(String listenerName, Listener listener) {
+		listenerLock.getWriteLock();
+		listenerList.remove(listenerName);
+		listenerLock.releaseLock();
 
-        listenerLock.getWriteLock();
+		MessageBroker.getInstance().unregister(listenerName);
+	}
 
-        listenerList.remove(broker.unregister(listener));
+	public int getNumberOfListeners() {
+		listenerLock.getReadLock();
+		int size = listenerList.size();
+		listenerLock.releaseLock();
 
-        if (listenerList.size() == 0) {
-            broker.removeTopic(this);
-        }
+		return size;
+	}
 
-        listenerLock.releaseLock();
-    }
+	public boolean equals(Object obj) {
+		if (obj == null) {
+			return false;
+		}
 
-    public int getNumberOfListeners() {
-        listenerLock.getReadLock();
-        int size = listenerList.size();
-        listenerLock.releaseLock();
+		if (!(obj instanceof Topic)) {
+			return false;
+		}
 
-        return size;
-    }
+		Topic other = (Topic) obj;
 
-    public boolean equals(Object obj) {
-        if (obj == null) {
-            return false;
-        }
-
-        if (!(obj instanceof Topic)) {
-            return false;
-        }
-
-        Topic other = (Topic) obj;
-
-        return other.getName().equals(name);
-    }
+		return other.getName().equals(name);
+	}
 }

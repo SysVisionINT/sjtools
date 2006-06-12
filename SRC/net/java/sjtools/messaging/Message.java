@@ -27,7 +27,7 @@ public class Message implements Serializable {
 	private String sender = null;
     private long timestamp = 0;
     private Object messageObject = null;
-    private String replayTo = null;
+    private String replyTo = null;
     private String messageID = null;
 
     public Message(Object messageObject) {       
@@ -73,12 +73,12 @@ public class Message implements Serializable {
         this.messageID = messageID;
     }
     
-    public String getReplayTo() {
-        return replayTo;
+    public String getReplyTo() {
+        return replyTo;
     }
     
-    public void setReplayTo(String replayTo) {
-        this.replayTo = replayTo;
+    public void setReplyTo(String replyTo) {
+        this.replyTo = replyTo;
     }
     
     public boolean equals(Object obj) {

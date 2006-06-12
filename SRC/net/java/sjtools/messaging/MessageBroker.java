@@ -23,7 +23,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
-import net.java.sjtools.messaging.error.MessageBrokerClosedException;
 import net.java.sjtools.messaging.impl.DefaultMessageStorage;
 import net.java.sjtools.messaging.impl.ListenerFeeder;
 import net.java.sjtools.messaging.model.Listener;
@@ -32,169 +31,108 @@ import net.java.sjtools.thread.Lock;
 
 public class MessageBroker {
 	private static MessageBroker messageBroker = new MessageBroker();
+
+	private Map topicMap = null;
+	private Lock topicLock = null;
+	private Map listenerMap = null;
+	private Lock listenerLock = null;
+	private MessageStorage messageStorage = null;
+
+	public static MessageBroker getInstance() {
+		return messageBroker;
+	}
+
+	private MessageBroker() {
+		topicMap = new HashMap();
+		topicLock = new Lock(topicMap);
+
+		setMessageStorage(new DefaultMessageStorage());
+
+		listenerMap = new HashMap();
+		listenerLock = new Lock(listenerMap);
+	}
+
+	public void setMessageStorage(MessageStorage storage) {
+		if (messageStorage != null) {
+			messageStorage.close();
+		}
+
+		messageStorage = storage;
+		messageStorage.open();
+	}
+
+	public Topic createTopic(String topicName) {
+		Topic topic = getTopic(topicName);
+
+		if (topic == null) {
+			topic = new Topic(topicName);
+			register(topicName, topic);
+		}
+
+		return topic;
+	}
+
+	private void register(String topicName, Topic topic) {
+		topicLock.getWriteLock();
+		topicMap.put(topicName, topic);
+		topicLock.releaseLock();
+	}
+
+	public String[] getTopicNames() {
+		topicLock.getReadLock();
+		Set topicNames = topicMap.keySet();
+		topicLock.releaseLock();
+
+		return (String[]) topicNames.toArray(new String[topicNames.size()]);
+	}
+
+	public Topic getTopic(String topicName) {
+		topicLock.getReadLock();
+		Topic topic = (Topic) topicMap.get(topicName);
+		topicLock.releaseLock();
+
+		return topic;
+	}
+
+	protected void register(String name, Listener listener) {
+		listenerLock.getWriteLock();
+
+		ListenerFeeder registed = (ListenerFeeder) listenerMap.get(name);
+		registed.incTopicCount();
+
+		if (registed == null) {
+			listenerMap.put(name, new ListenerFeeder(name, listener));
+		}
+
+		listenerLock.releaseLock();
+	}
+
+	protected void unregister(String name) {
+		listenerLock.getWriteLock();
+
+		ListenerFeeder registed = (ListenerFeeder) listenerMap.get(name);
+
+		if (registed != null) {
+			registed.decTopicCount();
+
+			if (registed.getTopicCount() == 0) {
+				listenerMap.remove(name);
+				registed.stop();
+			}
+		}
+
+		listenerLock.releaseLock();
+	}
+
+	public MessageStorage getMessageStorage() {
+		return messageStorage;
+	}
 	
-    private Map topicMap = null;
-    private Lock topicLock = null;
-    private Map listenerMap = null;
-    private Lock listenerLock = null;
-    private boolean closed = false;
-    private MessageStorage messageStorage = null;
-    
-    public static MessageBroker getInstance() {
-    	return messageBroker;
-    }
-
-    private MessageBroker() {
-        topicMap = new HashMap();
-        topicLock = new Lock(topicMap);
-
-        setMessageStorage(new DefaultMessageStorage());
-
-        listenerMap = new HashMap();
-        listenerLock = new Lock(listenerMap);
-    }
-
-    public void setMessageStorage(MessageStorage storage) {
-        if (messageStorage != null) {
-            messageStorage.close();
-        }
-
-        messageStorage = storage;
-        messageStorage.open();
-    }
-
-    public Topic createTopic(String topicName) throws MessageBrokerClosedException {
-        if (closed) {
-            throw new MessageBrokerClosedException();
-        }
-
-        Topic topic = getTopic(topicName);
-
-        if (topic == null) {
-            topic = new Topic(topicName);
-            topic.setBroker(this);
-
-            topicLock.getWriteLock();
-            topicMap.put(topicName, topic);
-            topicLock.releaseLock();
-        }
-
-        return topic;
-    }
-
-    protected void removeTopic(Topic topic) {
-        topicLock.getWriteLock();
-        topicMap.remove(topic.getName());
-        topicLock.releaseLock();
-    }
-
-    public String[] getTopicNames() {
-        topicLock.getReadLock();
-        Set topicNames = topicMap.keySet();
-        topicLock.releaseLock();
-
-        return (String[]) topicNames.toArray(new String[topicNames.size()]);
-    }
-
-    public boolean isClosed() {
-        return closed;
-    }
-
-    public Topic getTopic(String topicName) throws MessageBrokerClosedException {
-        if (closed) {
-            throw new MessageBrokerClosedException();
-        }
-        
-        topicLock.getReadLock();
-        Topic topic = (Topic) topicMap.get(topicName);
-        topicLock.releaseLock();
-
-        return topic;
-    }
-
-    public void close() {
-        String[] topicNames = getTopicNames();
-
-        Topic topic = null;
-
-        for (int i = 0; i < topicNames.length; i++) {
-            try {
-                topic = getTopic(topicNames[i]);
-            } catch (MessageBrokerClosedException e) {}
-
-            if (topic != null) {
-                topic.close();
-            }
-        }
-
-        if (messageStorage != null) {
-            messageStorage.close();
-        }
-        
-        closed = true;
-    }
-
-    protected Listener register(Listener listener) {
-        listenerLock.getWriteLock();
-        ListenerFeeder registed = (ListenerFeeder) listenerMap.get(listener.getClass());
-
-        if (registed == null) {
-            registed = new ListenerFeeder(listener, messageStorage);
-            listenerMap.put(listener.getClass(), registed);
-        }
-
-        registed.incTopicCount();
-
-        listenerLock.releaseLock();
-
-        return registed;
-    }
-
-    protected Listener unregister(Listener listener) {
-        listenerLock.getWriteLock();
-
-        ListenerFeeder registed = null;
-
-        if (listener instanceof ListenerFeeder) {
-            registed = (ListenerFeeder) listenerMap.get(((ListenerFeeder) listener).getListener().getClass());
-        } else {
-            registed = (ListenerFeeder) listenerMap.get(listener.getClass());
-        }
-
-        if (registed != null) {
-            registed.decTopicCount();
-
-            if (registed.getTopicCount() == 0) {
-                listenerMap.remove(listener.getClass());
-                registed.clean();
-            }
-        }
-
-        listenerLock.releaseLock();
-
-        return registed;
-    }
-
-    protected void stop(Listener listener) {
-        listenerLock.getWriteLock();
-
-        ListenerFeeder registed = null;
-
-        if (listener instanceof ListenerFeeder) {
-            registed = (ListenerFeeder) listenerMap.get(((ListenerFeeder) listener).getListener().getClass());
-        } else {
-            registed = (ListenerFeeder) listenerMap.get(listener.getClass());
-        }
-
-        if (registed != null) {
-            registed.decTopicCount();
-
-            if (registed.getTopicCount() == 0) {
-                listenerMap.remove(listener.getClass());
-                registed.stop();
-            }
-        }
-
-        listenerLock.releaseLock();
-    }
+	public ListenerFeeder getListenerFeeder(String listenerName) {
+		listenerLock.getReadLock();
+		ListenerFeeder feeder = (ListenerFeeder) listenerMap.get(listenerName);
+		listenerLock.releaseLock();
+		
+		return feeder;
+	}
 }

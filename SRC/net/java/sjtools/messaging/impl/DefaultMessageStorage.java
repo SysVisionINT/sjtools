@@ -23,7 +23,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import net.java.sjtools.messaging.Message;
-import net.java.sjtools.messaging.model.MessageRecord;
+import net.java.sjtools.messaging.model.StorageRecord;
 import net.java.sjtools.messaging.model.MessageStorage;
 import net.java.sjtools.thread.Lock;
 
@@ -56,22 +56,22 @@ public class DefaultMessageStorage  implements MessageStorage {
         lock.releaseLock();        
     }      
 
-    public MessageRecord getNextMessage(String listenerName) {
+    public StorageRecord getNextMessage(String listenerName) {
         Message message = null;
-        MessageRecord messageRecord = null;
+        StorageRecord messageRecord = null;
         
         MessageQueue queue = getMessageQueue(listenerName);
 
         if (queue != null) {
             message = queue.getFirst();
             
-            messageRecord = new MessageRecord("first", message);
+            messageRecord = new StorageRecord("first", message);
         }
 
         return messageRecord;
     }
 
-    public boolean isEmpty(String listenerName) {
+    public boolean hasMessages(String listenerName) {
         boolean empty = false;
         
         MessageQueue queue = getMessageQueue(listenerName);

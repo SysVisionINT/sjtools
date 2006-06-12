@@ -24,11 +24,11 @@ import net.java.sjtools.messaging.Message;
 public interface MessageStorage {
 	public void open();
 
-	public MessageRecord getNextMessage(String listenerName);
+	public StorageRecord getNextMessage(String listenerName);
 
 	public void deleteMessage(String listenerName, String recordKey);
 
-	public boolean isEmpty(String listenerName);
+	public boolean hasMessages(String listenerName);
 
 	public void store(String listenerName, Message message);
 
