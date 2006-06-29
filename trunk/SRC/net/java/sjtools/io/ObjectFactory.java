@@ -24,12 +24,10 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 
 public class ObjectFactory {
-	private static final char[] HEXCHAR =
-		{ '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f' };
+	private static final char[] HEXCHAR = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e',
+			'f' };
 	private static final String HEXINDEX = "0123456789abcdef          ABCDEF";
 
 	public static byte[] serialize(Object obj) throws IOException {
@@ -59,23 +57,23 @@ public class ObjectFactory {
 	public static byte[] hexToByte(String hexString) {
 		byte[] data = new byte[hexString.length() / 2];
 		int hexStringIndex = 0;
-		
+
 		char character;
 		int value;
 		int currentByte;
-		
+
 		for (int byteIndex = 0; byteIndex < data.length; byteIndex++) {
 			character = hexString.charAt(hexStringIndex++);
-			
+
 			value = HEXINDEX.indexOf(character);
 			currentByte = (value & 0xf) << 4;
-			
+
 			character = hexString.charAt(hexStringIndex++);
 			value = HEXINDEX.indexOf(character);
-			
+
 			currentByte += (value & 0xf);
-			
-			data[byteIndex] = (byte)currentByte;
+
+			data[byteIndex] = (byte) currentByte;
 		}
 
 		return data;
@@ -83,26 +81,21 @@ public class ObjectFactory {
 
 	public static String byteToHex(byte[] bytes) {
 		StringBuffer buffer = new StringBuffer();
-		
-		int currentByte;
-		
+
 		for (int i = 0; i < bytes.length; i++) {
-			currentByte = ((int)bytes[i]) & 0xff;
-			
-			buffer.append(HEXCHAR[(currentByte >> 4) & 0xf]);
-			buffer.append(HEXCHAR[currentByte & 0xf]);
+			buffer.append(byteToHex(bytes[i]));
 		}
 
 		return buffer.toString();
 	}
-	
-	public static byte[] digest(Object obj) throws NoSuchAlgorithmException, IOException {
-		MessageDigest md = MessageDigest.getInstance("MD5");
-		
-		return md.digest(serialize(obj));
-	}
 
-	public static String digestToString(Object obj) throws NoSuchAlgorithmException, IOException {
-		return byteToHex(digest(obj));
+	public static String byteToHex(byte _byte) {
+		StringBuffer buffer = new StringBuffer();
+
+		int _integer = ((int) _byte) & 0xff;
+		buffer.append(HEXCHAR[(_integer >> 4) & 0xf]);
+		buffer.append(HEXCHAR[_integer & 0xf]);
+
+		return buffer.toString();
 	}
 }
