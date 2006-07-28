@@ -114,7 +114,6 @@ public class ServiceLocater {
 
 	private static void fillDependencies(Object object) throws ServiceLocaterError {
 		Class[] parameters = null;
-		Object objParam = null;
 		Object[] value = null;
 
 		Method[] methods = object.getClass().getMethods();
@@ -126,10 +125,8 @@ public class ServiceLocater {
 				if (parameters.length == 1) {
 					if (isServiceDefined(parameters[0])) {
 						try {
-							objParam = lookup(parameters[0]);
-
 							value = new Object[1];
-							value[0] = objParam;
+							value[0] = lookup(parameters[0]);
 
 							methods[i].invoke(object, value);
 						} catch (ServiceLocaterError e) {
@@ -154,7 +151,7 @@ public class ServiceLocater {
 	}
 
 	private static ClassLoader getClassLoader() {
-		return ServiceLocater.class.getClassLoader();
+		return Thread.currentThread().getContextClassLoader();
 	}
 
 	private static synchronized void readServiceConfig() throws ServiceConfigError {

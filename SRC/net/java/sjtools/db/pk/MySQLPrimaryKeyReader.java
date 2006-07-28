@@ -37,7 +37,7 @@ public class MySQLPrimaryKeyReader implements NativePrimaryKeyReader {
         ResultSet rs = null;
 
        try {
-            ps = con.prepareStatement(SQL_GENERATED_ID);
+            ps = con.prepareStatement(SQL_GENERATED_ID, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
 
             rs = ps.executeQuery();
         
