@@ -26,9 +26,9 @@ import java.sql.SQLException;
 
 import net.java.sjtools.db.DBUtil;
 
-public class InformixPrimaryKeyReader implements NativePrimaryKeyReader {
+public class DerbyPrimaryKeyReader implements NativePrimaryKeyReader {
 	
-	private static final String SQL_GENERATED_ID = "SELECT DBINFO('sqlca.sqlerrd1') FROM systables WHERE tabid = 1";
+	private static final String SQL_GENERATED_ID = "SELECT IDENTITY_VAL_LOCAL() FROM sys.sysschemas WHERE schemaname = 'SYS'";
 
 	public long getKey(Connection con) throws SQLException {
 		long ret = 0;
