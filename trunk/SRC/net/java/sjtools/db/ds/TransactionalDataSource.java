@@ -19,177 +19,115 @@
  */
 package net.java.sjtools.db.ds;
 
+import java.io.PrintWriter;
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.HashMap;
-import java.util.Map;
 
-import net.java.sjtools.db.connection.ConnectionListener;
+import javax.naming.NamingException;
+import javax.sql.DataSource;
+
 import net.java.sjtools.db.connection.PoolableConnection;
-import net.java.sjtools.thread.Lock;
-import net.java.sjtools.thread.SuperThread;
-import net.java.sjtools.thread.ThreadContext;
+import net.java.sjtools.util.JNDIUtil;
 
-public class TransactionalDataSource extends DataSourceImpl implements ConnectionListener {
-	private static final long serialVersionUID = 4351891902885449679L;
+public class TransactionalDataSource implements DataSource {
+	private boolean transaction = false;
+	private PoolableConnection connection = null;
+	private DataSource dataSource = null;
+
+	private TransactionalDataSource(DataSource ds) {
+		dataSource = ds;
+	}
 	
-	private Map threadMap = null;
-	private Lock lock = null;
-
-	public TransactionalDataSource(String driver, String url, String user, String password) {
-		super(driver, url, user, password);
-		init();
+	public static TransactionalDataSource getInstance(String driver, String url, String user, String password) {
+		return getInstance(new DataSourceImpl(driver, url, user, password));
 	}
 
-	private void init() {
-		threadMap = new HashMap();
-		lock = new Lock(threadMap);
+	public static TransactionalDataSource getInstance(String jndiName) throws NamingException {
+		return getInstance((DataSource) JNDIUtil.getJNDIObject(jndiName));
 	}
 
-	public TransactionalDataSource(String url, String user, String password) {
-		super(url, user, password);
-		init();
-	}
+	public static TransactionalDataSource getInstance(DataSource ds) {
+		return new TransactionalDataSource(ds);
+	}	
 
 	public void startTransaction() {
-		DSTransactionInfo info = getDSTransactionInfo();
-		info.setInTransaction(true);
-		setDSTransactionInfo(info);
-	}
-
-	private void setDSTransactionInfo(DSTransactionInfo info) {
-		Thread thread = Thread.currentThread();
-
-		if (thread instanceof SuperThread) {
-			SuperThread superThread = (SuperThread) thread;
-			ThreadContext context = superThread.getThreadContext();
-
-			if (context == null) {
-				context = new ThreadContext();
-
-				superThread.setThreadContext(context);
-			}
-
-			context.put(toString(), info);
-		} else {
-			lock.getWriteLock();
-
-			if (info == null) {
-				threadMap.remove(thread.getName());
-			} else {
-				threadMap.put(thread.getName(), info);
-			}
-
-			lock.releaseLock();
-		}
-	}
-
-	private DSTransactionInfo getDSTransactionInfo() {
-		DSTransactionInfo info = null;
-
-		Thread thread = Thread.currentThread();
-
-		if (thread instanceof SuperThread) {
-			ThreadContext context = ((SuperThread) thread).getThreadContext();
-
-			if (context != null) {
-				info = (DSTransactionInfo) context.get(toString());
-			}
-		} else {
-			lock.getReadLock();
-			info = (DSTransactionInfo) threadMap.get(thread.getName());
-			lock.releaseLock();
-		}
-
-		if (info == null) {
-			info = new DSTransactionInfo();
-		}
-
-		return info;
+		transaction = true;
 	}
 
 	public void commit() throws SQLException {
-		DSTransactionInfo info = getDSTransactionInfo();
+		if (transaction) {
+			if (connection != null) {
+				try {
+					connection.commit();
+				} finally {
+					connection.closeConnection();
+					connection = null;
+				}
+			}
 
-		if (info.getConnection() != null) {
-			info.getConnection().commit();
+			transaction = false;
 		}
-
-		setDSTransactionInfo(null);
 	}
 
 	public void rollback() throws SQLException {
-		DSTransactionInfo info = getDSTransactionInfo();
+		if (transaction) {
+			if (connection != null) {
+				try {
+					connection.rollback();
+				} finally {
+					connection.closeConnection();
+					connection = null;
+				}
+			}
 
-		if (info.getConnection() != null) {
-			info.getConnection().rollback();
+			transaction = false;
 		}
-
-		setDSTransactionInfo(null);
 	}
 
 	public boolean isInTransaction() {
-		DSTransactionInfo info = getDSTransactionInfo();
-
-		return info.isInTransaction();
+		return transaction;
 	}
 
 	public Connection getConnection() throws SQLException {
-		DSTransactionInfo info = getDSTransactionInfo();
-
-		if (info.getConnection() != null) {
-			return info.getConnection();
-		} else {
-			Connection con = super.getConnection();
-
-			if (info.isInTransaction()) {
-				PoolableConnection connection = new PoolableConnection(con, this);
-				connection.setAutoCommit(false);
-
-				info.setConnection(connection);
-				setDSTransactionInfo(info);
-
+		if (transaction) {
+			if (connection != null) {
 				return connection;
 			} else {
-				return con;
+				connection = getNewConnection();
+				return connection;
 			}
+		} else {
+			return getNewConnection();
 		}
 	}
 
-	public void close(PoolableConnection connection) {
-		if (!isInTransaction()) {
-			try {
-				connection.closeConnection();
-			} catch (SQLException e) {
-			}
-		}
-	}
+	private PoolableConnection getNewConnection() throws SQLException {
+		Connection connection = dataSource.getConnection();
 
-	public String toString() {
-		StringBuffer buffer = new StringBuffer();
-
-		buffer.append("TransactionalDataSource(");
-		buffer.append("url=");
-		buffer.append(getDataBaseURL());
-		buffer.append("user=");
-		buffer.append(getUserName());
-		buffer.append(")");
-
-		return buffer.toString();
-	}
-
-	public boolean equals(Object obj) {
-		if (obj == null) {
-			return false;
+		if (transaction) {
+			connection.setAutoCommit(false);
 		}
 
-		if (!(obj instanceof TransactionalDataSource)) {
-			return false;
-		}
-
-		TransactionalDataSource other = (TransactionalDataSource) obj;
-
-		return toString().equals(other.toString());
+		return new PoolableConnection(connection, null);
 	}
 
+	public int getLoginTimeout() throws SQLException {
+		return dataSource.getLoginTimeout();
+	}
+
+	public void setLoginTimeout(int time) throws SQLException {
+		dataSource.setLoginTimeout(time);
+	}
+
+	public PrintWriter getLogWriter() throws SQLException {
+		return dataSource.getLogWriter();
+	}
+
+	public void setLogWriter(PrintWriter lw) throws SQLException {
+		dataSource.setLogWriter(lw);
+	}
+
+	public Connection getConnection(String user, String password) throws SQLException {
+		throw new SQLException("Method not supported!");
+	}
 }

@@ -20,5 +20,5 @@
 package net.java.sjtools.db.connection;
 
 public interface ConnectionListener {
-	public void close(PoolableConnection connection);
+	public void connectionClosed(PoolableConnection connection);
 }

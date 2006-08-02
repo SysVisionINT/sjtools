@@ -20,29 +20,18 @@
 package net.java.sjtools.db.connection;
 
 import java.sql.Connection;
-import java.sql.PreparedStatement;
 import java.sql.SQLException;
-import java.sql.Savepoint;
 
 public class PoolableConnection extends ConnectionWrapper {
 	private static int count = 0;
 
 	private String connectionID = null;
-
 	private ConnectionListener listener = null;
-	private PreparedStatementCache preparedStatementCache = null;
-
-	private boolean inTransaction = false;
-	private boolean closed = false;
 
 	public PoolableConnection(Connection con, ConnectionListener listener) {
 		super(con);
 		this.listener = listener;
 		connectionID = getConnectionID();
-	}
-
-	public void setPreparedStatementCache(PreparedStatementCache preparedStatementCache) {
-		this.preparedStatementCache = preparedStatementCache;
 	}
 
 	private static synchronized String getConnectionID() {
@@ -64,83 +53,9 @@ public class PoolableConnection extends ConnectionWrapper {
 	}
 
 	public void close() throws SQLException {
-		if (!inTransaction) {
-			if (listener != null) {
-				listener.close(this);
-			} else {
-				closeConnection();
-			}
+		if (listener != null) {
+			listener.connectionClosed(this);
 		}
-
-		closed = true;
-	}
-
-	public boolean isClosed() throws SQLException {
-		if (!closed) {
-			return super.isClosed();
-		}
-
-		return closed;
-	}
-
-	public void setAutoCommit(boolean autoCommit) throws SQLException {
-		super.setAutoCommit(autoCommit);
-
-		if (autoCommit == false) {
-			inTransaction = true;
-		}
-	}
-
-	public void commit() throws SQLException {
-		super.commit();
-		endOffTransaction();
-	}
-
-	public void rollback() throws SQLException {
-		super.rollback();
-		endOffTransaction();
-	}
-
-	private void endOffTransaction() throws SQLException {
-		inTransaction = false;
-
-		if (closed) {
-			close();
-		}
-	}
-
-	public Savepoint setSavepoint() throws SQLException {
-		throw new SQLException("Method not supported!");
-	}
-
-	public void releaseSavepoint(Savepoint savepoint) throws SQLException {
-		throw new SQLException("Method not supported!");
-	}
-
-	public void rollback(Savepoint savepoint) throws SQLException {
-		throw new SQLException("Method not supported!");
-	}
-
-	public Savepoint setSavepoint(String name) throws SQLException {
-		throw new SQLException("Method not supported!");
-	}
-
-	public PreparedStatement prepareStatement(String sql) throws SQLException {
-		PreparedStatement ret = null;
-
-		if (preparedStatementCache != null) {
-			ret = preparedStatementCache.getPreparedStatement(this, sql);
-		}
-
-		if (ret == null) {
-			ret = super.prepareStatement(sql);
-		}
-
-		if (preparedStatementCache != null) {
-			preparedStatementCache.registerPreparedStatement(this, sql, ret);
-		}
-
-		return ret;
 	}
 
 	public boolean equals(Object obj) {

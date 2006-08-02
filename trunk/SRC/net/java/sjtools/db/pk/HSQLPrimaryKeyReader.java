@@ -17,12 +17,38 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA
  */
-package net.java.sjtools.db.connection;
+package net.java.sjtools.db.pk;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 
-public interface PreparedStatementCache {
-	public PreparedStatement getPreparedStatement(Connection connection, String sql);
-	public void registerPreparedStatement(Connection connection, String sql, PreparedStatement ps);
+import net.java.sjtools.db.DBUtil;
+
+public class HSQLPrimaryKeyReader implements NativePrimaryKeyReader {
+	
+	private static final String SQL_GENERATED_ID = "CALL IDENTITY()";
+
+	public long getKey(Connection con) throws SQLException {
+		long ret = 0;
+		
+        PreparedStatement ps = null;
+        ResultSet rs = null;
+
+       try {
+            ps = con.prepareStatement(SQL_GENERATED_ID, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
+
+            rs = ps.executeQuery();
+        
+            if (rs.next()) {
+                ret = rs.getLong(1);
+            }
+        } finally {
+            DBUtil.close(rs);
+            DBUtil.close(ps);
+        }
+		
+		return ret;
+	}
 }
