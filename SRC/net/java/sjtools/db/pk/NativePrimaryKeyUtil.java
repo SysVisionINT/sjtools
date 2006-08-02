@@ -41,6 +41,10 @@ public class NativePrimaryKeyUtil {
 			reader = new InformixPrimaryKeyReader();
 		} else if (dbms.equals(DBMS.DBMS_MYSQL)) { 
 			reader = new MySQLPrimaryKeyReader();
+		} else if (dbms.equals(DBMS.DBMS_DERBY)) { 
+			reader = new DerbyPrimaryKeyReader();
+		} else if (dbms.equals(DBMS.DBMS_HSQL)) { 
+			reader = new HSQLPrimaryKeyReader();			
 		}
 
 		if (reader != null) {

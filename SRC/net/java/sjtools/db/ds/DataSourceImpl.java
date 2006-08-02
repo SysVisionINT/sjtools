@@ -83,15 +83,15 @@ public class DataSourceImpl implements DataSource, Serializable {
 	}
 
 	public Connection getConnection() throws SQLException {
+		return getConnection(userName, userPassword);
+	}
+
+	public Connection getConnection(String username, String password) throws SQLException {
 		if (!registed) {
 			driverRegistration();
 		}
 
 		return DriverManager.getConnection(dataBaseURL, userName, userPassword);
-	}
-
-	public Connection getConnection(String username, String password) throws SQLException {
-		throw new SQLException("Method not supported!");
 	}
 
 	private synchronized void driverRegistration() throws SQLException {
