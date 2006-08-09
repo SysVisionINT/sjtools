@@ -160,7 +160,7 @@ public class BeanUtil {
 		return toString().hashCode();
 	}
 
-	private String getClassName() {
+	public String getClassName() {
 		return obj.getClass().getName();
 	}
 
@@ -191,7 +191,7 @@ public class BeanUtil {
 		return buffer.toString();
 	}
 
-	private String getGetMethodName(String propertyName) {
+	public String getGetMethodName(String propertyName) {
 		String name = getMethodName("get", propertyName);
 
 		if (getMethods(name).isEmpty()) {
@@ -205,7 +205,7 @@ public class BeanUtil {
 		return name;
 	}
 
-	private List getMethods(String methodName) {
+	public List getMethods(String methodName) {
 		List ret = new ArrayList();
 
 		Method[] methods = obj.getClass().getMethods();
@@ -219,7 +219,7 @@ public class BeanUtil {
 		return ret;
 	}
 
-	private String getMethodName(String prefix, String propertyName) {
+	public String getMethodName(String prefix, String propertyName) {
 		StringBuffer buffer = new StringBuffer();
 
 		buffer.append(prefix);
@@ -258,7 +258,7 @@ public class BeanUtil {
 		method.invoke(obj, args);
 	}
 
-    private Method getSetMethod(String methodName, Class clazz) throws NoSuchMethodException {
+    public Method getSetMethod(String methodName, Class clazz) throws NoSuchMethodException {
         Class[] classes = new Class[1];
         Class[] classesI = new Class[1];
         Class[] interfaces = null;
