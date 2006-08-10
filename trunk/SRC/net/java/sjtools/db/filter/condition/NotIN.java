@@ -19,7 +19,6 @@
  */
 package net.java.sjtools.db.filter.condition;
 
-import java.util.Iterator;
 import java.util.List;
 
 import net.java.sjtools.util.BeanUtil;
@@ -34,12 +33,8 @@ public class NotIN extends Condition {
 		buffer.append(fieldName);
 		buffer.append(" NOT IN (");
 
-		boolean first = true;
-
-		for (Iterator i = values.iterator(); i.hasNext();) {
-			if (first) {
-				first = false;
-			} else {
+		for (int i = 0; i < values.size(); i++) {
+			if (i > 0) {
 				buffer.append(",");
 			}
 
