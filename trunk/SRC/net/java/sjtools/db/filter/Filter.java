@@ -156,18 +156,26 @@ public class Filter implements Comparator {
 		} else {
 			output.addAll(input);
 		}
-		
+
 		if (hasOrder()) {
-			Collections.sort(output,this);
+			Collections.sort(output, this);
 		}
 
 		return output;
 	}
 
+	public boolean isValid(Object object) throws Exception {
+		if (hasWhere()) {
+			return where.isTrue(new BeanUtil(object));
+		}
+
+		return true;
+	}
+
 	public int compare(Object obj1, Object obj2) {
 		BeanUtil bean1 = new BeanUtil(obj1);
 		BeanUtil bean2 = new BeanUtil(obj2);
-		
+
 		Order order = null;
 		int ret = 0;
 
@@ -179,12 +187,12 @@ public class Filter implements Comparator {
 			} catch (Exception e) {
 				throw new Error(e);
 			}
-			
+
 			if (ret != 0) {
 				break;
 			}
 		}
-		
+
 		return ret;
 	}
 }
