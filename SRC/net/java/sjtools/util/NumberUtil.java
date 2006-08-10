@@ -30,6 +30,10 @@ public class NumberUtil {
 	}
 
 	public static boolean isValid(String number) {
+		if (TextUtil.isEmptyString(number)) {
+			return false;
+		}
+		
 		String work = number.trim();
 		char ch = '\0';
 
@@ -53,6 +57,10 @@ public class NumberUtil {
 	}
 
 	public static boolean isValidInteger(String number) {
+		if (TextUtil.isEmptyString(number)) {
+			return false;
+		}
+		
 		String work = number.trim();
 		char ch = '\0';
 
