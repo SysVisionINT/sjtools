@@ -36,6 +36,18 @@ public class OrderDesc extends Order {
 		Object value1 = obj1.get(fieldName);
 		Object value2 = obj2.get(fieldName);
 		
+		if (value1 == null && value2 == null) {
+			return 0;
+		}
+		
+		if (value1 == null) {
+			return 1;
+		}
+		
+		if (value2 == null) {
+			return -1;
+		}	
+		
 		if (FilterUtil.isEqualTo(value1, value2)) {
 			return 0;	
 		}

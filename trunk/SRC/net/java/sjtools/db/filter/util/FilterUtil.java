@@ -307,7 +307,7 @@ public class FilterUtil {
 
 	public static boolean matches(String value, String object) {
 		Map map = new HashMap();
-		map.put("%", "*");
+		map.put("%", ".*");
 		map.put("?", ".");
 		
 		String expression = TextUtil.replace(object, map);
