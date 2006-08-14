@@ -23,6 +23,8 @@ import net.java.sjtools.db.filter.util.FilterUtil;
 import net.java.sjtools.util.BeanUtil;
 
 public class Like extends Condition {
+	private static final long serialVersionUID = 5417303075724789814L;
+
 	public Like(String fieldName, String object) {
 		super(fieldName);
 		addValue(object);

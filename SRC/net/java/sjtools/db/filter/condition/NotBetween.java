@@ -23,6 +23,7 @@ import net.java.sjtools.db.filter.util.FilterUtil;
 import net.java.sjtools.util.BeanUtil;
 
 public class NotBetween extends Condition {
+	private static final long serialVersionUID = 3948690336658688806L;
 
 	public NotBetween(String fieldName, Object object1, Object object2) {
 		super(fieldName);

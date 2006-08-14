@@ -23,6 +23,8 @@ import net.java.sjtools.db.filter.util.FilterUtil;
 import net.java.sjtools.util.BeanUtil;
 
 public class NotLike extends Condition {
+	private static final long serialVersionUID = -5674173036854696874L;
+
 	public NotLike(String fieldName, String object) {
 		super(fieldName);
 		addValue(object);

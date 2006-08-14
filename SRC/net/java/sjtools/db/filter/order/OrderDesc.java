@@ -23,7 +23,8 @@ import net.java.sjtools.db.filter.util.FilterUtil;
 import net.java.sjtools.util.BeanUtil;
 
 public class OrderDesc extends Order {
-	
+	private static final long serialVersionUID = 1071409868916342685L;
+
 	public OrderDesc(String fieldName) {
 		super(fieldName);
 	}

@@ -233,7 +233,8 @@ public class BeanUtil {
 		return buffer.toString();
 	}
 
-	public void set(String propertyName, Object value) throws NoSuchMethodException, IllegalArgumentException, IllegalAccessException, InvocationTargetException  {
+	public void set(String propertyName, Object value) throws NoSuchMethodException, IllegalArgumentException,
+			IllegalAccessException, InvocationTargetException {
 		String name = getMethodName("set", propertyName);
 		List list = getMethods(name);
 		Method method = null;
@@ -246,7 +247,7 @@ public class BeanUtil {
 			method = (Method) list.get(0);
 		} else {
 			method = getSetMethod(name, value.getClass());
-			
+
 			if (method == null) {
 				throw new NoSuchMethodException(name);
 			}
@@ -258,38 +259,40 @@ public class BeanUtil {
 		method.invoke(obj, args);
 	}
 
-    public Method getSetMethod(String methodName, Class clazz) throws NoSuchMethodException {
-        Class[] classes = new Class[1];
-        Class[] classesI = new Class[1];
-        Class[] interfaces = null;
-        Method method = null;
+	public Method getSetMethod(String methodName, Class clazz) throws NoSuchMethodException {
+		Class[] classes = new Class[1];
+		Class[] classesI = new Class[1];
+		Class[] interfaces = null;
+		Method method = null;
 
-        classes[0] = clazz;
+		classes[0] = clazz;
 
-        while (method == null && classes[0] != null) {
-            try {
-                method = obj.getClass().getMethod(methodName, classes);
-            } catch (NoSuchMethodException e) {}
+		while (method == null && classes[0] != null) {
+			try {
+				method = obj.getClass().getMethod(methodName, classes);
+			} catch (NoSuchMethodException e) {
+			}
 
-            if (method == null) {
-                interfaces = classes[0].getInterfaces();
+			if (method == null) {
+				interfaces = classes[0].getInterfaces();
 
-                for (int i = 0; i < interfaces.length; i++) {
-                    classesI[0] = interfaces[i];
+				for (int i = 0; i < interfaces.length; i++) {
+					classesI[0] = interfaces[i];
 
-                    try {
-                        method = obj.getClass().getMethod(methodName, classesI);
-                    } catch (NoSuchMethodException e) {}
-                }
-            }
+					try {
+						method = obj.getClass().getMethod(methodName, classesI);
+					} catch (NoSuchMethodException e) {
+					}
+				}
+			}
 
-            classes[0] = clazz.getSuperclass();
-        }
+			classes[0] = clazz.getSuperclass();
+		}
 
-        if (method == null) {
-            throw new NoSuchMethodException(methodName);
-        }
+		if (method == null) {
+			throw new NoSuchMethodException(methodName);
+		}
 
-        return method;
-    }
+		return method;
+	}
 }

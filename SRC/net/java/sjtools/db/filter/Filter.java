@@ -19,6 +19,7 @@
  */
 package net.java.sjtools.db.filter;
 
+import java.io.Serializable;
 import java.math.BigDecimal;
 import java.sql.Date;
 import java.sql.PreparedStatement;
@@ -35,7 +36,9 @@ import java.util.List;
 import net.java.sjtools.db.filter.order.Order;
 import net.java.sjtools.util.BeanUtil;
 
-public class Filter implements Comparator {
+public class Filter implements Comparator, Serializable {
+	private static final long serialVersionUID = 6161449435571748976L;
+
 	private Expression where = null;
 
 	private List orderBy = new ArrayList();

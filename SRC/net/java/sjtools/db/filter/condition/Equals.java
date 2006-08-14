@@ -23,6 +23,8 @@ import net.java.sjtools.db.filter.util.FilterUtil;
 import net.java.sjtools.util.BeanUtil;
 
 public class Equals extends Condition {
+	private static final long serialVersionUID = -7215764847377596424L;
+
 	public Equals(String fieldName, Object object) {
 		super(fieldName);
 		addValue(object);

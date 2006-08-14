@@ -19,9 +19,11 @@
  */
 package net.java.sjtools.db.filter.order;
 
+import java.io.Serializable;
+
 import net.java.sjtools.util.BeanUtil;
 
-public abstract class Order {
+public abstract class Order implements Serializable {
 	protected String fieldName = null;
 	
 	public Order(String fieldName) {
