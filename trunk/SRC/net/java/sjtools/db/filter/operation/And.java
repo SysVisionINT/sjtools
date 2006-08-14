@@ -25,6 +25,7 @@ import net.java.sjtools.db.filter.Expression;
 import net.java.sjtools.util.BeanUtil;
 
 public class And extends Operation {
+	private static final long serialVersionUID = -1160892575340122669L;
 
 	protected String getOperator() {
 		return "AND";

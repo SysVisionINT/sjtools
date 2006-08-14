@@ -23,6 +23,8 @@ import net.java.sjtools.db.filter.util.FilterUtil;
 import net.java.sjtools.util.BeanUtil;
 
 public class Between extends Condition {
+	private static final long serialVersionUID = -3508858224152814905L;
+
 	public Between(String fieldName, Object object1, Object object2) {
 		super(fieldName);
 		addValue(object1);

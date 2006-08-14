@@ -19,11 +19,12 @@
  */
 package net.java.sjtools.db.filter;
 
+import java.io.Serializable;
 import java.util.List;
 
 import net.java.sjtools.util.BeanUtil;
 
-public interface Expression {
+public interface Expression extends Serializable {
 
 	public void append(StringBuffer stringbuffer);
 

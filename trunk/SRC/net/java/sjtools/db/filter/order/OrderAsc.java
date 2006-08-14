@@ -23,6 +23,7 @@ import net.java.sjtools.db.filter.util.FilterUtil;
 import net.java.sjtools.util.BeanUtil;
 
 public class OrderAsc extends Order {
+	private static final long serialVersionUID = -8940279653043174137L;
 
 	public OrderAsc(String fieldName) {
 		super(fieldName);

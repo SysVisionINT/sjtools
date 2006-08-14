@@ -23,6 +23,8 @@ import net.java.sjtools.db.filter.util.FilterUtil;
 import net.java.sjtools.util.BeanUtil;
 
 public class NotEquals extends Condition {
+	private static final long serialVersionUID = -7341560667321615626L;
+
 	public NotEquals(String fieldName, Object object) {
 		super(fieldName);
 		addValue(object);

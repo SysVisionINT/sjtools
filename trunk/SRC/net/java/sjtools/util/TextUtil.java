@@ -20,6 +20,7 @@
 package net.java.sjtools.util;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -120,7 +121,7 @@ public class TextUtil {
         return buffer.toString();
     }
 
-    public static String toString(List list) {
+    public static String toString(Collection list) {
         if (list == null) {
             return "null";
         }

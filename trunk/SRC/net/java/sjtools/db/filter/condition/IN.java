@@ -24,6 +24,8 @@ import java.util.List;
 import net.java.sjtools.util.BeanUtil;
 
 public class IN extends Condition {
+	private static final long serialVersionUID = 4713687935075783753L;
+
 	public IN(String fieldName, List list) {
 		super(fieldName);
 		values.addAll(list);

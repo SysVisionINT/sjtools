@@ -22,6 +22,8 @@ package net.java.sjtools.db.filter.condition;
 import net.java.sjtools.util.BeanUtil;
 
 public class IsNotNull extends Condition {
+	private static final long serialVersionUID = 3000500505439617496L;
+
 	public IsNotNull(String fieldName) {
 		super(fieldName);
 	}

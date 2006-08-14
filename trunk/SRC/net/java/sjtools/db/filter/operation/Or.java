@@ -25,6 +25,8 @@ import net.java.sjtools.db.filter.Expression;
 import net.java.sjtools.util.BeanUtil;
 
 public class Or extends Operation {
+	private static final long serialVersionUID = 8828849031336430030L;
+
 	protected String getOperator() {
 		return "OR";
 	}
