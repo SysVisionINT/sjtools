@@ -45,12 +45,20 @@ public class SuperFile extends File {
 	}
 
 	public BufferedOutputStream getOutputStream() throws FileNotFoundException {
-		return new BufferedOutputStream(new FileOutputStream(this));
+		return getOutputStream(false);
 	}
 
+	public BufferedOutputStream getOutputStream(boolean appender) throws FileNotFoundException {
+		return new BufferedOutputStream(new FileOutputStream(this, appender));
+	}
+	
 	public PrintWriter getWriter() throws FileNotFoundException {
 		return new PrintWriter(getOutputStream());
 	}
+	
+	public PrintWriter getWriterAppender() throws FileNotFoundException {
+		return new PrintWriter(getOutputStream(true));
+	}	
 
 	public BufferedReader getReader() throws FileNotFoundException {
 		return new BufferedReader(new FileReader(this));
