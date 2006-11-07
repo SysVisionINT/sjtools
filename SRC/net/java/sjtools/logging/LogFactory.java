@@ -19,18 +19,14 @@
  */
 package net.java.sjtools.logging;
 
-import java.util.Properties;
-
 import net.java.sjtools.logging.api.Factory;
 import net.java.sjtools.logging.error.LogConfigurationError;
 import net.java.sjtools.logging.impl.DefaultFactory;
-import net.java.sjtools.logging.impl.Level;
-import net.java.sjtools.util.PropertyReader;
+import net.java.sjtools.logging.util.LogClassLoader;
+import net.java.sjtools.logging.util.LogConfigReader;
 
 public class LogFactory {
 	private static final String LOGGER_FACTORY_PROPERTY = "sjtools.logging.factory";
-	private static final String DEFAULT_LOGGER_LEVEL_PROPERTY = "sjtools.logging.level";
-	private static final String LOGGER_CONFIG_FILE = "sjtools-logging.properties";
 
 	private static Factory factory = null;
 
@@ -55,46 +51,16 @@ public class LogFactory {
 			return;
 		}
 
-		String factoryName = System.getProperty(LOGGER_FACTORY_PROPERTY);
-		String defaultLogLevel = System.getProperty(DEFAULT_LOGGER_LEVEL_PROPERTY);
-		ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
-
-		if (factoryName == null) {
-			Properties props = null;
-
-			try {
-				props = PropertyReader.getProperties(classLoader.getResourceAsStream(LOGGER_CONFIG_FILE));
-			} catch (Exception e) {
-			}
-
-			if (props != null) {
-				factoryName = props.getProperty(LOGGER_FACTORY_PROPERTY, DefaultFactory.class.getName());
-
-				if (factoryName.equals(DefaultFactory.class.getName())) {
-					defaultLogLevel = props.getProperty(DEFAULT_LOGGER_LEVEL_PROPERTY);
-				}
-			}
-		}
+		String factoryName = LogConfigReader.getParameter(LOGGER_FACTORY_PROPERTY);
 
 		if (factoryName == null) {
 			factoryName = DefaultFactory.class.getName();
 		}
 
 		if (factoryName.equals(DefaultFactory.class.getName())) {
-			DefaultFactory defaultFactory = new DefaultFactory();
-			defaultFactory.setLevel(Level.getLevel(defaultLogLevel));
-
-			factory = defaultFactory;
+			factory = new DefaultFactory();
 		} else {
-			try {
-				Class factoryClass = classLoader.loadClass(factoryName);
-
-				factory = (Factory) factoryClass.newInstance();
-			} catch (ClassNotFoundException e) {
-				throw new LogConfigurationError("Factory class " + factoryName + " not found!", e);
-			} catch (Exception e) {
-				throw new LogConfigurationError("Error creating instance of factory class " + factoryName, e);
-			}
+			factory = (Factory) LogClassLoader.getObject(factoryName);
 		}
 	}
 }

@@ -19,17 +19,15 @@
  */
 package net.java.sjtools.logging.impl;
 
-import java.sql.Timestamp;
-
 import net.java.sjtools.logging.Log;
+import net.java.sjtools.logging.api.Formater;
 
 public class DefaultLog implements Log {
-	private static final long serialVersionUID = -7805759768944248412L;
+	private static final long serialVersionUID = -8705829598191185310L;
 	
 	private String loggerName = null;
 	private Level currentLevel = Level.DEFAULT_LEVEL;
-	
-	private StringBuffer buffer = new StringBuffer();
+	private Formater formater = null;
 
 	public DefaultLog(String loggerName, Level level) {
 		this.loggerName = loggerName;
@@ -56,34 +54,13 @@ public class DefaultLog implements Log {
 		return currentLevel.isLoggable(Level.WARN);
 	}
 
-	public void write(Level level, Object message, Throwable throwable) {
-		buffer.setLength(0);
-
-		buffer.append(new Timestamp(System.currentTimeMillis()));
-		buffer.append(" ");
-		buffer.append(level);
-		buffer.append(" ");
-		buffer.append(getLoggerName());
-
-		if (message != null) {
-			buffer.append(" - ");
-			buffer.append(String.valueOf(message));
-		}
-
-		System.out.println(buffer.toString());
-
-		if (throwable != null) {
-			throwable.printStackTrace(System.out);
-		}
-	}
-
 	public void debug(Object message) {
 		debug(message, null);
 	}
 
 	public void debug(Object message, Throwable throwable) {
 		if (isDebugEnabled()) {
-			write(Level.DEBUG, message, throwable);
+			formater.write(getLoggerName(), Level.DEBUG, message, throwable);
 		}
 	}
 
@@ -93,7 +70,7 @@ public class DefaultLog implements Log {
 
 	public void info(Object message, Throwable throwable) {
 		if (isInfoEnabled()) {
-			write(Level.INFO, message, throwable);
+			formater.write(getLoggerName(), Level.INFO, message, throwable);
 		}
 	}
 
@@ -103,7 +80,7 @@ public class DefaultLog implements Log {
 
 	public void warn(Object message, Throwable throwable) {
 		if (isWarnEnabled()) {
-			write(Level.WARN, message, throwable);
+			formater.write(getLoggerName(), Level.WARN, message, throwable);
 		}
 	}
 
@@ -113,7 +90,7 @@ public class DefaultLog implements Log {
 
 	public void error(Object message, Throwable throwable) {
 		if (isErrorEnabled()) {
-			write(Level.ERROR, message, throwable);
+			formater.write(getLoggerName(), Level.ERROR, message, throwable);
 		}
 	}
 
@@ -123,7 +100,7 @@ public class DefaultLog implements Log {
 
 	public void fatal(Object message, Throwable throwable) {
 		if (isFatalEnabled()) {
-			write(Level.FATAL, message, throwable);
+			formater.write(getLoggerName(), Level.FATAL, message, throwable);
 		}
 	}
 
@@ -134,4 +111,8 @@ public class DefaultLog implements Log {
 	public String getLoggerName() {
 		return loggerName;
 	}	
+	
+	public void setFormater(Formater formater) {
+		this.formater = formater;
+	}
 }

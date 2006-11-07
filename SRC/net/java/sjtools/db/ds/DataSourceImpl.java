@@ -51,6 +51,10 @@ public class DataSourceImpl implements DataSource, Serializable {
 		return userName;
 	}
 
+	
+	public DataSourceImpl() {
+	}
+	
 	public DataSourceImpl(String driver, String url, String user, String password) {
 		driverClass = driver;
 		dataBaseURL = url;
@@ -92,6 +96,30 @@ public class DataSourceImpl implements DataSource, Serializable {
 		}
 
 		return DriverManager.getConnection(dataBaseURL, userName, userPassword);
+	}
+
+	public String getUserPassword() {
+		return userPassword;
+	}
+
+	public void setUserPassword(String userPassword) {
+		this.userPassword = userPassword;
+	}
+
+	public void setDataBaseURL(String dataBaseURL) {
+		this.dataBaseURL = dataBaseURL;
+	}
+
+	public void setDriverClass(String driverClass) {
+		if (!this.driverClass.equals(driverClass)) {
+			registed = false;
+		}
+		
+		this.driverClass = driverClass;
+	}
+
+	public void setUserName(String userName) {
+		this.userName = userName;
 	}
 
 	private synchronized void driverRegistration() throws SQLException {
