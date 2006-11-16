@@ -23,6 +23,7 @@ import java.io.Serializable;
 import java.sql.Timestamp;
 
 import net.java.sjtools.logging.api.Formater;
+import net.java.sjtools.logging.api.Level;
 import net.java.sjtools.logging.api.Writer;
 
 public class DefaultFormater implements Formater, Serializable {
@@ -45,13 +46,11 @@ public class DefaultFormater implements Formater, Serializable {
 			buffer.append(String.valueOf(message));
 		}
 
-		writer.println(buffer.toString());
-
 		if (throwable != null) {
-			writer.print(throwable);
+			writer.print(buffer.toString(), throwable);
+		} else {
+			writer.print(buffer.toString());
 		}
-		
-		writer.flush();
 	}
 
 	public void setWriter(Writer writer) {

@@ -27,7 +27,7 @@
 	<target name="jar" depends="compile">
 		<jar jarfile="${dist}/sjtools.jar">
 			<fileset dir="${classes}">
-				<exclude name="test/**"/>
+				<exclude name="testes/**"/>
 			</fileset>
 		</jar>
 	</target>

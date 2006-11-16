@@ -21,37 +21,39 @@ package net.java.sjtools.logging.impl;
 
 import net.java.sjtools.logging.Log;
 import net.java.sjtools.logging.api.Formater;
+import net.java.sjtools.logging.api.Level;
 
 public class DefaultLog implements Log {
 	private static final long serialVersionUID = -8705829598191185310L;
 	
 	private String loggerName = null;
-	private Level currentLevel = Level.DEFAULT_LEVEL;
+	private LogLevel logLevel = null;
 	private Formater formater = null;
 
-	public DefaultLog(String loggerName, Level level) {
+	public DefaultLog(String loggerName, LogLevel logLevel, Formater formater) {
 		this.loggerName = loggerName;
-		currentLevel = level;
+		this.logLevel = logLevel;
+		this.formater = formater;
 	}
 
 	public boolean isDebugEnabled() {
-		return currentLevel.isLoggable(Level.DEBUG);
+		return getLevel().isLoggable(Level.DEBUG);
 	}
 
 	public boolean isErrorEnabled() {
-		return currentLevel.isLoggable(Level.ERROR);
+		return getLevel().isLoggable(Level.ERROR);
 	}
 
 	public boolean isInfoEnabled() {
-		return currentLevel.isLoggable(Level.INFO);
+		return getLevel().isLoggable(Level.INFO);
 	}
 
 	public boolean isFatalEnabled() {
-		return currentLevel.isLoggable(Level.FATAL);
+		return getLevel().isLoggable(Level.FATAL);
 	}
 
 	public boolean isWarnEnabled() {
-		return currentLevel.isLoggable(Level.WARN);
+		return getLevel().isLoggable(Level.WARN);
 	}
 
 	public void debug(Object message) {
@@ -105,14 +107,10 @@ public class DefaultLog implements Log {
 	}
 
 	public Level getLevel() {
-		return currentLevel;
+		return logLevel.getLevel(loggerName);
 	}
 
 	public String getLoggerName() {
 		return loggerName;
 	}	
-	
-	public void setFormater(Formater formater) {
-		this.formater = formater;
-	}
 }

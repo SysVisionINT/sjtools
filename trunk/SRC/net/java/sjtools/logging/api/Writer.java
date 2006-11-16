@@ -21,7 +21,5 @@ package net.java.sjtools.logging.api;
 
 public interface Writer {
 	public void print(String text);
-	public void println(String text);
-	public void print(Throwable throwable);
-	public void flush();
+	public void print(String text, Throwable throwable);
 }

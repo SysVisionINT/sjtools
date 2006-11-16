@@ -26,18 +26,20 @@ import java.sql.SQLException;
 import javax.naming.NamingException;
 import javax.sql.DataSource;
 
+import net.java.sjtools.db.connection.ConnectionListener;
 import net.java.sjtools.db.connection.PoolableConnection;
 import net.java.sjtools.util.JNDIUtil;
 
-public class TransactionalDataSource implements DataSource {
+public class TransactionalDataSource implements DataSource, ConnectionListener {
 	private boolean transaction = false;
+	private boolean connectionClose = true;
 	private PoolableConnection connection = null;
 	private DataSource dataSource = null;
 
 	private TransactionalDataSource(DataSource ds) {
 		dataSource = ds;
 	}
-	
+
 	public static TransactionalDataSource getInstance(String driver, String url, String user, String password) {
 		return getInstance(new DataSourceImpl(driver, url, user, password));
 	}
@@ -48,7 +50,7 @@ public class TransactionalDataSource implements DataSource {
 
 	public static TransactionalDataSource getInstance(DataSource ds) {
 		return new TransactionalDataSource(ds);
-	}	
+	}
 
 	public void startTransaction() {
 		transaction = true;
@@ -60,8 +62,9 @@ public class TransactionalDataSource implements DataSource {
 				try {
 					connection.commit();
 				} finally {
-					connection.closeConnection();
-					connection = null;
+					if (connectionClose) {
+						closeConnection();
+					}
 				}
 			}
 
@@ -75,8 +78,9 @@ public class TransactionalDataSource implements DataSource {
 				try {
 					connection.rollback();
 				} finally {
-					connection.closeConnection();
-					connection = null;
+					if (connectionClose) {
+						closeConnection();
+					}
 				}
 			}
 
@@ -94,6 +98,7 @@ public class TransactionalDataSource implements DataSource {
 				return connection;
 			} else {
 				connection = getNewConnection();
+				connectionClose = false;
 				return connection;
 			}
 		} else {
@@ -108,7 +113,7 @@ public class TransactionalDataSource implements DataSource {
 			connection.setAutoCommit(false);
 		}
 
-		return new PoolableConnection(connection, null);
+		return new PoolableConnection(connection, transaction ? this : null);
 	}
 
 	public int getLoginTimeout() throws SQLException {
@@ -129,5 +134,21 @@ public class TransactionalDataSource implements DataSource {
 
 	public Connection getConnection(String user, String password) throws SQLException {
 		throw new SQLException("Method not supported!");
+	}
+
+	public void connectionClosed(PoolableConnection con) {
+		connectionClose = true;
+		
+		if (!transaction) {
+			try {
+				closeConnection();
+			} catch (SQLException e) {
+			}
+		}
+	}
+
+	private void closeConnection() throws SQLException {
+		connection.closeConnection();
+		connection = null;
 	}
 }

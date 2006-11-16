@@ -21,6 +21,9 @@ package net.java.sjtools.logging.external;
 
 import net.java.sjtools.logging.Log;
 import net.java.sjtools.logging.api.Factory;
+import net.java.sjtools.logging.api.Level;
+
+import org.apache.log4j.Logger;
 
 public class Log4jFactory implements Factory {
 
@@ -28,4 +31,11 @@ public class Log4jFactory implements Factory {
 		return new Log4jLog(name);
 	}
 
+	public void setLoggerLevel(String name, Level level) {
+		Logger logger = Logger.getLogger(name);
+
+		if (logger != null) {
+			logger.setLevel(org.apache.log4j.Level.toLevel(level.toString()));
+		}
+	}
 }

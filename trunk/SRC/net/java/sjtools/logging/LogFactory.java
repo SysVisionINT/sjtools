@@ -20,6 +20,7 @@
 package net.java.sjtools.logging;
 
 import net.java.sjtools.logging.api.Factory;
+import net.java.sjtools.logging.api.Level;
 import net.java.sjtools.logging.error.LogConfigurationError;
 import net.java.sjtools.logging.impl.DefaultFactory;
 import net.java.sjtools.logging.util.LogClassLoader;
@@ -38,6 +39,14 @@ public class LogFactory {
 		return getLogInstance(name);
 	}
 
+	public static void setLoggerLevel(String name, Level level) {
+		if (factory == null) {
+			loadFactory();
+		}
+
+		factory.setLoggerLevel(name, level);
+	}
+
 	private static Log getLogInstance(String name) throws LogConfigurationError {
 		if (factory == null) {
 			loadFactory();
@@ -54,10 +63,6 @@ public class LogFactory {
 		String factoryName = LogConfigReader.getParameter(LOGGER_FACTORY_PROPERTY);
 
 		if (factoryName == null) {
-			factoryName = DefaultFactory.class.getName();
-		}
-
-		if (factoryName.equals(DefaultFactory.class.getName())) {
 			factory = new DefaultFactory();
 		} else {
 			factory = (Factory) LogClassLoader.getObject(factoryName);

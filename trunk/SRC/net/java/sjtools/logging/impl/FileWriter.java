@@ -22,6 +22,7 @@ package net.java.sjtools.logging.impl;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.PrintWriter;
+import java.io.Serializable;
 
 import net.java.sjtools.io.SuperFile;
 import net.java.sjtools.logging.api.Config;
@@ -29,7 +30,9 @@ import net.java.sjtools.logging.api.Writer;
 import net.java.sjtools.logging.error.LogRuntimeError;
 import net.java.sjtools.time.SuperDate;
 
-public class FileWriter implements Writer, Config {
+public class FileWriter implements Writer, Config, Serializable {
+	private static final long serialVersionUID = -6035365141449424419L;
+	
 	private static final String FILE_NAME = "sjtools.logging.fileWriter.fileName";
 	private static final String DATE_PATTERN = "sjtools.logging.fileWriter.datePattern";
 
@@ -40,8 +43,8 @@ public class FileWriter implements Writer, Config {
 	private PrintWriter printWriter = null;
 
 	public synchronized void print(String text) {
-		init();
-		printWriter.print(text);
+		println(text);
+		flush();
 	}
 
 	private void init() {
@@ -53,9 +56,9 @@ public class FileWriter implements Writer, Config {
 			if (!lastDate.getFormatedDate(datePattern).equals(now.getFormatedDate(datePattern))) {
 				printWriter.flush();
 				printWriter.close();
-				
+
 				File file = new File(fileName);
-				
+
 				file.renameTo(new File(file.getParentFile(), file.getName().concat(
 						lastDate.getFormatedDate(datePattern))));
 
@@ -74,16 +77,16 @@ public class FileWriter implements Writer, Config {
 		}
 	}
 
-	public synchronized void println(String text) {
+	private void println(String text) {
 		init();
 
 		printWriter.println(text);
 	}
 
-	public synchronized void print(Throwable throwable) {
-		init();
-
+	public synchronized void print(String text, Throwable throwable) {
+		println(text);
 		throwable.printStackTrace(printWriter);
+		flush();
 	}
 
 	public String[] getConfigParameters() {
@@ -95,9 +98,9 @@ public class FileWriter implements Writer, Config {
 	public void setConfigParameter(String name, String value) {
 		if (name.equals(FILE_NAME)) {
 			fileName = value;
-			
+
 			File file = new File(fileName);
-			
+
 			if (file.exists()) {
 				lastDate = new SuperDate(file.lastModified());
 			}
@@ -106,9 +109,7 @@ public class FileWriter implements Writer, Config {
 		}
 	}
 
-	public synchronized void flush() {
-		if (printWriter != null) {
-			printWriter.flush();
-		}
+	private void flush() {
+		printWriter.flush();
 	}
 }

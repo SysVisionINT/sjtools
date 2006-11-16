@@ -19,10 +19,8 @@
  */
 package net.java.sjtools.logging.api;
 
-import net.java.sjtools.logging.impl.Level;
 
 public interface Formater {
 	public void write(String loggerName, Level level, Object message, Throwable throwable);
-	
 	public void setWriter(Writer writer);
 }
