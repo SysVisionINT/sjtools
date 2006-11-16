@@ -19,8 +19,12 @@
  */
 package net.java.sjtools.logging.util;
 
+import java.io.InputStream;
+import java.util.Iterator;
 import java.util.Properties;
 
+import net.java.sjtools.logging.error.LogConfigurationError;
+import net.java.sjtools.thread.Lock;
 import net.java.sjtools.util.PropertyReader;
 import net.java.sjtools.util.ResourceUtil;
 
@@ -28,31 +32,70 @@ public class LogConfigReader {
 	private static final String LOGGER_CONFIG_FILE = "sjtools-logging.properties";
 
 	private static Properties properties = null;
+	private static Lock lock = null;
 
 	public static String getParameter(String parameter) {
-		String value = System.getProperty(parameter);
-
-		if (value == null) {
-			if (properties == null) {
-				readProperties();
-			}
-			
-			value = properties.getProperty(parameter);
+		if (properties == null) {
+			readProperties();
 		}
-		
+
+		lock.getReadLock();
+		String value = properties.getProperty(parameter);
+		lock.releaseLock();
+
 		return value;
+	}
+
+	public static void setParameter(String parameter, String value) {
+		if (properties == null) {
+			readProperties();
+		}
+
+		lock.getWriteLock();
+		properties.setProperty(parameter, value);
+		lock.releaseLock();
+	}
+
+	public static Properties getParameters(String parameter) {
+		Properties p = new Properties();
+
+		lock.getReadLock();
+
+		String key = null;
+
+		for (Iterator i = properties.keySet().iterator(); i.hasNext();) {
+			key = (String) i.next();
+
+			if (key.startsWith(parameter)) {
+				p.setProperty(key, properties.getProperty(key));
+			}
+		}
+
+		lock.releaseLock();
+
+		return p;
 	}
 
 	private static synchronized void readProperties() {
 		if (properties != null) {
 			return;
 		}
-		
+
+		Properties props = null;
+
 		try {
-			Properties props = PropertyReader.getProperties(ResourceUtil.getContextResourceInputStream(LOGGER_CONFIG_FILE));
-			
+			InputStream is = ResourceUtil.getContextResourceInputStream(LOGGER_CONFIG_FILE);
+
+			if (is != null) {
+				props = PropertyReader.getProperties(is);
+			} else {
+				props = new Properties();
+			}
+
 			properties = props;
+			lock = new Lock(properties);
 		} catch (Exception e) {
+			throw new LogConfigurationError("Error reading configuration file " + LOGGER_CONFIG_FILE);
 		}
 	}
 }

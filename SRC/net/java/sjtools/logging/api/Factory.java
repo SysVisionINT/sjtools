@@ -23,4 +23,5 @@ import net.java.sjtools.logging.Log;
 
 public interface Factory {
 	public Log getLog(String name);
+	public void setLoggerLevel(String name, Level level);
 }

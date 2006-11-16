@@ -19,8 +19,11 @@
  */
 package net.java.sjtools.logging.external;
 
+import java.util.logging.Logger;
+
 import net.java.sjtools.logging.Log;
 import net.java.sjtools.logging.api.Factory;
+import net.java.sjtools.logging.api.Level;
 
 public class JDKFactory implements Factory {
 
@@ -28,4 +31,21 @@ public class JDKFactory implements Factory {
 		return new JDKLog(name);
 	}
 
+	public void setLoggerLevel(String name, Level level) {
+		Logger logger = Logger.getLogger(name);
+		
+		if (logger != null) {
+			if (level.equals(Level.DEBUG)) {
+				logger.setLevel(java.util.logging.Level.FINE);
+			} else if (level.equals(Level.INFO)) {
+				logger.setLevel(java.util.logging.Level.INFO);
+			} else if (level.equals(Level.WARN)) {
+				logger.setLevel(java.util.logging.Level.WARNING);
+			} else if (level.equals(Level.ERROR)) {
+				logger.setLevel(java.util.logging.Level.SEVERE);
+			} else if (level.equals(Level.FATAL)) {
+				logger.setLevel(java.util.logging.Level.SEVERE);
+			}
+		}
+	}
 }

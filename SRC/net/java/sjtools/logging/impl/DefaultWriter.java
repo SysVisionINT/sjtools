@@ -19,21 +19,19 @@
  */
 package net.java.sjtools.logging.impl;
 
+import java.io.Serializable;
+
 import net.java.sjtools.logging.api.Writer;
 
-public class DefaultWriter implements Writer {
-	public void print(String text) {
-		System.out.print(text);
-	}
+public class DefaultWriter implements Writer, Serializable {
+	private static final long serialVersionUID = 8134149474386932672L;
 
-	public void println(String text) {
+	public void print(String text) {
 		System.out.println(text);
 	}
 
-	public void print(Throwable throwable) {
+	public void print(String text, Throwable throwable) {
+		print(text);
 		throwable.printStackTrace(System.out);
-	}
-
-	public void flush() {
 	}
 }

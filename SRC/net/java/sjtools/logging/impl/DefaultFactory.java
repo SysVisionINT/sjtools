@@ -23,28 +23,24 @@ import net.java.sjtools.logging.Log;
 import net.java.sjtools.logging.api.Config;
 import net.java.sjtools.logging.api.Factory;
 import net.java.sjtools.logging.api.Formater;
+import net.java.sjtools.logging.api.Level;
 import net.java.sjtools.logging.api.Writer;
 import net.java.sjtools.logging.util.LogClassLoader;
 import net.java.sjtools.logging.util.LogConfigReader;
 
 public class DefaultFactory implements Factory {
-	private static final String DEFAULT_LOGGER_LEVEL_PROPERTY = "sjtools.logging.level";
 	private static final String DEFAULT_LOGGER_FORMATER_PROPERTY = "sjtools.logging.formater";
 	private static final String DEFAULT_LOGGER_WRITER_PROPERTY = "sjtools.logging.writer";
 
-	private Level currentLevel = Level.DEFAULT_LEVEL;
+	private LogLevel logLevel = null;
 	private Formater formater = null;
 
 	public DefaultFactory() {
-		// Level
-		String value = LogConfigReader.getParameter(DEFAULT_LOGGER_LEVEL_PROPERTY);
-
-		if (value != null) {
-			setLevel(Level.getLevel(value));
-		}
+		// LogLevel
+		logLevel = new LogLevel();
 
 		// Writer
-		value = LogConfigReader.getParameter(DEFAULT_LOGGER_WRITER_PROPERTY);
+		String value = LogConfigReader.getParameter(DEFAULT_LOGGER_WRITER_PROPERTY);
 		Writer writer = null;
 
 		if (value == null) {
@@ -87,13 +83,10 @@ public class DefaultFactory implements Factory {
 	}
 
 	public Log getLog(String name) {
-		DefaultLog log = new DefaultLog(name, currentLevel);
-		log.setFormater(formater);
-
-		return log;
+		return new DefaultLog(name, logLevel, formater);
 	}
 
-	public void setLevel(Level level) {
-		currentLevel = level;
+	public void setLoggerLevel(String name, Level level) {
+		logLevel.setLoggerLevel(name, level);
 	}
 }

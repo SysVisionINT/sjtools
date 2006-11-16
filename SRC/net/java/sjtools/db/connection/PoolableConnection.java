@@ -55,6 +55,8 @@ public class PoolableConnection extends ConnectionWrapper {
 	public void close() throws SQLException {
 		if (listener != null) {
 			listener.connectionClosed(this);
+		} else {
+			closeConnection();
 		}
 	}
 
