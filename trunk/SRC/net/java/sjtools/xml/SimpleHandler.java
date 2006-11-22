@@ -99,13 +99,12 @@ public abstract class SimpleHandler extends DefaultHandler {
 
     public void characters(char[] ch, int start, int len) throws SAXException {
         String text = new String(ch, start, len);
-        String value = text.trim();
 
-        if (value.length() > 0) {
+        if (text.trim().length() > 0) {
             XMLElement elementName = (XMLElement) currentElement.peek();
             XMLElement elementObject = (XMLElement) currentObject.peek();
             
-            processPCDATA(elementName.getElementName(), elementObject.getElementObject(), value);
+            processPCDATA(elementName.getElementName(), elementObject.getElementObject(), text);
         }
     }
 

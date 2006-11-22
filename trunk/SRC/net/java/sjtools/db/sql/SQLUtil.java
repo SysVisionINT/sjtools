@@ -108,6 +108,7 @@ public class SQLUtil {
 
 		workingSQL = workingSQL.replace('\n', ' ');
 		workingSQL = workingSQL.replace('\r', ' ');
+		workingSQL = workingSQL.replace('\t', ' ');
 		
 		workingSQL = addSpaces(workingSQL, '(');
 		workingSQL = addSpaces(workingSQL, ')');
