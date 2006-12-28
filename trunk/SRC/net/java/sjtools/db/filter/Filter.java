@@ -33,6 +33,7 @@ import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 
+import net.java.sjtools.db.filter.operation.Operation;
 import net.java.sjtools.db.filter.order.Order;
 import net.java.sjtools.util.BeanUtil;
 
@@ -52,7 +53,15 @@ public class Filter implements Comparator, Serializable {
 	}
 
 	public boolean hasWhere() {
-		return where != null;
+		if (where == null) {
+			return false;
+		}
+		
+		if (where instanceof Operation) {
+			return !((Operation)where).isEmpty();	
+		} else {
+			return true;
+		}
 	}
 
 	public String getWhereSQL() {

@@ -32,7 +32,7 @@ import net.java.sjtools.time.SuperDate;
 
 public class FileWriter implements Writer, Config, Serializable {
 	private static final long serialVersionUID = -6035365141449424419L;
-	
+
 	private static final String FILE_NAME = "sjtools.logging.fileWriter.fileName";
 	private static final String DATE_PATTERN = "sjtools.logging.fileWriter.datePattern";
 
@@ -52,18 +52,17 @@ public class FileWriter implements Writer, Config, Serializable {
 
 		if (printWriter == null) {
 			createFile();
-		} else {
-			if (!lastDate.getFormatedDate(datePattern).equals(now.getFormatedDate(datePattern))) {
-				printWriter.flush();
-				printWriter.close();
+		}
 
-				File file = new File(fileName);
+		if (!lastDate.getFormatedDate(datePattern).equals(now.getFormatedDate(datePattern))) {
+			printWriter.flush();
+			printWriter.close();
 
-				file.renameTo(new File(file.getParentFile(), file.getName().concat(
-						lastDate.getFormatedDate(datePattern))));
+			File file = new File(fileName);
 
-				createFile();
-			}
+			file.renameTo(new File(file.getParentFile(), file.getName().concat(lastDate.getFormatedDate(datePattern))));
+
+			createFile();
 		}
 
 		lastDate = now;
@@ -71,7 +70,13 @@ public class FileWriter implements Writer, Config, Serializable {
 
 	private void createFile() {
 		try {
-			printWriter = new SuperFile(fileName).getWriterAppender();
+			SuperFile file = new SuperFile(fileName);
+
+			if (file.exists()) {
+				lastDate = new SuperDate(file.lastModified());
+			}
+
+			printWriter = file.getWriterAppender();
 		} catch (FileNotFoundException e) {
 			throw new LogRuntimeError(e);
 		}
@@ -98,12 +103,6 @@ public class FileWriter implements Writer, Config, Serializable {
 	public void setConfigParameter(String name, String value) {
 		if (name.equals(FILE_NAME)) {
 			fileName = value;
-
-			File file = new File(fileName);
-
-			if (file.exists()) {
-				lastDate = new SuperDate(file.lastModified());
-			}
 		} else if (name.equals(DATE_PATTERN)) {
 			datePattern = value;
 		}
