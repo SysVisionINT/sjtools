@@ -28,13 +28,17 @@ import net.java.sjtools.db.filter.Expression;
 public abstract class Operation implements Expression {
 
 	protected List expressions = new ArrayList();
+	
+	public boolean isEmpty() {
+		return expressions.isEmpty();
+	}
 
 	public void addExpression(Expression expression) {
 		expressions.add(expression);
 	}
 
 	public void append(StringBuffer buffer) {
-		if (expressions.isEmpty()) {
+		if (isEmpty()) {
 			return;
 		}
 
@@ -61,7 +65,7 @@ public abstract class Operation implements Expression {
 	}
 
 	public void appendValues(List list) {
-		if (expressions.isEmpty()) {
+		if (isEmpty()) {
 			return;
 		}
 
