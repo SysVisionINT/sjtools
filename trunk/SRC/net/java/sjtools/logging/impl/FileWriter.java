@@ -74,6 +74,8 @@ public class FileWriter implements Writer, Config, Serializable {
 
 			if (file.exists()) {
 				lastDate = new SuperDate(file.lastModified());
+			} else {
+				lastDate = new SuperDate();
 			}
 
 			printWriter = file.getWriterAppender();
