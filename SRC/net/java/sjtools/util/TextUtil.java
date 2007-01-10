@@ -27,169 +27,213 @@ import java.util.Map;
 import java.util.StringTokenizer;
 
 public class TextUtil {
-    public static final int ALLIGN_CENTER = 0;
-    public static final int ALLIGN_LEFT = -1;
-    public static final int ALLIGN_RIGHT = 1;
+	public static final int ALLIGN_CENTER = 0;
+	public static final int ALLIGN_LEFT = -1;
+	public static final int ALLIGN_RIGHT = 1;
 
-    public static boolean isEmptyString(String txt) {
-        return (txt == null || txt.length() == 0);
-    }
+	public static boolean isEmptyString(String txt) {
+		return (txt == null || txt.length() == 0);
+	}
 
-    public static List split(String text, String token) {
-        StringTokenizer st = new StringTokenizer(text, token);
-        List list = new ArrayList();
+	public static List split(String text, String token) {
+		StringTokenizer st = new StringTokenizer(text, token);
+		List list = new ArrayList();
 
-        while (st.hasMoreTokens()) {
-            list.add(st.nextToken());
-        }
+		while (st.hasMoreTokens()) {
+			list.add(st.nextToken());
+		}
 
-        return list;
-    }
+		return list;
+	}
 
-    public static String replace(String text, String searchString, String replaceString) {
-        StringBuffer buffer = new StringBuffer();
-        String line = text;
+	public static String replace(String text, String searchString, String replaceString) {
+		StringBuffer buffer = new StringBuffer();
+		String line = text;
 
-        int pos = 0;
+		int pos = 0;
 
-        while ((pos = line.indexOf(searchString)) != -1) {
-            buffer.setLength(0);
+		while ((pos = line.indexOf(searchString)) != -1) {
+			buffer.setLength(0);
 
-            if (pos == 0) {
-                buffer.append(replaceString);
-                buffer.append(line.substring(pos + searchString.length()));
-            } else {
-                buffer.append(line.substring(0, pos));
-                buffer.append(replaceString);
-                buffer.append(line.substring(pos + searchString.length()));
-            }
+			if (pos == 0) {
+				buffer.append(replaceString);
+				buffer.append(line.substring(pos + searchString.length()));
+			} else {
+				buffer.append(line.substring(0, pos));
+				buffer.append(replaceString);
+				buffer.append(line.substring(pos + searchString.length()));
+			}
 
-            line = buffer.toString();
-        }
+			line = buffer.toString();
+		}
 
-        return line;
-    }
-    
-    public static String replace(String msg, Map parameters) {
-        if (parameters.isEmpty() || msg == null) {
-            return msg;
-        }
+		return line;
+	}
 
-        String key = null;
-        String text = msg;
+	public static String replace(String msg, Map parameters) {
+		if (parameters.isEmpty() || msg == null) {
+			return msg;
+		}
 
-        for (Iterator i = parameters.keySet().iterator(); i.hasNext();) {
-            key = (String) i.next();
-            text = replace(text, key, (String) parameters.get(key));
-        }
+		String key = null;
+		String text = msg;
 
-        return text;
-    }
+		for (Iterator i = parameters.keySet().iterator(); i.hasNext();) {
+			key = (String) i.next();
+			text = replace(text, key, (String) parameters.get(key));
+		}
 
-    public static String format(String text, int size, char filler, int allignType) {
-        if (text.length() > size) {
-            return text.substring(0, size);
-        }
+		return text;
+	}
 
-        StringBuffer buffer = new StringBuffer();
-        int rigth = 0;
-        int left = 0;
+	public static String format(String text, int size, char filler, int allignType) {
+		if (text.length() > size) {
+			return text.substring(0, size);
+		}
 
-        switch (allignType) {
-            case ALLIGN_LEFT:
-                rigth = size - text.length();
-                break;
-            case ALLIGN_CENTER:
-                left = (size - text.length()) / 2;
-                rigth = size - (text.length() + left);
-                break;
-            case ALLIGN_RIGHT:
-                left = size - text.length();
-                break;
-        }
+		StringBuffer buffer = new StringBuffer();
+		int rigth = 0;
+		int left = 0;
 
-        for (int i = 0; i < left; i++) {
-            buffer.append(filler);
-        }
+		switch (allignType) {
+		case ALLIGN_LEFT:
+			rigth = size - text.length();
+			break;
+		case ALLIGN_CENTER:
+			left = (size - text.length()) / 2;
+			rigth = size - (text.length() + left);
+			break;
+		case ALLIGN_RIGHT:
+			left = size - text.length();
+			break;
+		}
 
-        buffer.append(text);
+		for (int i = 0; i < left; i++) {
+			buffer.append(filler);
+		}
 
-        for (int i = 0; i < rigth; i++) {
-            buffer.append(filler);
-        }
+		buffer.append(text);
 
-        return buffer.toString();
-    }
+		for (int i = 0; i < rigth; i++) {
+			buffer.append(filler);
+		}
 
-    public static String toString(Collection list) {
-        if (list == null) {
-            return "null";
-        }
+		return buffer.toString();
+	}
 
-        StringBuffer buffer = new StringBuffer();
+	public static String toString(Collection list) {
+		if (list == null) {
+			return "null";
+		}
 
-        for (Iterator i = list.iterator(); i.hasNext();) {
-            if (buffer.length() != 0) {
-                buffer.append(", ");
-            }
+		StringBuffer buffer = new StringBuffer();
 
-            buffer.append(toString(i.next()));
-        }
+		for (Iterator i = list.iterator(); i.hasNext();) {
+			if (buffer.length() != 0) {
+				buffer.append(", ");
+			}
 
-        return buffer.toString();
-    }
+			buffer.append(toString(i.next()));
+		}
 
-    public static String toString(Object[] array) {
-        if (array == null) {
-            return "null";
-        }
+		return buffer.toString();
+	}
 
-        if (array.length == 0) {
-            return "";
-        }
+	public static String toString(Map map) {
+		if (map == null) {
+			return "null";
+		}
 
-        StringBuffer buffer = new StringBuffer();
+		StringBuffer buffer = new StringBuffer();
 
-        for (int i = 0; i < array.length; i++) {
-            if (i != 0) {
-                buffer.append(", ");
-            }
+		Object obj = null;
 
-            buffer.append(toString(array[i]));
-        }
+		for (Iterator i = map.keySet().iterator(); i.hasNext();) {
+			if (buffer.length() != 0) {
+				buffer.append(", ");
+			}
 
-        return buffer.toString();
-    }
+			obj = i.next();
 
-    public static String toString(Object obj) {
-        if (obj == null) {
-            return "null";
-        }
-        
-        return (new BeanUtil(obj)).toString();
-    }
+			buffer.append(toString(obj));
+			buffer.append("=");
+			buffer.append(toString(map.get(obj)));
+		}
 
-    public static String trim(String text) {
-        if (text == null) {
-            return null;
-        } else {
-            return text.trim();
-        }
-    }
+		return buffer.toString();
+	}
 
-    public static String toLowerCase(String text) {
-        if (text == null) {
-            return null;
-        } else {
-            return text.toLowerCase();
-        }
-    }
+	public static String toString(Object[] array) {
+		if (array == null) {
+			return "null";
+		}
 
-    public static String toUpperCase(String text) {
-        if (text == null) {
-            return null;
-        } else {
-            return text.toUpperCase();
-        }
-    }
+		if (array.length == 0) {
+			return "";
+		}
+
+		StringBuffer buffer = new StringBuffer();
+
+		for (int i = 0; i < array.length; i++) {
+			if (i != 0) {
+				buffer.append(", ");
+			}
+
+			buffer.append(toString(array[i]));
+		}
+
+		return buffer.toString();
+	}
+
+	public static String toString(Object obj) {
+		if (obj == null) {
+			return "null";
+		}
+
+		if (obj instanceof String) {
+			return (String) obj;
+		}
+
+		if (obj.getClass().isPrimitive()) {
+			return obj.toString();
+		}
+
+		String packageName = obj.getClass().getPackage().getName();
+
+		if (packageName.startsWith("java.") || packageName.startsWith("javax.")) {
+			return obj.toString();
+		}
+
+		BeanUtil beanUtil = new BeanUtil(obj);
+		
+		if (beanUtil.extendsClassFromPackageStartingWith("java.") || beanUtil.extendsClassFromPackageStartingWith("javax.")) {
+			return obj.toString();
+		}
+		
+		return beanUtil.toString();
+	}
+
+	public static String trim(String text) {
+		if (text == null) {
+			return null;
+		} else {
+			return text.trim();
+		}
+	}
+
+	public static String toLowerCase(String text) {
+		if (text == null) {
+			return null;
+		} else {
+			return text.toLowerCase();
+		}
+	}
+
+	public static String toUpperCase(String text) {
+		if (text == null) {
+			return null;
+		} else {
+			return text.toUpperCase();
+		}
+	}
 }

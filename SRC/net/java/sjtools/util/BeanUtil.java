@@ -24,7 +24,9 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 
 public class BeanUtil {
 	private Object obj = null;
@@ -39,6 +41,44 @@ public class BeanUtil {
 		}
 
 		this.obj = obj;
+	}
+
+	public Class[] getExtendsList() {
+		List ret = new ArrayList();
+
+		Class father = obj.getClass().getSuperclass();
+
+		while (father != null && !father.equals(Object.class)) {
+			ret.add(father);
+
+			father = father.getSuperclass();
+		}
+
+		return (Class[]) ret.toArray(new Class[ret.size()]);
+	}
+
+	public boolean extendsClass(Class clazz) {
+		Class[] fathers = getExtendsList();
+
+		for (int i = 0; i < fathers.length; i++) {
+			if (fathers[i].getName().equals(clazz.getName())) {
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	public boolean extendsClassFromPackageStartingWith(String packageName) {
+		Class[] fathers = getExtendsList();
+
+		for (int i = 0; i < fathers.length; i++) {
+			if (fathers[i].getPackage().getName().startsWith(packageName)) {
+				return true;
+			}
+		}
+
+		return false;
 	}
 
 	public String toString() {
@@ -83,6 +123,10 @@ public class BeanUtil {
 			try {
 				value = method.invoke(obj, new Object[0]);
 
+				if (value != null && value.equals(obj)) {
+					continue;
+				}
+
 				if (count != 0) {
 					buffer.append(", ");
 				}
@@ -103,14 +147,14 @@ public class BeanUtil {
 						}
 
 						buffer.append("]");
-					} else if (value instanceof List) {
+					} else if (value instanceof Collection) {
 						buffer.append("[");
-						buffer.append(TextUtil.toString((List) value));
+						buffer.append(TextUtil.toString((Collection) value));
 						buffer.append("]");
-					} else if (value instanceof String) {
-						buffer.append(value);
-					} else if (value.getClass().isPrimitive()) {
-						buffer.append(value);
+					} else if (value instanceof Map) {
+						buffer.append("{");
+						buffer.append(TextUtil.toString((Map) value));
+						buffer.append("}");
 					} else {
 						buffer.append(TextUtil.toString(value));
 					}
