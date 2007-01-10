@@ -1,5 +1,6 @@
 <project name="SJTools" default="all" basedir=".">
-
+	<property file="build.properties" />
+	
 	<property name="src" value="SRC" />
 	<property name="build" value="BUILD" />
 	<property name="dist" value="${build}/DIST" />
@@ -26,6 +27,15 @@
 
 	<target name="jar" depends="compile">
 		<jar jarfile="${dist}/sjtools.jar">
+			<manifest>
+				<section name="net/java/sjtools">
+					<attribute name="Implementation-Title" value="SJTools - SysVision Java Tools"/>
+					<attribute name="Implementation-Version" value="${version.id}"/>
+					<attribute name="Implementation-Vendor" value="SysVision - Consultadoria e Desenvolvimento em Sistemas de Informática, Lda"/>
+					<attribute name="Implementation-URL" value="https://sjtools.dev.java.net/"/>
+					<attribute name="Implementation-License" value="Lesser General Public License (LGPL)"/>
+				</section>
+			</manifest>
 			<fileset dir="${classes}">
 				<exclude name="testes/**"/>
 			</fileset>
