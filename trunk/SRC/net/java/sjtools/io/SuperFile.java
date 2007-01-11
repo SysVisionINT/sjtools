@@ -59,11 +59,23 @@ public class SuperFile extends File {
 	public PrintWriter getWriterAppender() throws FileNotFoundException {
 		return new PrintWriter(getOutputStream(true));
 	}	
+	
+	public PrintWriter getWriter(String charset) throws FileNotFoundException, UnsupportedEncodingException {
+		return new PrintWriter(new OutputStreamWriter(getOutputStream(), charset));
+	}
+	
+	public PrintWriter getWriterAppender(String charset) throws FileNotFoundException, UnsupportedEncodingException {
+		return new PrintWriter(new OutputStreamWriter(getOutputStream(true), charset));
+	}	
 
 	public BufferedReader getReader() throws FileNotFoundException {
 		return new BufferedReader(new FileReader(this));
 	}
 
+	public BufferedReader getReader(String charset) throws FileNotFoundException, UnsupportedEncodingException {
+		return new BufferedReader(new InputStreamReader(new FileInputStream(this),charset));
+	}
+	
 	public boolean copyTo(File pathName) {
 		boolean ret = false;
 
