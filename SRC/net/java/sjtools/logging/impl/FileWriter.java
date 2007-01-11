@@ -23,6 +23,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.PrintWriter;
 import java.io.Serializable;
+import java.io.UnsupportedEncodingException;
 
 import net.java.sjtools.io.SuperFile;
 import net.java.sjtools.logging.api.Config;
@@ -35,9 +36,11 @@ public class FileWriter implements Writer, Config, Serializable {
 
 	private static final String FILE_NAME = "sjtools.logging.fileWriter.fileName";
 	private static final String DATE_PATTERN = "sjtools.logging.fileWriter.datePattern";
+	private static final String CHARSET = "sjtools.logging.fileWriter.charset";
 
 	private String fileName = null;
 	private String datePattern = null;
+	private String charset = null;
 	private SuperDate lastDate = null;
 
 	private PrintWriter printWriter = null;
@@ -78,8 +81,14 @@ public class FileWriter implements Writer, Config, Serializable {
 				lastDate = new SuperDate();
 			}
 
-			printWriter = file.getWriterAppender();
+			if (charset == null) {
+				printWriter = file.getWriterAppender();
+			} else {
+				printWriter = file.getWriterAppender(charset);
+			}
 		} catch (FileNotFoundException e) {
+			throw new LogRuntimeError(e);
+		} catch (UnsupportedEncodingException e) {
 			throw new LogRuntimeError(e);
 		}
 	}
@@ -97,7 +106,7 @@ public class FileWriter implements Writer, Config, Serializable {
 	}
 
 	public String[] getConfigParameters() {
-		String[] args = { FILE_NAME, DATE_PATTERN };
+		String[] args = { FILE_NAME, DATE_PATTERN, CHARSET };
 
 		return args;
 	}
@@ -107,6 +116,8 @@ public class FileWriter implements Writer, Config, Serializable {
 			fileName = value;
 		} else if (name.equals(DATE_PATTERN)) {
 			datePattern = value;
+		} else if (name.equals(CHARSET)) {
+			charset = value;
 		}
 	}
 
