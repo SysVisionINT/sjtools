@@ -19,11 +19,10 @@
  */
 package net.java.sjtools.security;
 
+import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
 
 public class PasswordUtil {
-	private static final char DEFAULT_SALT = '=';
-
 	public static String getRandomPassword(int size) {
 		StringBuffer output = new StringBuffer();
 
@@ -34,32 +33,35 @@ public class PasswordUtil {
 		return output.toString();
 	}
 
-	public static String passwordCypher(String password) throws NoSuchAlgorithmException {
-		return passwordCypher(DEFAULT_SALT, password);
+	public static String passwordCypher(String password) throws NoSuchAlgorithmException, IOException {
+		return passwordCypher(getRandomSalt(), getRandomSalt(), password);
+	}
+	
+	public static char getRandomSalt() {
+		return CypherUtil.getRandomChar();
 	}
 
-	public static String passwordCypher(char salt, String password) throws NoSuchAlgorithmException {
-		byte[] masterTable = { (byte) salt };
-		byte[] saltedPassword = CypherUtil.xor(password.getBytes(), masterTable);
-		byte[] cypher = CypherUtil.digest(saltedPassword);
+	public static String passwordCypher(char salt1, char salt2, String password) throws NoSuchAlgorithmException, IOException {
+		char[] masterTable = { salt1, salt2 };
 
 		StringBuffer output = new StringBuffer();
-		output.append(salt);
-		output.append(CypherUtil.getReadableText(cypher));
+		output.append(salt1);
+		output.append(salt2);
+		output.append(Base64Util.encode(CypherUtil.digest(CypherUtil.xor(password, String.valueOf(masterTable)))));
 
 		return output.toString();
 	}
 
-	public static boolean isEqual(String nonCipheredPassword, String cipheredPassword) throws NoSuchAlgorithmException {
+	public static boolean isEqual(String nonCipheredPassword, String cipheredPassword) throws NoSuchAlgorithmException, IOException {
 		if (cipheredPassword == null || nonCipheredPassword == null) {
 			return false;
 		}
 
-		if (cipheredPassword.length() <= 1) {
+		if (cipheredPassword.length() <= 2) {
 			return false;
 		}
 
-		String newCipheredPassword = passwordCypher(cipheredPassword.charAt(0), nonCipheredPassword);
+		String newCipheredPassword = passwordCypher(cipheredPassword.charAt(0), cipheredPassword.charAt(1), nonCipheredPassword);
 
 		return newCipheredPassword.equals(cipheredPassword);
 	}
