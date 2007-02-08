@@ -20,9 +20,12 @@
 package net.java.sjtools.security;
 
 import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
 import java.io.Reader;
+import java.io.StringReader;
 import java.io.StringWriter;
 import java.io.Writer;
 
@@ -43,11 +46,22 @@ public class Base64Util {
 		
 		return writer.toString();
 	}
+	
+	public static byte[] decode(String source) throws IOException {
+		ByteArrayOutputStream out = new ByteArrayOutputStream();
+		OutputStreamWriter os = new OutputStreamWriter(out);
+		
+		decode(new StringReader(source), os);
+		
+		os.flush();
+		
+		return out.toByteArray();
+	}	
 
 	public static void encode(Reader in, Writer out) throws IOException {
 		int c, d, e, k = 0, end = 0;
 
-		byte u, v, w, x;
+		int u, v, w, x;
 
 		while (end == 0) {
 			if ((c = in.read()) == -1) {
@@ -65,10 +79,10 @@ public class Base64Util {
 				end += 1;
 			}  
 			
-			u = (byte) MASTER_TABLE[(c & 0xFC) >> 2];
-			v = (byte) MASTER_TABLE[(0x03 & c) << 4 | (d & 0xF0) >> 4];
-			w = (byte) MASTER_TABLE[(0x0F & d) << 2 | (e & 0xC0) >> 6];
-			x = (byte) MASTER_TABLE[e & 0x3F];
+			u = MASTER_TABLE[(c & 0xFC) >> 2];
+			v = MASTER_TABLE[(0x03 & c) << 4 | (d & 0xF0) >> 4];
+			w = MASTER_TABLE[(0x0F & d) << 2 | (e & 0xC0) >> 6];
+			x = MASTER_TABLE[e & 0x3F];
 
 			if (k == 76) {
 				k = 0;
@@ -77,18 +91,18 @@ public class Base64Util {
 			}
 
 			if (end >= 1) {
-				x = (byte) PAD;
+				x = PAD;
 
 				if (end == 2) {
-					w = (byte) PAD;
+					w = PAD;
 				}
 			}
 
 			if (end < 3) {
-				out.write((char) u);
-				out.write((char) v);
-				out.write((char) w);
-				out.write((char) x);
+				out.write(u);
+				out.write(v);
+				out.write(w);
+				out.write(x);
 			}
 
 			k += 4;
@@ -117,18 +131,18 @@ public class Base64Util {
 				n++;
 
 				if (n % 4 == 0) {
-					out.write((char) c);
-					out.write((char) d);
-					out.write((char) e);
+					out.write(c);
+					out.write(d);
+					out.write(e);
 				}
 			}
 		} while (f != -1);
 
 		if (n % 4 == 3) {
-			out.write((char) c);
-			out.write((char) d);
+			out.write(c);
+			out.write(d);
 		} else if (n % 4 == 2) {
-			out.write((char) c);
+			out.write(c);
 		}
 	}
 
