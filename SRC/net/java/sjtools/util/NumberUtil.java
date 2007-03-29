@@ -20,6 +20,9 @@
 package net.java.sjtools.util;
 
 public class NumberUtil {
+	private static final String MAX_INTEGER = String.valueOf(Integer.MAX_VALUE);
+	private static final String MIN_INTEGER = String.valueOf(Integer.MIN_VALUE);
+
 	public static Double format(String number) {
 		Double ret = null;
 		String work = number.replace(',', '.');
@@ -33,7 +36,7 @@ public class NumberUtil {
 		if (TextUtil.isEmptyString(number)) {
 			return false;
 		}
-		
+
 		String work = number.trim();
 		char ch = '\0';
 
@@ -60,7 +63,7 @@ public class NumberUtil {
 		if (TextUtil.isEmptyString(number)) {
 			return false;
 		}
-		
+
 		String work = number.trim();
 		char ch = '\0';
 
@@ -71,6 +74,24 @@ public class NumberUtil {
 				if (!(ch == '-' && i == 0)) {
 					return false;
 				}
+			}
+		}
+
+		if (work.charAt(0) == '-') {
+			if (work.length() > MIN_INTEGER.length()) {
+				return false;
+			}
+
+			if (work.length() == MIN_INTEGER.length() && work.compareTo(MIN_INTEGER) > 0) {
+				return false;
+			}
+		} else {
+			if (work.length() > MAX_INTEGER.length()) {
+				return false;
+			}
+
+			if (work.length() == MAX_INTEGER.length() && work.compareTo(MAX_INTEGER) > 0) {
+				return false;
 			}
 		}
 
