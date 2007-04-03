@@ -93,7 +93,7 @@ public class PoolConfig {
 
 	/**
 	 * Sets the minimalSize.
-	 * @param initialSize The initialSize to set
+	 * @param minimalSize The initialSize to set
 	 */
 	public void setMinimalSize(int minimalSize) {
 		this.minimalSize = minimalSize;

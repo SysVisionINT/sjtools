@@ -23,8 +23,15 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
+/**
+ * Classe com utilit&aacute;rios para fechar Streams
+ */ 
 public class StreamUtil {
 
+    /**
+     * Fecha um InputStream
+     * @param inputStream O InputStream a ser fechado
+     */
 	public static void close(InputStream inputStream) {
 		if (inputStream != null) {
 			try {
@@ -34,6 +41,10 @@ public class StreamUtil {
 		}
 	}
 
+    /**
+     * Fecha um OutputStream
+     * @param outputStream O OutputStream a ser fechado
+     */
 	public static void close(OutputStream outputStream) {
 		if (outputStream != null) {
 			try {
