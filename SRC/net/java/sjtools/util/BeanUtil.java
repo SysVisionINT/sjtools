@@ -165,6 +165,8 @@ public class BeanUtil {
 				buffer.append(fields[i].getName());
 				buffer.append("=");
 				appendObject(buffer, value);
+				
+				count++;
 			} catch (Exception e) {
 				throw new RuntimeException("Unable to get the value from field " + fields[i].getName() + ".");
 			}
