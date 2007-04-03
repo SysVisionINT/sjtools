@@ -20,6 +20,7 @@
 package net.java.sjtools.util;
 
 import java.lang.reflect.Array;
+import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
@@ -97,6 +98,8 @@ public class BeanUtil {
 		Method method = null;
 		Object value = null;
 		int count = 0;
+		List listedFields = new ArrayList();
+		String fieldName = null;
 
 		for (int i = 0; i < methods.length; i++) {
 			method = methods[i];
@@ -122,6 +125,9 @@ public class BeanUtil {
 
 			try {
 				value = method.invoke(obj, new Object[0]);
+				
+				fieldName = getPropertyName(method.getName());
+				listedFields.add(fieldName);
 
 				if (value != null && value.equals(obj)) {
 					continue;
@@ -131,46 +137,73 @@ public class BeanUtil {
 					buffer.append(", ");
 				}
 
-				buffer.append(getPropertyName(method.getName()));
+				buffer.append(fieldName);
 				buffer.append("=");
-
-				if (value != null) {
-					if (value.getClass().isArray()) {
-						buffer.append("[");
-
-						for (int j = 0; j < Array.getLength(value); j++) {
-							if (j != 0) {
-								buffer.append(", ");
-							}
-
-							buffer.append(TextUtil.toString(Array.get(value, j)));
-						}
-
-						buffer.append("]");
-					} else if (value instanceof Collection) {
-						buffer.append("[");
-						buffer.append(TextUtil.toString((Collection) value));
-						buffer.append("]");
-					} else if (value instanceof Map) {
-						buffer.append("{");
-						buffer.append(TextUtil.toString((Map) value));
-						buffer.append("}");
-					} else {
-						buffer.append(TextUtil.toString(value));
-					}
-				} else {
-					buffer.append("null");
-				}
+				appendObject(buffer, value);
 
 				count++;
 			} catch (Exception e) {
-				e.printStackTrace();
+				throw new RuntimeException("Unable to invoke method " + method.getName() + ".");
+			}
+		}
+		
+		Field[] fields = clazz.getFields();
+		
+		for (int i = 0; i < fields.length; i++) {
+			
+			if (listedFields.contains(fields[i].getName())) {
+				continue;
+			}
+			
+			if (count != 0) {
+				buffer.append(", ");
+			}
+
+			try {
+				value = fields[i].get(obj);
+				
+				buffer.append(fields[i].getName());
+				buffer.append("=");
+				appendObject(buffer, value);
+			} catch (Exception e) {
+				throw new RuntimeException("Unable to get the value from field " + fields[i].getName() + ".");
 			}
 		}
 
 		buffer.append(")");
 
 		return buffer.toString();
+	}
+
+	private void appendObject(StringBuffer buffer, Object value) {
+		if (value != null) {
+			if (value.getClass().isArray()) {
+				buffer.append("[");
+
+				for (int j = 0; j < Array.getLength(value); j++) {
+					if (j != 0) {
+						buffer.append(", ");
+					}
+
+					buffer.append(TextUtil.toString(Array.get(value, j)));
+				}
+
+				buffer.append("]");
+			} else if (value instanceof Collection) {
+				buffer.append("[");
+				buffer.append(TextUtil.toString((Collection) value));
+				buffer.append("]");
+			} else if (value instanceof Map) {
+				buffer.append("{");
+				buffer.append(TextUtil.toString((Map) value));
+				buffer.append("}");
+			} else {
+				buffer.append(TextUtil.toString(value));
+			}
+		} else {
+			buffer.append("null");
+		}
+		
 	}
 
 	public boolean implementsMethod(String methodName, Class[] args) {
