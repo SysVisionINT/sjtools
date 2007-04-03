@@ -25,7 +25,17 @@ import java.util.Date;
 import net.java.sjtools.time.SuperDate;
 import net.java.sjtools.time.TimeConst;
 
+/**
+ * Classe com utilit&aacute;rios para tratamento / valida&ccedil;&atilde;o de String com datas
+ */ 
 public class DateUtil {	
+	
+    /**
+     * Verifica se uma String com uma data respeita um determinado formato
+     * @param inputDate A String com uma data a ser validada
+     * @param format String com o formato a ser respeitado
+     * @return <strong>true</strong> se <I>inputDate</I> respeitar </I>format</I>
+     */
 	public static boolean isValidDate(String inputDate, String format) {
 		try {
 			SuperDate date = new SuperDate(inputDate, format);
@@ -40,22 +50,52 @@ public class DateUtil {
 		}
 	}	
 	
+    /**
+     * Retorna o n&uacute;mero de dias entre duas datas
+     * @param firstDate Data inicial
+     * @param lastDate Data final
+     * @return N&uacute;mero de dias
+     */
 	public static int daysBetween(Date firstDate, Date lastDate) {
 		return (int) (millisBetween(firstDate, lastDate) / TimeConst.DAY);
 	}
 	
+    /**
+     * Retorna o n&uacute;mero de horas entre duas datas
+     * @param firstDate Data inicial
+     * @param lastDate Data final
+     * @return N&uacute;mero de horas
+     */
 	public static int hoursBetween(Date firstDate, Date lastDate) {
 		return (int) (millisBetween(firstDate, lastDate) / TimeConst.HOUR);
 	}	
 	
+    /**
+     * Retorna o n&uacute;mero de minutos entre duas datas
+     * @param firstDate Data inicial
+     * @param lastDate Data final
+     * @return N&uacute;mero de minutos
+     */
 	public static int minutesBetween(Date firstDate, Date lastDate) {
 		return (int) (millisBetween(firstDate, lastDate) / TimeConst.MINUTE);
 	}	
 	
+    /**
+     * Retorna o n&uacute;mero de segundos entre duas datas
+     * @param firstDate Data inicial
+     * @param lastDate Data final
+     * @return N&uacute;mero de segundos
+     */
 	public static int secondsBetween(Date firstDate, Date lastDate) {
 		return (int) (millisBetween(firstDate, lastDate) / TimeConst.SECOND);
 	}	
 
+    /**
+     * Retorna o n&uacute;mero de milissegundos entre duas datas
+     * @param firstDate Data inicial
+     * @param lastDate Data final
+     * @return N&uacute;mero de milissegundos
+     */
 	public static long millisBetween(Date firstDate, Date lastDate) {
 		long t1 = firstDate.getTime();
 		long t2 = lastDate.getTime();
