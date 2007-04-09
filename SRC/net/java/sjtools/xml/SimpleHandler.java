@@ -26,6 +26,7 @@ import java.util.Stack;
 import org.xml.sax.Attributes;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
+import org.xml.sax.SAXParseException;
 import org.xml.sax.helpers.DefaultHandler;
 
 public abstract class SimpleHandler extends DefaultHandler {
@@ -109,4 +110,6 @@ public abstract class SimpleHandler extends DefaultHandler {
     }
 
     public abstract void processPCDATA(String elementType, Object currentObject, String value) throws SAXException;
+    
+    public abstract void error(SAXParseException ex) throws SAXException;
 }
