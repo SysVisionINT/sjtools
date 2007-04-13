@@ -52,7 +52,7 @@ public class TextUtil {
 
 		int pos = 0;
 
-		while ((pos = line.indexOf(searchString)) != -1) {
+		while ((pos = line.indexOf(searchString, pos)) != -1) {
 			buffer.setLength(0);
 
 			if (pos == 0) {
@@ -63,6 +63,8 @@ public class TextUtil {
 				buffer.append(replaceString);
 				buffer.append(line.substring(pos + searchString.length()));
 			}
+
+			pos = pos + replaceString.length();
 
 			line = buffer.toString();
 		}
@@ -205,11 +207,12 @@ public class TextUtil {
 		}
 
 		BeanUtil beanUtil = new BeanUtil(obj);
-		
-		if (beanUtil.extendsClassFromPackageStartingWith("java.") || beanUtil.extendsClassFromPackageStartingWith("javax.")) {
+
+		if (beanUtil.extendsClassFromPackageStartingWith("java.")
+				|| beanUtil.extendsClassFromPackageStartingWith("javax.")) {
 			return obj.toString();
 		}
-		
+
 		return beanUtil.toString();
 	}
 

@@ -115,7 +115,9 @@ public class SQLUtil {
 
 		workingSQL = TextUtil.replace(workingSQL, keywords);
 		
-		workingSQL = TextUtil.replace(workingSQL, "  ", " ");
+		while (workingSQL.indexOf("  ") != -1) {
+			workingSQL = TextUtil.replace(workingSQL, "  ", " ");
+		}
 
 		return workingSQL.trim();
 	}
