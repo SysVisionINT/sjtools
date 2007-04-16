@@ -37,7 +37,7 @@ public class EmailUtil {
 	private static final Pattern regularEmailPattern = Pattern.compile("^[a-zA-Z0-9]+[a-zA-Z0-9_.-]*@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,4}$");
 
 
-	public static boolean isValidEmailAddress(String email) {
+	public static boolean isValid(String email) {
 		if (email == null) {
 			return false;
 		}
