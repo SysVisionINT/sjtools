@@ -52,6 +52,10 @@ public class SuperDate extends Timestamp {
 	public SuperDate(Calendar calendar) {
 		this(calendar.getTime());
 	}
+	
+	public Timestamp getTimestamp() {
+		return new Timestamp(getTime());
+	}
 
 	public Calendar getCalendar() {
 		Calendar calendar = Calendar.getInstance();
