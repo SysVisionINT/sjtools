@@ -110,7 +110,7 @@ public class SuperDate extends Timestamp {
 	}	
 	
 	public void setMonth(int value) {
-		set(Calendar.MONTH, value);
+		set(Calendar.MONTH, value - 1);
 	}		
 	
 	public void setDay(int value) {
