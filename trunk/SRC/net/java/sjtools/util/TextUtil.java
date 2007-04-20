@@ -200,6 +200,10 @@ public class TextUtil {
 			return obj.toString();
 		}
 
+		if (obj.getClass().isArray()) {
+			return toString((Object[]) obj);
+		}
+
 		String packageName = obj.getClass().getPackage().getName();
 
 		if (packageName.startsWith("java.") || packageName.startsWith("javax.")) {
