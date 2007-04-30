@@ -220,14 +220,22 @@ public class BeanUtil {
 
 	public Object invokeMethod(String methodName, Object[] args) throws SecurityException, NoSuchMethodException,
 			IllegalArgumentException, IllegalAccessException, InvocationTargetException {
-		Class[] clazzs = new Class[args.length];
+		
+		List methods = getMethods(methodName);
+		Method method = null;
+		
+		if (methods.size() == 1) {
+			method = (Method) methods.get(0);
+		} else {
+			Class[] clazzs = new Class[args.length];
 
-		for (int i = 0; i < args.length; i++) {
-			clazzs[i] = args[i].getClass();
+			for (int i = 0; i < args.length; i++) {
+				clazzs[i] = args[i].getClass();
+			}
+
+			method = obj.getClass().getMethod(methodName, clazzs);
 		}
-
-		Method method = obj.getClass().getMethod(methodName, clazzs);
-
+		
 		return method.invoke(obj, args);
 	}
 
