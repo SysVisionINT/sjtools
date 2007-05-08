@@ -30,86 +30,87 @@ import org.xml.sax.SAXParseException;
 import org.xml.sax.helpers.DefaultHandler;
 
 public abstract class SimpleHandler extends DefaultHandler {
-    private Stack currentElement = new Stack();
-    private XMLElement rootObject = null;
-    private Stack currentObject = new Stack();
+	private Stack currentElement = new Stack();
+	private XMLElement rootObject = null;
+	private Stack currentObject = new Stack();
+	private StringBuffer pcdata = new StringBuffer();
 
-    private Map dtdResolver = new HashMap();
+	private Map dtdResolver = new HashMap();
 
-    public void addDTD(String publicId, String dtdName) {
-        dtdResolver.put(publicId, dtdName);
-    }
+	public void addDTD(String publicId, String dtdName) {
+		dtdResolver.put(publicId, dtdName);
+	}
 
-    public Object getRootElement() {
-        return rootObject.getElementObject();
-    }
+	public Object getRootElement() {
+		return rootObject.getElementObject();
+	}
 
-    public InputSource resolveEntity(String publicId, String systemId) throws SAXException {
-        Object fileName = dtdResolver.get(publicId);
+	public InputSource resolveEntity(String publicId, String systemId) throws SAXException {
+		Object fileName = dtdResolver.get(publicId);
 
-        if (fileName != null) {
-            InputSource is = new InputSource((String) fileName);
-            is.setPublicId(publicId);
-            return is;
-        } else {
-            throw new SAXException(publicId + " is not known!");
-        }
-    }
+		if (fileName != null) {
+			InputSource is = new InputSource((String) fileName);
+			is.setPublicId(publicId);
+			return is;
+		} else {
+			throw new SAXException(publicId + " is not known!");
+		}
+	}
 
-    public void startElement(String namespace, String localname, String type, Attributes attributes)
-            throws SAXException {
+	public void startElement(String namespace, String localname, String type, Attributes attributes)
+			throws SAXException {
 
-        XMLElement current = null;
-        Object obj = null;
+		XMLElement current = null;
+		Object obj = null;
 
-        if (!currentObject.empty()) {
-            current = (XMLElement) currentObject.peek();
-            obj = proccessElement(localname, current.getElementObject(), attributes);
-        } else {
-            obj = proccessElement(localname, null, attributes);
-        }
+		if (!currentObject.empty()) {
+			current = (XMLElement) currentObject.peek();
+			obj = proccessElement(localname, current.getElementObject(), attributes);
+		} else {
+			obj = proccessElement(localname, null, attributes);
+		}
 
-        currentElement.push(new XMLElement(localname, obj));
-        
-        if (obj != null) {
-            currentObject.push(currentElement.peek());
+		currentElement.push(new XMLElement(localname, obj));
 
-            if (rootObject == null) {
-                rootObject = (XMLElement) currentElement.peek();
-            }
-        }
-    }
+		if (obj != null) {
+			currentObject.push(currentElement.peek());
 
-    public abstract Object proccessElement(String elementType, Object currentObject, Attributes attributes) throws SAXException;
+			if (rootObject == null) {
+				rootObject = (XMLElement) currentElement.peek();
+			}
+		}
+	}
 
-    public void endElement(String namespace, String localname, String type) throws SAXException {
-        XMLElement element = (XMLElement) currentElement.peek();
+	public abstract Object proccessElement(String elementType, Object currentObject, Attributes attributes)
+			throws SAXException;
 
-        if (element.getElementName().equals(localname)) {
-            currentElement.pop();
-            
-            element = (XMLElement) currentObject.peek();
-            
-            if (element.getElementName().equals(localname)) {
-                currentObject.pop();
-            }
-        } else {
-            throw new SAXException("Element " + localname + " ended when expected " + element.getElementName());
-        }
-    }
+	public void endElement(String namespace, String localname, String type) throws SAXException {
+		XMLElement elementName = (XMLElement) currentElement.peek();
 
-    public void characters(char[] ch, int start, int len) throws SAXException {
-        String text = new String(ch, start, len);
+		if (elementName.getElementName().equals(localname)) {
+			XMLElement elementObject = (XMLElement) currentObject.peek();
+			
+			if (pcdata.length() > 0) {
+				processPCDATA(elementName.getElementName(), elementObject.getElementObject(), pcdata.toString());
 
-        if (text.trim().length() > 0) {
-            XMLElement elementName = (XMLElement) currentElement.peek();
-            XMLElement elementObject = (XMLElement) currentObject.peek();
-            
-            processPCDATA(elementName.getElementName(), elementObject.getElementObject(), text);
-        }
-    }
+				pcdata.setLength(0);
+			}
 
-    public abstract void processPCDATA(String elementType, Object currentObject, String value) throws SAXException;
-    
-    public abstract void error(SAXParseException ex) throws SAXException;
+			currentElement.pop();
+
+			if (elementObject.getElementName().equals(localname)) {
+				currentObject.pop();
+			}
+		} else {
+			throw new SAXException("Element " + localname + " ended when expected " + elementName.getElementName());
+		}
+	}
+
+	public void characters(char[] ch, int start, int len) throws SAXException {
+		pcdata.append(ch, start, len);
+	}
+
+	public abstract void processPCDATA(String elementType, Object currentObject, String value) throws SAXException;
+
+	public abstract void error(SAXParseException ex) throws SAXException;
 }
