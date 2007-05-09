@@ -91,7 +91,7 @@ public abstract class SimpleHandler extends DefaultHandler {
 			XMLElement elementObject = (XMLElement) currentObject.peek();
 			
 			if (pcdata.length() > 0) {
-				processPCDATA(elementName.getElementName(), elementObject.getElementObject(), pcdata.toString());
+				processPCDATA(elementName.getElementName(), elementObject.getElementObject(), pcdata.toString().trim());
 
 				pcdata.setLength(0);
 			}
