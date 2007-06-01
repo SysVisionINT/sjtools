@@ -88,7 +88,13 @@ public class TextUtil {
 		return text;
 	}
 
-	public static String format(String text, int size, char filler, int allignType) {
+	public static String format(String unformatedText, int size, char filler, int allignType) {
+		String text = unformatedText;
+		
+		if (text == null) {
+			text = "";
+		}
+		
 		if (text.length() > size) {
 			return text.substring(0, size);
 		}
