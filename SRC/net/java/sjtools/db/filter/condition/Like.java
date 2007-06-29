@@ -36,7 +36,7 @@ public class Like extends Condition {
 	}
 	
 	public boolean isTrue(BeanUtil obj) throws Exception {
-		String value = (String) obj.get(fieldName);
+		String value = (String) BeanUtil.getPropertyValue(obj, fieldName);
 
 		String object = (String) values.get(0);
 		

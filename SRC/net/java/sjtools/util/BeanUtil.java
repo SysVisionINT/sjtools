@@ -382,4 +382,23 @@ public class BeanUtil {
 
 		return method;
 	}
+	
+	public static Object getPropertyValue(BeanUtil beanUtil, String propertyName) throws Exception {
+		BeanUtil bu = beanUtil;
+		List list = TextUtil.split(propertyName, ".");
+		String pn = (String) list.get(list.size() - 1);
+
+		Object obj = null;
+		
+		for (int i = 0; i < list.size() - 1; i++) {
+			obj = bu.get((String) list.get(i));
+			bu = new BeanUtil(obj);
+		}
+
+		return bu.get(pn);
+	}
+	
+	public static Object getPropertyValue(Object obj, String propertyName) throws Exception {
+		return getPropertyValue(new BeanUtil(obj), propertyName);
+	}	
 }

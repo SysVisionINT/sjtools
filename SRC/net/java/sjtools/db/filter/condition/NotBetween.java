@@ -39,7 +39,7 @@ public class NotBetween extends Condition {
 	}
 	
 	public boolean isTrue(BeanUtil obj) throws Exception {
-		Object value = obj.get(fieldName);
+		Object value = BeanUtil.getPropertyValue(obj, fieldName);
 
 		Object object1 = values.get(0);
 		Object object2 = values.get(1);

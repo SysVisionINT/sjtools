@@ -34,8 +34,8 @@ public class OrderDesc extends Order {
 	}
 	
 	public int compare(BeanUtil obj1, BeanUtil obj2) throws Exception {
-		Object value1 = obj1.get(fieldName);
-		Object value2 = obj2.get(fieldName);
+		Object value1 = BeanUtil.getPropertyValue(obj1, fieldName);
+		Object value2 = BeanUtil.getPropertyValue(obj2, fieldName);
 		
 		if (value1 == null && value2 == null) {
 			return 0;
