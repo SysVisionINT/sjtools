@@ -36,7 +36,7 @@ public class Equals extends Condition {
 	}
 
 	public boolean isTrue(BeanUtil obj) throws Exception {
-		Object value = obj.get(fieldName);
+		Object value = BeanUtil.getPropertyValue(obj, fieldName);
 
 		Object object = values.get(0);
 

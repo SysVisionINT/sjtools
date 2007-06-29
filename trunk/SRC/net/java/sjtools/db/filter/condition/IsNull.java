@@ -34,7 +34,7 @@ public class IsNull extends Condition {
 	}
 	
 	public boolean isTrue(BeanUtil obj) throws Exception {
-		Object value = obj.get(fieldName);
+		Object value = BeanUtil.getPropertyValue(obj, fieldName);
 
 		return value == null;
 	}	
