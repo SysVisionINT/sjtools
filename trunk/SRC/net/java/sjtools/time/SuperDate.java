@@ -47,6 +47,10 @@ public class SuperDate extends Timestamp {
 		Date dt = sdf.parse(date);
 		
 		this.setTime(dt.getTime());
+		
+		if (!getFormatedDate(format).equals(date)) {
+			throw new ParseException("Invalid format " + format + " for " + date, 0);
+		}
 	}
 
 	public SuperDate(Calendar calendar) {
