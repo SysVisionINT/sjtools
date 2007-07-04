@@ -38,13 +38,9 @@ public class DateUtil {
      */
 	public static boolean isValidDate(String inputDate, String format) {
 		try {
-			SuperDate date = new SuperDate(inputDate, format);
-
-			if (inputDate.equals(date.getFormatedDate(format))) {
-				return true;
-			} else {
-				return false;
-			}
+			new SuperDate(inputDate, format);
+			
+			return true;
 		} catch (ParseException e) {
 			return false;
 		}
