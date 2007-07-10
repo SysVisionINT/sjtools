@@ -24,7 +24,6 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.StringTokenizer;
 
 public class TextUtil {
 	public static final int ALLIGN_CENTER = 0;
@@ -35,14 +34,19 @@ public class TextUtil {
 		return (txt == null || txt.length() == 0);
 	}
 
-	public static List split(String text, String token) {
-		StringTokenizer st = new StringTokenizer(text, token);
+	public static List split(String text, String token) {		
 		List list = new ArrayList();
+		int start = 0;
+		int end = -1;
 
-		while (st.hasMoreTokens()) {
-			list.add(st.nextToken());
+		while ((end = text.indexOf(token, start)) != -1) {
+			list.add(text.substring(start, end));
+			
+			start = end + token.length();
 		}
 
+		list.add(text.substring(start));
+		
 		return list;
 	}
 
