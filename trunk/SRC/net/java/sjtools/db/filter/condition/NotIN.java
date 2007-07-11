@@ -19,14 +19,14 @@
  */
 package net.java.sjtools.db.filter.condition;
 
-import java.util.List;
+import java.util.Collection;
 
 import net.java.sjtools.util.BeanUtil;
 
 public class NotIN extends Condition {
 	private static final long serialVersionUID = 8197026574050361764L;
 
-	public NotIN(String fieldName, List list) {
+	public NotIN(String fieldName, Collection list) {
 		super(fieldName);
 		values.addAll(list);
 	}

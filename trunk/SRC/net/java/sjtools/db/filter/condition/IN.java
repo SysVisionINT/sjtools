@@ -19,14 +19,14 @@
  */
 package net.java.sjtools.db.filter.condition;
 
-import java.util.List;
+import java.util.Collection;
 
 import net.java.sjtools.util.BeanUtil;
 
 public class IN extends Condition {
 	private static final long serialVersionUID = 4713687935075783753L;
 
-	public IN(String fieldName, List list) {
+	public IN(String fieldName, Collection list) {
 		super(fieldName);
 		values.addAll(list);
 	}
