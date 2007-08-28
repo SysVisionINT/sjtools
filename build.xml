@@ -13,7 +13,7 @@
 	</path>
 
 	<target name="all" depends="jar" />
-
+	
 	<target name="init">
 		<tstamp />
 		<mkdir dir="${build}" />
@@ -30,6 +30,7 @@
 			<manifest>
 				<section name="net/java/sjtools">
 					<attribute name="Implementation-Title" value="SJTools - SysVision Java Tools"/>
+					<attribute name="Implementation-Edition" value="Standalone"/>
 					<attribute name="Implementation-Version" value="${version.id}"/>
 					<attribute name="Implementation-Vendor" value="SysVision - Consultadoria e Desenvolvimento em Sistemas de Informática, Lda"/>
 					<attribute name="Implementation-URL" value="https://sjtools.dev.java.net/"/>
@@ -38,9 +39,45 @@
 			</manifest>
 			<fileset dir="${classes}">
 				<exclude name="testes/**"/>
+				<exclude name="**/enterprise/**"/>
+				<exclude name="**/struts/**"/>
 			</fileset>
 		</jar>
+		
+		<jar jarfile="${dist}/sjtools-enterprise.jar">
+			<manifest>
+				<section name="net/java/sjtools">
+					<attribute name="Implementation-Title" value="SJTools - SysVision Java Tools"/>
+					<attribute name="Implementation-Edition" value="Enterprise"/>
+					<attribute name="Implementation-Version" value="${version.id}"/>
+					<attribute name="Implementation-Vendor" value="SysVision - Consultadoria e Desenvolvimento em Sistemas de Informática, Lda"/>
+					<attribute name="Implementation-URL" value="https://sjtools.dev.java.net/"/>
+					<attribute name="Implementation-License" value="Lesser General Public License (LGPL)"/>
+				</section>
+			</manifest>
+			<fileset dir="${classes}">
+				<exclude name="testes/**"/>
+				<exclude name="**/struts/**"/>
+			</fileset>
+		</jar>
+		
+		<jar jarfile="${dist}/sjtools-struts.jar">
+			<manifest>
+				<section name="net/java/sjtools">
+					<attribute name="Implementation-Title" value="SJTools - SysVision Java Tools"/>
+					<attribute name="Implementation-Edition" value="Struts extensions"/>
+					<attribute name="Implementation-Version" value="${version.id}"/>
+					<attribute name="Implementation-Vendor" value="SysVision - Consultadoria e Desenvolvimento em Sistemas de Informática, Lda"/>
+					<attribute name="Implementation-URL" value="https://sjtools.dev.java.net/"/>
+					<attribute name="Implementation-License" value="Lesser General Public License (LGPL)"/>
+				</section>
+			</manifest>
+			<fileset dir="${classes}">
+				<include name="**/struts/**"/>
+			</fileset>
+		</jar>		
 	</target>
+
 
 	<target name="clean_all">
 		<delete dir="${build}" />
