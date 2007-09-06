@@ -85,28 +85,26 @@ public abstract class SimpleHandler extends DefaultHandler {
 			throws SAXException;
 
 	public void endElement(String namespace, String localname, String type) throws SAXException {
-		XMLElement elementName = (XMLElement) currentElement.peek();
-		
-		if (elementName == null) {
-			return;
-		}
+		XMLElement element = (XMLElement) currentElement.peek();
 
-		if (elementName.getElementName().equals(localname)) {
-			XMLElement elementObject = (XMLElement) currentObject.peek();
-			
-			if (pcdata.length() > 0) {
-				processPCDATA(elementName.getElementName(), elementObject.getElementObject(), pcdata.toString().trim());
+		if (element.getElementName().equals(localname)) {
+			if (!currentObject.isEmpty()) {
+				XMLElement elementObject = (XMLElement) currentObject.peek();
 
-				pcdata.setLength(0);
+				if (pcdata.length() > 0) {
+					processPCDATA(element.getElementName(), elementObject.getElementObject(), pcdata.toString().trim());
+
+					pcdata.setLength(0);
+				}
+
+				if (elementObject.getElementName().equals(localname)) {
+					currentObject.pop();
+				}
 			}
 
 			currentElement.pop();
-
-			if (elementObject.getElementName().equals(localname)) {
-				currentObject.pop();
-			}
 		} else {
-			throw new SAXException("Element " + localname + " ended when expected " + elementName.getElementName());
+			throw new SAXException("Element " + localname + " ended when expected " + element.getElementName());
 		}
 	}
 
