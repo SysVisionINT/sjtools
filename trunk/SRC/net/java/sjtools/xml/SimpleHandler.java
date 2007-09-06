@@ -86,6 +86,10 @@ public abstract class SimpleHandler extends DefaultHandler {
 
 	public void endElement(String namespace, String localname, String type) throws SAXException {
 		XMLElement elementName = (XMLElement) currentElement.peek();
+		
+		if (elementName == null) {
+			return;
+		}
 
 		if (elementName.getElementName().equals(localname)) {
 			XMLElement elementObject = (XMLElement) currentObject.peek();
