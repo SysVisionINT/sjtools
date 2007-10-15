@@ -126,7 +126,7 @@ public class BeanUtil {
 			try {
 				value = method.invoke(obj, new Object[0]);
 				
-				fieldName = getPropertyName(method.getName());
+				fieldName = BeanUtil.getPropertyName(method.getName());
 				listedFields.add(fieldName);
 
 				if (value != null && value.equals(obj)) {
@@ -256,7 +256,7 @@ public class BeanUtil {
 		return invokeMethod(getGetMethodName(propertyName), new Object[0]);
 	}
 
-	public String getPropertyName(String methodName) {
+	public static String getPropertyName(String methodName) {
 		String name = null;
 
 		if (methodName.startsWith("get") || methodName.startsWith("set")) {
