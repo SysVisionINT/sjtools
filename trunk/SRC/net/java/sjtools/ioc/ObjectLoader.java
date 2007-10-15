@@ -17,12 +17,11 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA
  */
-package net.java.sjtools.service.error;
+package net.java.sjtools.ioc;
 
-public class ServiceCreationError extends ServiceLocaterError {
-	private static final long serialVersionUID = 3933725626074706065L;
+import net.java.sjtools.ioc.error.ObjectRegestryError;
 
-	public ServiceCreationError(String message, Throwable error) {
-		super(message, error);
-	}
+public interface ObjectLoader {
+	public Object loadObject(String objectName) throws ObjectRegestryError;
+	public boolean isObjectDefined(String objectName) throws ObjectRegestryError;
 }

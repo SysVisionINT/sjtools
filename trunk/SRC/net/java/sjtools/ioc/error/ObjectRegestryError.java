@@ -17,12 +17,22 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA
  */
-package net.java.sjtools.service.error;
+package net.java.sjtools.ioc.error;
 
-public class ServiceNotFound extends ServiceLocaterError {
-	private static final long serialVersionUID = 1922512802380909070L;
+import net.java.sjtools.error.ApplicationError;
 
-	public ServiceNotFound(String message) {
+public class ObjectRegestryError extends ApplicationError {
+	private static final long serialVersionUID = -7703248918605220214L;
+
+	public ObjectRegestryError(Throwable error) {
+		super(error);
+	}
+
+	public ObjectRegestryError(String message, Throwable error) {
+		super(message, error);
+	}
+
+	public ObjectRegestryError(String message) {
 		super(message);
 	}
 }
