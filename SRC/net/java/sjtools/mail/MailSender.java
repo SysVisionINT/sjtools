@@ -36,8 +36,12 @@ import net.java.sjtools.mail.attach.MailAttach;
 import net.java.sjtools.mail.util.ByteArrayDataSource;
 
 public class MailSender {
-	private static final String UTF = "utf-8";
-	private static final String HTML = "text/html";
+	private static final String READ_RECEIPT_HEADER = "Disposition-Notification-To";
+	private static final String DELIVERY_RECEIPT_HEADER = "Return-Receipt-To";
+	private static final String MAILER_HEADER = "X-Mailer";
+	private static final String PRIORITY_HEADER = "X-Priority";
+	private static final String UTF_ENCODE = "utf-8";
+	private static final String HTML_ENCODE = "text/html";
 
 	private Session mailSession = null;
 	private String mailSystemName = MailSender.class.getName();
@@ -60,7 +64,12 @@ public class MailSender {
 
 	public void send(MailMessage mailMessage) throws MessagingException {
 		MimeMessage message = new MimeMessage(mailSession);
+		
 		message.setFrom(mailMessage.getFrom());
+		
+		if (!mailMessage.isReplyTOEmpty()) {
+			message.setReplyTo(mailMessage.getReplyTo());
+		}
 
 		if (!mailMessage.isTOEmpty()) {
 			message.addRecipients(Message.RecipientType.TO, mailMessage.getTo());
@@ -74,22 +83,30 @@ public class MailSender {
 			message.addRecipients(Message.RecipientType.BCC, mailMessage.getBCC());
 		}
 
-		message.setSubject(mailMessage.getSubject(), UTF);
+		message.setSubject(mailMessage.getSubject(), UTF_ENCODE);
 
-		if (mailMessage.isPriorityMail()) {
-			message.setHeader("X-Priority", "1");
+		if (!mailMessage.getMailPriority().equals(MailPriority.NORMAL)) {
+			message.setHeader(PRIORITY_HEADER, mailMessage.getMailPriority().toString());
 		}
 
-		message.setHeader("X-Mailer", getMailSystemName());
+		message.setHeader(MAILER_HEADER, getMailSystemName());
 
+		if (mailMessage.getDeliveryReceipt() != null) {
+			message.setHeader(DELIVERY_RECEIPT_HEADER, mailMessage.getDeliveryReceipt().getAddress());
+		}		
+		
+		if (mailMessage.getReadReceipt() != null) {
+			message.setHeader(READ_RECEIPT_HEADER, mailMessage.getReadReceipt().getAddress());
+		}
+		
 		message.setSentDate(new Date());
 
 		MimeBodyPart messageBodyPart = new MimeBodyPart();
 
 		if (mailMessage.isHtml()) {
-			messageBodyPart.setDataHandler(new DataHandler(new ByteArrayDataSource(mailMessage.getMessage(), HTML)));
+			messageBodyPart.setDataHandler(new DataHandler(new ByteArrayDataSource(mailMessage.getMessage(), HTML_ENCODE)));
 		} else {
-			messageBodyPart.setText(mailMessage.getMessage(), UTF);
+			messageBodyPart.setText(mailMessage.getMessage(), UTF_ENCODE);
 		}
 
 		Multipart multipart = new MimeMultipart();
