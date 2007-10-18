@@ -32,15 +32,18 @@ import net.java.sjtools.mail.attach.MailAttach;
 public class MailMessage implements Serializable {
 	private static final long serialVersionUID = -1483657954547235668L;
 	
-	private boolean priorityMail = false;
+	private MailPriority priority = MailPriority.NORMAL;
 	private InternetAddress from = null;
 	private List to = new ArrayList();
+	private List replyTo = new ArrayList();
 	private List cc = new ArrayList();
 	private List bcc = new ArrayList();
 	private String subject = "";
 	private String message = "";
 	private boolean html = false;
 	private List attaches = new ArrayList();
+	private InternetAddress deliveryReceipt = null;
+	private InternetAddress readReceipt = null;
 	
 	public MailMessage(InternetAddress from) {
 		this.from = from;
@@ -50,12 +53,12 @@ public class MailMessage implements Serializable {
 		this.from = new InternetAddress(from);
 	}
 
-	public boolean isPriorityMail() {
-		return priorityMail;
+	public MailPriority getMailPriority() {
+		return priority;
 	}
 
-	public void setPriorityMail(boolean priorityMail) {
-		this.priorityMail = priorityMail;
+	public void setMailPriority(MailPriority mailPriority) {
+		this.priority = mailPriority;
 	}
 
 	public InternetAddress getFrom() {
@@ -81,6 +84,26 @@ public class MailMessage implements Serializable {
 	public boolean isTOEmpty() {
 		return to.isEmpty();
 	}
+	
+	public InternetAddress[] getReplyTo() {
+		return (InternetAddress[]) replyTo.toArray(new InternetAddress[replyTo.size()]);
+	}
+
+	public void addReplyTo(InternetAddress replyTo) {
+		this.to.add(replyTo);
+	}
+	
+	public void setReplyTo(String replyTo) throws AddressException {
+		InternetAddress[] addresses = InternetAddress.parse(replyTo, false);
+		
+		for (int i = 0; i < addresses.length; i++) {
+			this.replyTo.add(addresses[i]);
+		}
+	}
+	
+	public boolean isReplyTOEmpty() {
+		return replyTo.isEmpty();
+	}	
 	
 	public InternetAddress[] getCC() {
 		return (InternetAddress[]) cc.toArray(new InternetAddress[cc.size()]);
@@ -149,5 +172,29 @@ public class MailMessage implements Serializable {
 	
 	public Collection getMailAttaches() {
 		return attaches;
+	}
+
+	public InternetAddress getDeliveryReceipt() {
+		return deliveryReceipt;
+	}
+
+	public void setDeliveryReceipt(InternetAddress deliveryReceipt) {
+		this.deliveryReceipt = deliveryReceipt;
+	}
+	
+	public void requestDeliveryReceipt() {
+		setDeliveryReceipt(getFrom());
+	}
+
+	public InternetAddress getReadReceipt() {
+		return readReceipt;
+	}
+
+	public void setReadReceipt(InternetAddress readReceipt) {
+		this.readReceipt = readReceipt;
+	}
+	
+	public void requestReadReceipt() {
+		setReadReceipt(getFrom());
 	}
 }
