@@ -70,7 +70,7 @@ public class LDAPUtil {
 
 			SearchControls searchCtls = new SearchControls();
 			searchCtls.setSearchScope(SearchControls.SUBTREE_SCOPE);
-			searchCtls.setReturningAttributes(null);
+			searchCtls.setReturningAttributes(returnedAtts);
 
 			NamingEnumeration answer = ctx
 					.search(config.getSearchBase(), getUserFilter(data.getUserName()), searchCtls);
