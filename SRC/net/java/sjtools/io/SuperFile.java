@@ -19,13 +19,26 @@
  */
 package net.java.sjtools.io;
 
-import java.io.*;
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileFilter;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.FileReader;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
+import java.io.PrintWriter;
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.List;
 
 import net.java.sjtools.util.StreamUtil;
 
 public class SuperFile extends File {
+
 	private static final long serialVersionUID = -615070155290162604L;
 
 	public SuperFile(String pathname) {
@@ -51,31 +64,31 @@ public class SuperFile extends File {
 	public BufferedOutputStream getOutputStream(boolean appender) throws FileNotFoundException {
 		return new BufferedOutputStream(new FileOutputStream(this, appender));
 	}
-	
+
 	public PrintWriter getWriter() throws FileNotFoundException {
 		return new PrintWriter(getOutputStream());
 	}
-	
+
 	public PrintWriter getWriterAppender() throws FileNotFoundException {
 		return new PrintWriter(getOutputStream(true));
-	}	
-	
+	}
+
 	public PrintWriter getWriter(String charset) throws FileNotFoundException, UnsupportedEncodingException {
 		return new PrintWriter(new OutputStreamWriter(getOutputStream(), charset));
 	}
-	
+
 	public PrintWriter getWriterAppender(String charset) throws FileNotFoundException, UnsupportedEncodingException {
 		return new PrintWriter(new OutputStreamWriter(getOutputStream(true), charset));
-	}	
+	}
 
 	public BufferedReader getReader() throws FileNotFoundException {
 		return new BufferedReader(new FileReader(this));
 	}
 
 	public BufferedReader getReader(String charset) throws FileNotFoundException, UnsupportedEncodingException {
-		return new BufferedReader(new InputStreamReader(new FileInputStream(this),charset));
+		return new BufferedReader(new InputStreamReader(new FileInputStream(this), charset));
 	}
-	
+
 	public boolean copyTo(File pathName) {
 		boolean ret = false;
 
@@ -137,4 +150,18 @@ public class SuperFile extends File {
 
 		return fl;
 	}
+
+	public List listSuperFiles(FileFilter fileFilter) {
+		List fl = new ArrayList();
+		File[] files = super.listFiles(fileFilter);
+
+		if (files != null) {
+			for (int i = 0; i < files.length; i++) {
+				fl.add(new SuperFile(files[i].getAbsolutePath()));
+			}
+		}
+
+		return fl;
+	}
+
 }
