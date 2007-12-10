@@ -29,6 +29,8 @@ import java.io.UnsupportedEncodingException;
 import javax.activation.DataSource;
 
 public class ByteArrayDataSource implements DataSource {
+	private static final String ISO_8859_1 = "iso-8859-1";
+	
 	private byte[] data = null;
 	private String type = null;
 
@@ -55,11 +57,27 @@ public class ByteArrayDataSource implements DataSource {
 
 	public ByteArrayDataSource(String data, String type) {
 		try {
-			this.data = data.getBytes("iso-8859-1");
+			this.data = data.getBytes(ISO_8859_1);
 		} catch (UnsupportedEncodingException e) {
 		}
 		
 		this.type = type;
+	}
+	
+	public String getContentAsString() throws IOException {
+		if (data == null) {
+			throw new IOException("ERROR: No data!");
+		}
+		
+		return new String(data, ISO_8859_1);
+	}
+	
+	public byte[] getContent() throws IOException {
+		if (data == null) {
+			throw new IOException("ERROR: No data!");
+		}
+		
+		return data;
 	}
 
 	public InputStream getInputStream() throws IOException {
