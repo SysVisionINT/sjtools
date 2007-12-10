@@ -19,6 +19,8 @@
  */
 package net.java.sjtools.mail.attach;
 
+import java.io.IOException;
+
 import javax.activation.DataSource;
 
 import net.java.sjtools.mail.util.ByteArrayDataSource;
@@ -26,7 +28,7 @@ import net.java.sjtools.mail.util.ByteArrayDataSource;
 public class ByteAttach implements MailAttach {	
 	private static final long serialVersionUID = 135815486428034737L;
 	
-	private DataSource dataSource = null;
+	private ByteArrayDataSource dataSource = null;
 	private String fileName = null;
 	
 	public ByteAttach(String fileName, byte [] data) {
@@ -40,5 +42,15 @@ public class ByteAttach implements MailAttach {
 
 	public String getFileName() {
 		return fileName;
+	}
+	
+	public byte[] getContent() {
+		try {
+			return dataSource.getContent();
+		} catch (IOException e) {
+			// Temos sempre dados
+		}
+		
+		return null;
 	}
 }
