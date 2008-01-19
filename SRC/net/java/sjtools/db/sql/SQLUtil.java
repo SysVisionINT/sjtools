@@ -22,13 +22,23 @@ package net.java.sjtools.db.sql;
 import java.text.CharacterIterator;
 import java.text.StringCharacterIterator;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 
 import net.java.sjtools.db.filter.Filter;
+import net.java.sjtools.util.SearchUtil;
 import net.java.sjtools.util.TextUtil;
 
 public class SQLUtil {
+	private static final String ORDER_BY = " ORDER BY ";
+	private static final String HAVING = " HAVING ";
+	private static final String GROUP_BY = " GROUP BY ";
+	private static final String WHERE = " WHERE ";
+	private static final String FROM = " FROM ";
+	private static final String SELECT = " SELECT ";
+	
 	private static Map keywords = null;
+	private static SearchUtil search = SearchUtil.getInstance("(", ")");
 	
 	public static String getSelectForTable(String tableName, Filter filter) {
 		if (TextUtil.isEmptyString(tableName)) {
@@ -42,12 +52,12 @@ public class SQLUtil {
 
 		if (filter != null) {
 			if (filter.hasWhere()) {
-				buffer.append(" WHERE ");
+				buffer.append(WHERE);
 				buffer.append(filter.getWhereSQL());
 			}
 
 			if (filter.hasOrder()) {
-				buffer.append(" ORDER BY ");
+				buffer.append(ORDER_BY);
 				buffer.append(filter.getOrderSQL());
 			}
 		}
@@ -60,39 +70,52 @@ public class SQLUtil {
 			return sql;
 		}
 
-		String workingSQL = cleanSQL(sql);
+		String workingSQL = " ".concat(cleanSQL(sql));
 
-		String from = getSelectToFrom(workingSQL);
+		String select = getSelectClause(workingSQL);
+		String from = getFromClause(workingSQL);
 		String where = getWhereClause(workingSQL);
-		String group = getGroupToHaving(workingSQL);
+		String group = getGroupClause(workingSQL);
+		String having = getHavingClause(workingSQL);
 		String order = getOrderClause(workingSQL);
 
 		StringBuffer buffer = new StringBuffer();
 
+		buffer.append(SELECT);
+		buffer.append(select);
+		buffer.append(FROM);
 		buffer.append(from);
+		buffer.append(WHERE);
 
 		if (filter.hasWhere()) {
-			if (where == null) {
-				buffer.append(" WHERE ");
-			} else {
+			if (where != null) {
+				buffer.append("(");
 				buffer.append(where);
-
-				buffer.append(" AND ");
+				buffer.append(") AND ");
 			}
 
+			buffer.append("(");
 			buffer.append(filter.getWhereSQL());
+			buffer.append(")");
 		} else if (where != null) {
 			buffer.append(where);
 		}
 
 		if (group != null) {
+			buffer.append(GROUP_BY);
 			buffer.append(group);
+		}
+		
+		if (having != null) {
+			buffer.append(HAVING);
+			buffer.append(having);
 		}
 
 		if (filter.hasOrder()) {
-			buffer.append(" ORDER BY ");
+			buffer.append(ORDER_BY);
 			buffer.append(filter.getOrderSQL());
 		} else if (order != null) {
+			buffer.append(ORDER_BY);
 			buffer.append(order);
 		}
 
@@ -113,7 +136,7 @@ public class SQLUtil {
 		workingSQL = addSpaces(workingSQL, '(');
 		workingSQL = addSpaces(workingSQL, ')');
 
-		workingSQL = TextUtil.replace(workingSQL, keywords);
+		workingSQL = replaceKeywords(workingSQL);
 		
 		while (workingSQL.indexOf("  ") != -1) {
 			workingSQL = TextUtil.replace(workingSQL, "  ", " ");
@@ -122,7 +145,44 @@ public class SQLUtil {
 		return workingSQL.trim();
 	}
 
-    private static String addSpaces(String text, char searchChar) {
+    private static String replaceKeywords(String sql) {
+    	String workingSQL = sql.toLowerCase();
+    	String retSQL = sql;
+    	
+    	StringBuffer buffer = new StringBuffer();
+		String key = null;
+		String value = null;
+
+		for (Iterator i = keywords.keySet().iterator(); i.hasNext();) {
+			key = (String) i.next();
+			value = (String) keywords.get(key);
+			
+			buffer.setLength(0);
+
+			int pos = 0;
+
+			while ((pos = workingSQL.indexOf(key, pos)) != -1) {
+				buffer.setLength(0);
+
+				if (pos == 0) {
+					buffer.append(value);
+					buffer.append(retSQL.substring(pos + key.length()));
+				} else {
+					buffer.append(retSQL.substring(0, pos));
+					buffer.append(value);
+					buffer.append(retSQL.substring(pos + key.length()));
+				}
+
+				pos = pos + value.length();
+
+				retSQL = buffer.toString();
+			}
+		}
+		
+		return retSQL;
+	}
+
+	private static String addSpaces(String text, char searchChar) {
     	CharacterIterator iterator = new StringCharacterIterator(text);
     	
         StringBuffer buffer = new StringBuffer();
@@ -142,80 +202,121 @@ public class SQLUtil {
         return buffer.toString();
     }
     
-	private static String getOrderClause(String workingSQL) {
-		int posORDER = workingSQL.indexOf(" ORDER BY ");
+	public static String getOrderClause(String workingSQL) {
+		int posORDER = search.indexOf(workingSQL, ORDER_BY);
 
 		if (posORDER < 0) {
 			return null;
 		}
 
-		return workingSQL.substring(posORDER);
+		return workingSQL.substring(posORDER + 10);
 	}
 
-	private static String getGroupToHaving(String workingSQL) {
-		int posGROUP = workingSQL.indexOf(" GROUP BY ");
+	public static String getGroupClause(String workingSQL) {
+		int posGROUP = search.indexOf(workingSQL, GROUP_BY);
 
 		if (posGROUP < 0) {
 			return null;
 		}
 
-		int pos = workingSQL.indexOf(" ORDER BY ");
+		int pos = search.indexOf(workingSQL, HAVING);
+		
+		if (pos < 0) {
+			pos = search.indexOf(workingSQL, ORDER_BY);
+		}
 
 		if (pos < 0) {
 			pos = workingSQL.length();
 		}
 
-		return workingSQL.substring(posGROUP, pos);
+		return workingSQL.substring(posGROUP + 10, pos);
 	}
+	
+	public static String getHavingClause(String workingSQL) {
+		int posHAVING = search.indexOf(workingSQL, HAVING);
 
-	private static String getWhereClause(String workingSQL) {
-		int posWHERE = workingSQL.indexOf(" WHERE ");
+		if (posHAVING < 0) {
+			return null;
+		}
+
+		int pos = search.indexOf(workingSQL, ORDER_BY);
+
+		if (pos < 0) {
+			pos = workingSQL.length();
+		}
+
+		return workingSQL.substring(posHAVING + 8, pos);
+	}	
+
+	public static String getWhereClause(String workingSQL) {
+		int posWHERE = search.indexOf(workingSQL, WHERE);
 
 		if (posWHERE < 0) {
 			return null;
 		}
 
-		int pos = workingSQL.indexOf(" GROUP BY ");
+		int pos = search.indexOf(workingSQL, GROUP_BY);
 
 		if (pos < 0) {
-			pos = workingSQL.indexOf(" ORDER BY ");
+			pos = search.indexOf(workingSQL, ORDER_BY);
 		}
 
 		if (pos < 0) {
 			pos = workingSQL.length();
 		}
 
-		return workingSQL.substring(posWHERE, pos);
+		return workingSQL.substring(posWHERE + 7, pos);
 	}
 
-	private static String getSelectToFrom(String workingSQL) {
-		int pos = workingSQL.indexOf(" WHERE ");
+	public static String getSelectClause(String workingSQL) {
+		int posSELECT = search.indexOf(workingSQL, SELECT);
+
+		if (posSELECT < 0) {
+			return null;
+		}
+		
+		int pos = search.indexOf(workingSQL, FROM);
 
 		if (pos < 0) {
-			pos = workingSQL.indexOf(" GROUP BY ");
+			pos = workingSQL.length();
+		}
+
+		return workingSQL.substring(posSELECT + 8, pos);
+	}
+	
+	public static String getFromClause(String workingSQL) {
+		int posFROM = search.indexOf(workingSQL, FROM);
+		
+		if (posFROM < 0) {
+			return null;
+		}
+
+		int	pos = search.indexOf(workingSQL, WHERE);
+		
+		if (pos < 0) {
+			pos = search.indexOf(workingSQL, GROUP_BY);
 		}
 
 		if (pos < 0) {
-			pos = workingSQL.indexOf(" ORDER BY ");
+			pos = search.indexOf(workingSQL, ORDER_BY);
 		}
 
 		if (pos < 0) {
 			pos = workingSQL.length();
 		}
 
-		return workingSQL.substring(0, pos);
-	}
+		return workingSQL.substring(posFROM + 6, pos);
+	}	
 	
 	static {
 		keywords = new HashMap();
 		
-		keywords.put(" select ", " SELECT ");
-		keywords.put(" from ", " FROM ");
-		keywords.put(" where ", " WHERE ");
-		keywords.put(" group ", " GROUP ");
-		keywords.put(" by ", " BY ");
-		keywords.put(" having ", " HAVING ");
-		keywords.put(" order ", " ORDER ");
+		keywords.put(" select ", SELECT);
+		keywords.put(" from ", FROM);
+		keywords.put(" where ", WHERE);
+		keywords.put(" group by ", GROUP_BY);
+		keywords.put(" having ", HAVING);
+		keywords.put(" order by ", ORDER_BY);
 		keywords.put(" and ", " AND ");
 		keywords.put(" or ", " OR ");
 		keywords.put(" like ", " LIKE ");
@@ -223,5 +324,7 @@ public class SQLUtil {
 		keywords.put(" not ", " NOT ");
 		keywords.put(" in ", " IN ");
 		keywords.put(" distinct ", " DISTINCT ");
+		keywords.put(" exists ", " EXISTS ");
+		keywords.put(" null ", " NULL ");
 	}
 }

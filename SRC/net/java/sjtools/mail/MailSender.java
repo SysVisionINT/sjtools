@@ -36,6 +36,7 @@ import net.java.sjtools.mail.attach.MailAttach;
 import net.java.sjtools.mail.util.ByteArrayDataSource;
 
 public class MailSender {
+
 	private static final String READ_RECEIPT_HEADER = "Disposition-Notification-To";
 	private static final String DELIVERY_RECEIPT_HEADER = "Return-Receipt-To";
 	private static final String MAILER_HEADER = "X-Mailer";
@@ -64,12 +65,8 @@ public class MailSender {
 
 	public void send(MailMessage mailMessage) throws MessagingException {
 		MimeMessage message = new MimeMessage(mailSession);
-		
+
 		message.setFrom(mailMessage.getFrom());
-		
-		if (!mailMessage.isReplyTOEmpty()) {
-			message.setReplyTo(mailMessage.getReplyTo());
-		}
 
 		if (!mailMessage.isTOEmpty()) {
 			message.addRecipients(Message.RecipientType.TO, mailMessage.getTo());
@@ -83,7 +80,17 @@ public class MailSender {
 			message.addRecipients(Message.RecipientType.BCC, mailMessage.getBCC());
 		}
 
-		message.setSubject(mailMessage.getSubject(), UTF_ENCODE);
+		if (!mailMessage.isReplyTOEmpty()) {
+			message.setReplyTo(mailMessage.getReplyTo());
+		}
+
+		if (mailMessage.getDeliveryReceipt() != null) {
+			message.setHeader(DELIVERY_RECEIPT_HEADER, mailMessage.getDeliveryReceipt().getAddress());
+		}
+
+		if (mailMessage.getReadReceipt() != null) {
+			message.setHeader(READ_RECEIPT_HEADER, mailMessage.getReadReceipt().getAddress());
+		}
 
 		if (!mailMessage.getMailPriority().equals(MailPriority.NORMAL)) {
 			message.setHeader(PRIORITY_HEADER, mailMessage.getMailPriority().toString());
@@ -91,15 +98,9 @@ public class MailSender {
 
 		message.setHeader(MAILER_HEADER, getMailSystemName());
 
-		if (mailMessage.getDeliveryReceipt() != null) {
-			message.setHeader(DELIVERY_RECEIPT_HEADER, mailMessage.getDeliveryReceipt().getAddress());
-		}		
-		
-		if (mailMessage.getReadReceipt() != null) {
-			message.setHeader(READ_RECEIPT_HEADER, mailMessage.getReadReceipt().getAddress());
-		}
-		
 		message.setSentDate(new Date());
+
+		message.setSubject(mailMessage.getSubject(), UTF_ENCODE);
 
 		MimeBodyPart messageBodyPart = new MimeBodyPart();
 
