@@ -25,50 +25,59 @@ import java.util.Map;
 import net.java.sjtools.thread.Lock;
 
 public class StaticCache {
+
 	private static final int INITIAL_SIZE = 250;
 	private static Map cache = new HashMap(INITIAL_SIZE);
-	private static Map time = new HashMap(INITIAL_SIZE);
 	private static Lock lock = new Lock(cache);
 
 	public static Object getObject(String name) {
-		lock.getReadLock();
+		CacheEntry entry = getCatchEntry(name);
 
-		Object obj = cache.get(name);
+		if (entry == null) {
+			return null;
+		}
 
-		lock.releaseLock();
+		Object obj = entry.getObject();
+
+		if (obj == null) {
+			invalidadeObject(name);
+		}
 
 		return obj;
+	}
+
+	private static CacheEntry getCatchEntry(String name) {
+		lock.getReadLock();
+
+		CacheEntry entry = (CacheEntry) cache.get(name);
+
+		lock.releaseLock();
+		return entry;
 	}
 
 	public static void storeObject(String name, Object obj) {
 		lock.getWriteLock();
 
-		cache.put(name, obj);
-		
-		if (obj != null) {
-			time.put(name, new Long(System.currentTimeMillis()));
-		} else {
-			time.remove(name);
-		}
+		cache.put(name, new CacheEntry(obj));
 
 		lock.releaseLock();
 	}
 
 	public static void invalidadeObject(String name) {
-		storeObject(name, null);
-	}
-	
-	public static long getLastChange(String name) {
-		lock.getReadLock();
+		lock.getWriteLock();
 
-		Long ret = (Long)time.get(name);
+		cache.remove(name);
 
 		lock.releaseLock();
-		
-		if (ret == null) {
+	}
+
+	public static long getLastChange(String name) {
+		CacheEntry entry = getCatchEntry(name);
+
+		if (entry == null) {
 			return 0;
-		} else {
-			return ret.longValue();
 		}
-	}	
+
+		return entry.getTimestamp();
+	}
 }

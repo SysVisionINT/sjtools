@@ -27,6 +27,29 @@ public class SQLError extends ApplicationError {
 	private static final long serialVersionUID = -1773781004539682300L;
 
 	public SQLError(SQLException e) {
-		super(e);
+		super(getErrorMsg(e), e);
+	}
+
+	private static String getErrorMsg(SQLException e) {
+		StringBuffer buffer = new StringBuffer();
+		
+		buffer.append("SQLException chain:");
+		
+		SQLException exception = e;
+		
+		while (exception != null) {
+			buffer.append(" (");
+			buffer.append("errorCode=");
+			buffer.append(e.getErrorCode());
+			buffer.append(" SQLState=");
+			buffer.append(e.getSQLState());
+			buffer.append(" message=");
+			buffer.append(e.getMessage());
+			buffer.append(")");
+			
+			exception = exception.getNextException();
+		}
+		
+		return buffer.toString();
 	}
 }
