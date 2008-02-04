@@ -33,7 +33,7 @@ public class StringAttach implements MailAttach {
 	
 	public StringAttach(String fileName, String data) {
 		this.fileName = fileName;
-		dataSource = new ByteArrayDataSource(data, "application/octet-stream");
+		dataSource = new ByteArrayDataSource(data, "text/plain");
 	}
 
 	public DataSource getData() {

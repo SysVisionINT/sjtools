@@ -19,38 +19,60 @@
  */
 package net.java.sjtools.util;
 
+import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.PrintWriter;
 
 /**
  * Classe com utilit&aacute;rios para fechar Streams
- */ 
+ */
 public class StreamUtil {
 
-    /**
-     * Fecha um InputStream
-     * @param inputStream O InputStream a ser fechado
-     */
+	/**
+	 * Fecha um InputStream
+	 * @param inputStream O InputStream a ser fechado
+	 */
 	public static void close(InputStream inputStream) {
 		if (inputStream != null) {
 			try {
 				inputStream.close();
-			} catch (IOException e) {
-			}
+			} catch (IOException e) {}
 		}
 	}
 
-    /**
-     * Fecha um OutputStream
-     * @param outputStream O OutputStream a ser fechado
-     */
+	/**
+	 * Fecha um BufferedReader
+	 * @param reader O BufferedReader a ser fechado
+	 */
+	public static void close(BufferedReader reader) {
+		if (reader != null) {
+			try {
+				reader.close();
+			} catch (IOException e) {}
+		}
+	}
+
+	/**
+	 * Fecha um OutputStream
+	 * @param outputStream O OutputStream a ser fechado
+	 */
 	public static void close(OutputStream outputStream) {
 		if (outputStream != null) {
 			try {
 				outputStream.close();
-			} catch (IOException e) {
-			}
+			} catch (IOException e) {}
+		}
+	}
+
+	/**
+	 * Fecha um PrintWriter
+	 * @param writer O PrintWriter a ser fechado
+	 */
+	public static void close(PrintWriter writer) {
+		if (writer != null) {
+			writer.close();
 		}
 	}
 }

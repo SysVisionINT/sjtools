@@ -36,7 +36,6 @@ import net.java.sjtools.mail.attach.MailAttach;
 import net.java.sjtools.mail.util.ByteArrayDataSource;
 
 public class MailSender {
-
 	private static final String READ_RECEIPT_HEADER = "Disposition-Notification-To";
 	private static final String DELIVERY_RECEIPT_HEADER = "Return-Receipt-To";
 	private static final String MAILER_HEADER = "X-Mailer";
