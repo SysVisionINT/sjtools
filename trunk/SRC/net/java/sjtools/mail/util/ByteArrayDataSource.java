@@ -29,7 +29,7 @@ import java.io.UnsupportedEncodingException;
 import javax.activation.DataSource;
 
 public class ByteArrayDataSource implements DataSource {
-	private static final String ISO_8859_1 = "iso-8859-1";
+	private static final String ISO_8859_1 = "ISO-8859-1";
 	
 	private byte[] data = null;
 	private String type = null;

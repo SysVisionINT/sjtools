@@ -39,7 +39,7 @@ public class PropertyReader {
 		Properties p = null;
 
 		if (is != null) {
-			p = new Properties();
+			p = new SuperProperties();
 
 			try {
 				p.load(is);
