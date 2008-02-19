@@ -52,16 +52,18 @@ public class BasicController extends TilesRequestProcessor {
 				return super.processPreprocess(request, response);
 			}
 
-			if (log.isWarnEnabled()) {
-				log.warn(path + " can not be accessed without a session.");
-			}
+			//Se a action existir
+			if (moduleConfig.findActionConfig(path) != null) {
+				if (log.isWarnEnabled()) {
+					log.warn(path + " can not be accessed without a session.");
+				}
 
-			try {
-				gotoForwardName(request, response, config.getForward());
-			} catch (Exception e) {
-			}
+				try {
+					gotoForwardName(request, response, config.getForward());
+				} catch (Exception e) {}
 
-			return false;
+				return false;
+			}
 		}
 
 		return gotoAction(request, response, path);
@@ -78,8 +80,7 @@ public class BasicController extends TilesRequestProcessor {
 
 		try {
 			path = processPath(request, response);
-		} catch (Exception e) {
-		}
+		} catch (Exception e) {}
 
 		return path;
 	}
