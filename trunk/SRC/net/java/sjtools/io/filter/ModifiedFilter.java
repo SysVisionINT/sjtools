@@ -1,18 +1,18 @@
 /*
  * SJTools - SysVision Java Tools
- * 
- * Copyright (C) 2008 SysVision - Consultadoria e Desenvolvimento em Sistemas de Informática, Lda.  
- * 
+ *
+ * Copyright (C) 2008 SysVision - Consultadoria e Desenvolvimento em Sistemas de Informática, Lda.
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
  * version 2.1 of the License, or (at your option) any later version.
- * 
+ *
  * This library is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA
@@ -27,6 +27,7 @@ import net.java.sjtools.error.UnexpectedError;
 import net.java.sjtools.io.error.InvalidFilterException;
 import net.java.sjtools.io.filter.model.MinMax;
 import net.java.sjtools.time.SuperDate;
+import net.java.sjtools.time.error.InvalidMonthDayException;
 
 public class ModifiedFilter implements FileFilter {
 
@@ -135,7 +136,12 @@ public class ModifiedFilter implements FileFilter {
 		switch (precision) {
 			case YEAR:
 				work.setMonth(1);
-				work.setDay(1);
+
+				try {
+					work.setDay(1);
+				} catch (InvalidMonthDayException e) {
+				}
+
 				work.setHour(0);
 				work.setMinute(0);
 				work.setSecond(0);
@@ -146,7 +152,11 @@ public class ModifiedFilter implements FileFilter {
 				ret.setMax(work.getTime());
 				break;
 			case MONTH:
-				work.setDay(1);
+				try {
+					work.setDay(1);
+				} catch (InvalidMonthDayException e) {
+				}
+
 				work.setHour(0);
 				work.setMinute(0);
 				work.setSecond(0);
