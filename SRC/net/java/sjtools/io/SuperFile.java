@@ -164,4 +164,16 @@ public class SuperFile extends File {
 		return fl;
 	}
 
+	public String getExtension() {
+		int dotPosition = this.getName().lastIndexOf('.');
+
+		return dotPosition > 0 ? this.getName().substring(dotPosition + 1) : null;
+	}
+
+	public String getNameWithoutExtension() {
+		int dotPosition = this.getName().lastIndexOf('.');
+
+		return dotPosition > 0 ? this.getName().substring(0, dotPosition) : this.getName();
+	}
+
 }
