@@ -19,17 +19,16 @@
  */
 package net.java.sjtools.util;
 
+import java.math.BigDecimal;
+import java.math.BigInteger;
+
+
 public class NumberUtil {
-	private static final String MAX_INTEGER = String.valueOf(Integer.MAX_VALUE);
-	private static final String MIN_INTEGER = String.valueOf(Integer.MIN_VALUE);
 
 	public static Double format(String number) {
-		Double ret = null;
 		String work = number.replace(',', '.');
 
-		ret = new Double(work);
-
-		return ret;
+		return new Double(work);
 	}
 
 	public static boolean isValid(String number) {
@@ -59,7 +58,83 @@ public class NumberUtil {
 		return true;
 	}
 
+	public static boolean isValidFloat(String number) {
+		if (isValid(number)) {
+			try {
+				Float.valueOf(number);
+
+				return true;
+			} catch (NumberFormatException e) {}
+		}
+
+		return false;
+	}
+
+	public static boolean isValidDouble(String number) {
+		if (isValid(number)) {
+			try {
+				Double.valueOf(number);
+
+				return true;
+			} catch (NumberFormatException e) {}
+		}
+
+		return false;
+	}
+
+	public static boolean isValidBigDecimal(String number) {
+		if (isValid(number)) {
+			try {
+				new BigDecimal(number);
+
+				return true;
+			} catch (NumberFormatException e) {}
+		}
+
+		return false;
+	}
+
+	public static boolean isValidBigInteger(String number) {
+		if (isValid(number)) {
+			try {
+				new BigInteger(number);
+
+				return true;
+			} catch (NumberFormatException e) {}
+		}
+
+		return false;
+	}
+
 	public static boolean isValidInteger(String number) {
+		String MAX_INTEGER = String.valueOf(Integer.MAX_VALUE);
+		String MIN_INTEGER = String.valueOf(Integer.MIN_VALUE);
+
+		return isValidIntegerNumber(number, MIN_INTEGER, MAX_INTEGER);
+	}
+
+	public static boolean isValidLong(String number) {
+		String MAX_INTEGER = String.valueOf(Long.MAX_VALUE);
+		String MIN_INTEGER = String.valueOf(Long.MIN_VALUE);
+
+		return isValidIntegerNumber(number, MIN_INTEGER, MAX_INTEGER);
+	}
+
+	public static boolean isValidShort(String number) {
+		String MAX_INTEGER = String.valueOf(Short.MAX_VALUE);
+		String MIN_INTEGER = String.valueOf(Short.MIN_VALUE);
+
+		return isValidIntegerNumber(number, MIN_INTEGER, MAX_INTEGER);
+	}
+
+	public static boolean isValidByte(String number) {
+		String MAX_INTEGER = String.valueOf(Byte.MAX_VALUE);
+		String MIN_INTEGER = String.valueOf(Byte.MIN_VALUE);
+
+		return isValidIntegerNumber(number, MIN_INTEGER, MAX_INTEGER);
+	}
+
+	public static boolean isValidIntegerNumber(String number, String MIN_INTEGER, String MAX_INTEGER) {
 		if (TextUtil.isEmptyString(number)) {
 			return false;
 		}
