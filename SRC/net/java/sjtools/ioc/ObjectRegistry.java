@@ -138,7 +138,7 @@ public class ObjectRegistry {
 				if (parameters.length == 1) {
 					propertyName = BeanUtil.getPropertyName(methods[i].getName());
 
-					if (!isPropertyFillable(propertyName)) {
+					if (!isPropertyFillable(objectName, propertyName)) {
 						continue;
 					}
 
@@ -180,7 +180,7 @@ public class ObjectRegistry {
 		}
 	}
 
-	protected boolean isPropertyFillable(String propertyName) {
+	protected boolean isPropertyFillable(String objectName, String propertyName) {
 		return true;
 	}
 
