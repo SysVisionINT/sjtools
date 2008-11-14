@@ -37,6 +37,11 @@ public class NumberUtil {
 		}
 
 		String work = number.trim();
+
+		if (work.length() == 0) {
+			return false;
+		}
+
 		char ch = '\0';
 
 		for (int i = 0; i < work.length(); i++) {
