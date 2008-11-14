@@ -30,6 +30,7 @@ import java.util.List;
 import java.util.Map;
 
 public class BeanUtil {
+
 	private Object obj = null;
 
 	public BeanUtil(Class clazz) throws InstantiationException, IllegalAccessException {
@@ -74,7 +75,7 @@ public class BeanUtil {
 		Class[] fathers = getExtendsList();
 
 		for (int i = 0; i < fathers.length; i++) {
-			if (fathers[i].getPackage().getName().startsWith(packageName)) {
+			if (fathers[i].getPackage() != null && fathers[i].getPackage().getName().startsWith(packageName)) {
 				return true;
 			}
 		}
@@ -114,8 +115,7 @@ public class BeanUtil {
 
 			int modifiers = method.getModifiers();
 
-			if (Modifier.isStatic(modifiers) || Modifier.isFinal(modifiers) || Modifier.isAbstract(modifiers)
-					|| Modifier.isProtected(modifiers) || Modifier.isPrivate(modifiers)) {
+			if (Modifier.isStatic(modifiers) || Modifier.isFinal(modifiers) || Modifier.isAbstract(modifiers) || Modifier.isProtected(modifiers) || Modifier.isPrivate(modifiers)) {
 				continue;
 			}
 
@@ -125,7 +125,7 @@ public class BeanUtil {
 
 			try {
 				value = method.invoke(obj, new Object[0]);
-				
+
 				fieldName = BeanUtil.getPropertyName(method.getName());
 				listedFields.add(fieldName);
 
@@ -146,26 +146,26 @@ public class BeanUtil {
 				throw new RuntimeException("Unable to invoke method " + method.getName() + ".");
 			}
 		}
-		
+
 		Field[] fields = clazz.getFields();
-		
+
 		for (int i = 0; i < fields.length; i++) {
-			
+
 			if (listedFields.contains(fields[i].getName())) {
 				continue;
 			}
-			
+
 			if (count != 0) {
 				buffer.append(", ");
 			}
 
 			try {
 				value = fields[i].get(obj);
-				
+
 				buffer.append(fields[i].getName());
 				buffer.append("=");
 				appendObject(buffer, value);
-				
+
 				count++;
 			} catch (Exception e) {
 				throw new RuntimeException("Unable to get the value from field " + fields[i].getName() + ".");
@@ -205,7 +205,7 @@ public class BeanUtil {
 		} else {
 			buffer.append("null");
 		}
-		
+
 	}
 
 	public boolean implementsMethod(String methodName, Class[] args) {
@@ -218,12 +218,11 @@ public class BeanUtil {
 		return true;
 	}
 
-	public Object invokeMethod(String methodName, Object[] args) throws SecurityException, NoSuchMethodException,
-			IllegalArgumentException, IllegalAccessException, InvocationTargetException {
-		
+	public Object invokeMethod(String methodName, Object[] args) throws SecurityException, NoSuchMethodException, IllegalArgumentException, IllegalAccessException, InvocationTargetException {
+
 		List methods = getMethods(methodName);
 		Method method = null;
-		
+
 		if (methods.size() == 1) {
 			method = (Method) methods.get(0);
 		} else {
@@ -235,7 +234,7 @@ public class BeanUtil {
 
 			method = obj.getClass().getMethod(methodName, clazzs);
 		}
-		
+
 		return method.invoke(obj, args);
 	}
 
@@ -251,8 +250,7 @@ public class BeanUtil {
 		return obj.getClass().getName();
 	}
 
-	public Object get(String propertyName) throws SecurityException, NoSuchMethodException, IllegalArgumentException,
-			IllegalAccessException, InvocationTargetException {
+	public Object get(String propertyName) throws SecurityException, NoSuchMethodException, IllegalArgumentException, IllegalAccessException, InvocationTargetException {
 		return invokeMethod(getGetMethodName(propertyName), new Object[0]);
 	}
 
@@ -320,8 +318,7 @@ public class BeanUtil {
 		return buffer.toString();
 	}
 
-	public void set(String propertyName, Object value) throws NoSuchMethodException, IllegalArgumentException,
-			IllegalAccessException, InvocationTargetException {
+	public void set(String propertyName, Object value) throws NoSuchMethodException, IllegalArgumentException, IllegalAccessException, InvocationTargetException {
 		String name = getMethodName("set", propertyName);
 		List list = getMethods(name);
 		Method method = null;
@@ -357,8 +354,7 @@ public class BeanUtil {
 		while (method == null && classes[0] != null) {
 			try {
 				method = obj.getClass().getMethod(methodName, classes);
-			} catch (NoSuchMethodException e) {
-			}
+			} catch (NoSuchMethodException e) {}
 
 			if (method == null) {
 				interfaces = classes[0].getInterfaces();
@@ -368,8 +364,7 @@ public class BeanUtil {
 
 					try {
 						method = obj.getClass().getMethod(methodName, classesI);
-					} catch (NoSuchMethodException e) {
-					}
+					} catch (NoSuchMethodException e) {}
 				}
 			}
 
@@ -382,14 +377,14 @@ public class BeanUtil {
 
 		return method;
 	}
-	
+
 	public static Object getPropertyValue(BeanUtil beanUtil, String propertyName) throws Exception {
 		BeanUtil bu = beanUtil;
 		List list = TextUtil.split(propertyName, ".");
 		String pn = (String) list.get(list.size() - 1);
 
 		Object obj = null;
-		
+
 		for (int i = 0; i < list.size() - 1; i++) {
 			obj = bu.get((String) list.get(i));
 			bu = new BeanUtil(obj);
@@ -397,8 +392,8 @@ public class BeanUtil {
 
 		return bu.get(pn);
 	}
-	
+
 	public static Object getPropertyValue(Object obj, String propertyName) throws Exception {
 		return getPropertyValue(new BeanUtil(obj), propertyName);
-	}	
+	}
 }

@@ -26,6 +26,7 @@ import java.util.List;
 import java.util.Map;
 
 public class TextUtil {
+
 	public static final int ALLIGN_CENTER = 0;
 	public static final int ALLIGN_LEFT = -1;
 	public static final int ALLIGN_RIGHT = 1;
@@ -34,19 +35,19 @@ public class TextUtil {
 		return (txt == null || txt.length() == 0);
 	}
 
-	public static List split(String text, String token) {		
+	public static List split(String text, String token) {
 		List list = new ArrayList();
 		int start = 0;
 		int end = -1;
 
 		while ((end = text.indexOf(token, start)) != -1) {
 			list.add(text.substring(start, end));
-			
+
 			start = end + token.length();
 		}
 
 		list.add(text.substring(start));
-		
+
 		return list;
 	}
 
@@ -94,11 +95,11 @@ public class TextUtil {
 
 	public static String format(String unformatedText, int size, char filler, int allignType) {
 		String text = unformatedText;
-		
+
 		if (text == null) {
 			text = "";
 		}
-		
+
 		if (text.length() > size) {
 			return text.substring(0, size);
 		}
@@ -108,16 +109,16 @@ public class TextUtil {
 		int left = 0;
 
 		switch (allignType) {
-		case ALLIGN_LEFT:
-			rigth = size - text.length();
-			break;
-		case ALLIGN_CENTER:
-			left = (size - text.length()) / 2;
-			rigth = size - (text.length() + left);
-			break;
-		case ALLIGN_RIGHT:
-			left = size - text.length();
-			break;
+			case ALLIGN_LEFT:
+				rigth = size - text.length();
+				break;
+			case ALLIGN_CENTER:
+				left = (size - text.length()) / 2;
+				rigth = size - (text.length() + left);
+				break;
+			case ALLIGN_RIGHT:
+				left = size - text.length();
+				break;
 		}
 
 		for (int i = 0; i < left; i++) {
@@ -214,16 +215,17 @@ public class TextUtil {
 			return toString((Object[]) obj);
 		}
 
-		String packageName = obj.getClass().getPackage().getName();
+		if (obj.getClass().getPackage() != null) {
+			String packageName = obj.getClass().getPackage().getName();
 
-		if (packageName.startsWith("java.") || packageName.startsWith("javax.")) {
-			return obj.toString();
+			if (packageName.startsWith("java.") || packageName.startsWith("javax.")) {
+				return obj.toString();
+			}
 		}
 
 		BeanUtil beanUtil = new BeanUtil(obj);
 
-		if (beanUtil.extendsClassFromPackageStartingWith("java.")
-				|| beanUtil.extendsClassFromPackageStartingWith("javax.")) {
+		if (beanUtil.extendsClassFromPackageStartingWith("java.") || beanUtil.extendsClassFromPackageStartingWith("javax.")) {
 			return obj.toString();
 		}
 
