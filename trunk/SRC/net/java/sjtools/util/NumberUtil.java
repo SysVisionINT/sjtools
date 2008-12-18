@@ -140,11 +140,12 @@ public class NumberUtil {
 	}
 
 	public static boolean isValidIntegerNumber(String number, String MIN_INTEGER, String MAX_INTEGER) {
-		if (TextUtil.isEmptyString(number)) {
+		String work = TextUtil.trim(number);
+
+		if (TextUtil.isEmptyString(work)) {
 			return false;
 		}
 
-		String work = number.trim();
 		char ch = '\0';
 
 		for (int i = 0; i < work.length(); i++) {
