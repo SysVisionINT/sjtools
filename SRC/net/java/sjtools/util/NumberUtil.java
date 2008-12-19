@@ -36,23 +36,17 @@ public class NumberUtil {
 			return false;
 		}
 
-		String work = number.trim();
-
-		if (work.length() == 0) {
-			return false;
-		}
-
 		char ch = '\0';
 
-		for (int i = 0; i < work.length(); i++) {
-			ch = work.charAt(i);
+		for (int i = 0; i < number.length(); i++) {
+			ch = number.charAt(i);
 
 			if (!Character.isDigit(ch)) {
 				if (ch == '-' && i == 0) {
 					continue;
 				}
 
-				if ((ch == ',' || ch == '.') && (i > 0) && (i < (work.length() - 1))) {
+				if ((ch == ',' || ch == '.') && (i > 0) && (i < (number.length() - 1))) {
 					continue;
 				}
 
@@ -144,16 +138,10 @@ public class NumberUtil {
 			return false;
 		}
 
-		String work = number.trim();
-
-		if (work.length() == 0) {
-			return false;
-		}
-
 		char ch = '\0';
 
-		for (int i = 0; i < work.length(); i++) {
-			ch = work.charAt(i);
+		for (int i = 0; i < number.length(); i++) {
+			ch = number.charAt(i);
 
 			if (!Character.isDigit(ch)) {
 				if (!(ch == '-' && i == 0)) {
@@ -162,20 +150,20 @@ public class NumberUtil {
 			}
 		}
 
-		if (work.charAt(0) == '-') {
-			if (work.length() > MIN_INTEGER.length()) {
+		if (number.charAt(0) == '-') {
+			if (number.length() > MIN_INTEGER.length()) {
 				return false;
 			}
 
-			if (work.length() == MIN_INTEGER.length() && work.compareTo(MIN_INTEGER) > 0) {
+			if (number.length() == MIN_INTEGER.length() && number.compareTo(MIN_INTEGER) > 0) {
 				return false;
 			}
 		} else {
-			if (work.length() > MAX_INTEGER.length()) {
+			if (number.length() > MAX_INTEGER.length()) {
 				return false;
 			}
 
-			if (work.length() == MAX_INTEGER.length() && work.compareTo(MAX_INTEGER) > 0) {
+			if (number.length() == MAX_INTEGER.length() && number.compareTo(MAX_INTEGER) > 0) {
 				return false;
 			}
 		}
