@@ -98,11 +98,12 @@ public class MessageBroker {
 		listenerLock.getWriteLock();
 
 		ListenerFeeder registed = (ListenerFeeder) listenerMap.get(name);
-		registed.incTopicCount();
 
 		if (registed == null) {
 			listenerMap.put(name, new ListenerFeeder(name, listener));
 		}
+		
+		registed.incTopicCount();
 
 		listenerLock.releaseLock();
 	}
