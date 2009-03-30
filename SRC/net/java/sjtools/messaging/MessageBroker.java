@@ -100,7 +100,8 @@ public class MessageBroker {
 		ListenerFeeder registed = (ListenerFeeder) listenerMap.get(name);
 
 		if (registed == null) {
-			listenerMap.put(name, new ListenerFeeder(name, listener));
+			registed = new ListenerFeeder(name, listener);
+			listenerMap.put(name, registed);
 		}
 		
 		registed.incTopicCount();
