@@ -20,6 +20,7 @@
 package net.java.sjtools.messaging;
 
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
@@ -136,5 +137,23 @@ public class MessageBroker {
 		listenerLock.releaseLock();
 
 		return feeder;
+	}
+	
+	public void stop() {
+		listenerLock.getWriteLock();
+		
+		ListenerFeeder feeder = null;
+		
+		for (Iterator i =  listenerMap.values().iterator(); i.hasNext();) {
+			feeder = (ListenerFeeder) i.next();
+			feeder.stop();
+		}
+		
+		listenerMap.clear();
+		listenerLock.releaseLock();
+		
+		topicLock.getWriteLock();
+		topicMap.clear();
+		topicLock.releaseLock();
 	}
 }
