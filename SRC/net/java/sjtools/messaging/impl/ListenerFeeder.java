@@ -89,5 +89,6 @@ public class ListenerFeeder implements Runnable {
 		run = false;
 		thread.interrupt();
 		MessageBroker.getInstance().getMessageStorage().clean(storageKey);
+		thread.die();
 	}
 }
