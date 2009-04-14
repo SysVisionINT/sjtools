@@ -84,11 +84,11 @@
 			</fileset>
 		</jar>
 		
-		<jar jarfile="${dist}/sjtools-fileprocessor.jar">
+		<jar jarfile="${dist}/sjtools-recordprocessor.jar">
 			<manifest>
 				<section name="net/java/sjtools">
 					<attribute name="Implementation-Title" value="SJTools - SysVision Java Tools"/>
-					<attribute name="Implementation-Edition" value="Frameworks: File Processor"/>
+					<attribute name="Implementation-Edition" value="Frameworks: Record Processor"/>
 					<attribute name="Implementation-Version" value="${version.id}"/>
 					<attribute name="Implementation-Vendor" value="SysVision - Consultadoria e Desenvolvimento em Sistemas de Informatica, Lda"/>
 					<attribute name="Implementation-URL" value="https://sjtools.dev.java.net/"/>
@@ -96,10 +96,10 @@
 				</section>
 			</manifest>
 			<fileset dir="${classes}">
-				<include name="**/frameworks/file/processor/**"/>
+				<include name="**/frameworks/recordProcessor/**"/>
 			</fileset>
 			<fileset dir="${dtd}">
-    			<include name="fileprocessor.dtd"/>
+    			<include name="recordprocessor.dtd"/>
 			</fileset>
 		</jar>
 	</target>
