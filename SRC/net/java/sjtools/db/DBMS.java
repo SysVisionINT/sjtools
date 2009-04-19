@@ -33,6 +33,7 @@ public class DBMS implements Serializable {
 	public static final String DRIVER_MYSQL = "MYSQL";
 	public static final String DRIVER_DERBY = "DERBY";
 	public static final String DRIVER_HSQL = "HSQL";
+	public static final String DRIVER_H2 = "H2";
 	
 	private static final int DBMS_UNKNOWN_VALUE = 0;
 	private static final int DBMS_SAPDB_VALUE = 1;
@@ -41,7 +42,8 @@ public class DBMS implements Serializable {
 	private static final int DBMS_INFORMIX_VALUE = 4;
 	private static final int DBMS_MYSQL_VALUE = 5;
 	private static final int DBMS_DERBY_VALUE = 6;
-	private static final int DBMS_HSQL_VALUE = 7;	
+	private static final int DBMS_HSQL_VALUE = 7;
+	private static final int DBMS_H2_VALUE = 8;
 	
 	public static final DBMS DBMS_UNKNOWN = new DBMS(DBMS_UNKNOWN_VALUE);
 	public static final DBMS DBMS_SAPDB = new DBMS(DBMS_SAPDB_VALUE);
@@ -51,6 +53,7 @@ public class DBMS implements Serializable {
 	public static final DBMS DBMS_MYSQL = new DBMS(DBMS_MYSQL_VALUE);
 	public static final DBMS DBMS_DERBY = new DBMS(DBMS_DERBY_VALUE);
 	public static final DBMS DBMS_HSQL = new DBMS(DBMS_HSQL_VALUE);
+	public static final DBMS DBMS_H2 = new DBMS(DBMS_H2_VALUE);
 	
 	private int dbms = DBMS_UNKNOWN_VALUE;
 	
@@ -75,6 +78,8 @@ public class DBMS implements Serializable {
 			return DBMS_DERBY;	
 		} else if (driver.indexOf(DRIVER_HSQL) >= 0) {
 			return DBMS_HSQL;				
+		} else if (driver.indexOf(DRIVER_H2) >= 0) {
+			return DBMS_H2;				
 		} else {
 			return DBMS_UNKNOWN;
 		}
@@ -111,7 +116,9 @@ public class DBMS implements Serializable {
 		case DBMS_DERBY_VALUE:
 			return DRIVER_DERBY;	
 		case DBMS_HSQL_VALUE:
-			return DRIVER_HSQL;			
+			return DRIVER_HSQL;
+		case DBMS_H2_VALUE:
+			return DRIVER_H2;					
 		}
 
 		return null;
