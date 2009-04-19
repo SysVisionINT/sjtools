@@ -20,39 +20,35 @@
 package net.java.sjtools.db.pk;
 
 import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 
-import net.java.sjtools.db.DBMS;
-import net.java.sjtools.db.DBMSUtil;
+import net.java.sjtools.db.DBUtil;
 
-public class NativePrimaryKeyUtil {
-	public static final long KEY_NOT_FOUND = -1;
+public class H2PrimaryKeyReader implements NativePrimaryKeyReader {
+	
+	private static final String SQL_GENERATED_ID = "CALL IDENTITY()";
 
-	public static long getPrimaryKey(Connection con) throws SQLException {
-		return getPrimaryKey(con, DBMSUtil.getDBMS(con));
-	}
+	public long getKey(Connection con) throws SQLException {
+		long ret = 0;
+		
+        PreparedStatement ps = null;
+        ResultSet rs = null;
 
-	public static long getPrimaryKey(Connection con, DBMS dbms) throws SQLException {
-		long ret = KEY_NOT_FOUND;
+       try {
+            ps = con.prepareStatement(SQL_GENERATED_ID, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
 
-		NativePrimaryKeyReader reader = null;
-
-		if (dbms.equals(DBMS.DBMS_INFORMIX)) {
-			reader = new InformixPrimaryKeyReader();
-		} else if (dbms.equals(DBMS.DBMS_MYSQL)) { 
-			reader = new MySQLPrimaryKeyReader();
-		} else if (dbms.equals(DBMS.DBMS_DERBY)) { 
-			reader = new DerbyPrimaryKeyReader();
-		} else if (dbms.equals(DBMS.DBMS_HSQL)) { 
-			reader = new HSQLPrimaryKeyReader();
-		} else if (dbms.equals(DBMS.DBMS_H2)) { 
-			reader = new H2PrimaryKeyReader();			
-		}
-
-		if (reader != null) {
-			ret = reader.getKey(con);
-		}
-
+            rs = ps.executeQuery();
+        
+            if (rs.next()) {
+                ret = rs.getLong(1);
+            }
+        } finally {
+            DBUtil.close(rs);
+            DBUtil.close(ps);
+        }
+		
 		return ret;
 	}
 }
