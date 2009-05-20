@@ -39,110 +39,104 @@ import net.java.sjtools.util.TextUtil;
 
 public class Processor {
 
-	public static void process(InputStream inputStream, RuleSet ruleSet, RecordProcessor recordProcessor) throws ProcessorError {
-		try {
-			// Check if RecordProcessor is not null
-			if (recordProcessor == null) {
-				throw new ProcessorError("RecordProcessor is null");
-			}
+	public static void process(InputStream inputStream, RuleSet ruleSet, RecordProcessor recordProcessor) throws Exception {
+		// Check if RecordProcessor is not null
+		if (recordProcessor == null) {
+			throw new ProcessorError("RecordProcessor is null");
+		}
 
-			// Get the return object		
-			SimpleBeanUtil beanUtil = null;
-			boolean hasReturnObject = ruleSet.getReturnObjectClass() != null;
+		// Get the return object		
+		SimpleBeanUtil beanUtil = null;
+		boolean hasReturnObject = ruleSet.getReturnObjectClass() != null;
 
-			// Splitter initialization
-			ruleSet.getSplitter().init(inputStream);
+		// Splitter initialization
+		ruleSet.getSplitter().init(inputStream);
 
-			boolean hasMaximumRecords = ruleSet.getMaximumRecords() != null;
+		boolean hasMaximumRecords = ruleSet.getMaximumRecords() != null;
 
-			int recordCount = 0;
-			List elements = null;
-			while ((elements = ruleSet.getSplitter().nextRecord()) != null) {
-				recordCount++;
+		int recordCount = 0;
+		List elements = null;
+		while ((elements = ruleSet.getSplitter().nextRecord()) != null) {
+			recordCount++;
 
-				try {
-					// Check record count limits
-					if (hasMaximumRecords && recordCount > ruleSet.getMaximumRecords().intValue()) {
-						throw new TooManyRecordsError(ruleSet.getMaximumRecords().intValue());
-					}
-
-					if (hasReturnObject) {
-						beanUtil = new SimpleBeanUtil(ruleSet.getReturnObjectClass());
-					}
-
-					// Execute column validations
-					boolean hasValidationErrors = false;
-					for (Iterator iterator = ruleSet.getColumns().iterator(); iterator.hasNext();) {
-						try {
-							Column column = (Column) iterator.next();
-
-							String value = null;
-
-							try {
-								value = (String) elements.get(column.getPosition() - 1);
-							} catch (IndexOutOfBoundsException e) {
-								throw new ColumnNotFoundError(recordCount, column.getPosition());
-							}
-
-							// Check if it is mandatory
-							if (column.isMandatory() && TextUtil.isEmptyString(value)) {
-								throw new MandatoryElementError(recordCount, column.getPosition());
-							}
-
-							if (!TextUtil.isEmptyString(value)) {
-								// Validate the value with all pre-format validators
-								for (Iterator iterator2 = column.getPreFormatValidators().iterator(); iterator2.hasNext();) {
-									Validator validator = (Validator) iterator2.next();
-
-									if (!validator.isValid(value)) {
-										throw new InvalidElementError(recordCount, column.getPosition(), validator.toString(), value);
-									}
-								}
-
-								// Format the value
-								for (Iterator iterator2 = column.getFormatters().iterator(); iterator2.hasNext();) {
-									Formatter formatter = (Formatter) iterator2.next();
-
-									value = formatter.format(value);
-								}
-
-								// Validate the value with all post-format validators
-								for (Iterator iterator2 = column.getPostFormatValidators().iterator(); iterator2.hasNext();) {
-									Validator validator = (Validator) iterator2.next();
-
-									if (!validator.isValid(value)) {
-										throw new InvalidElementError(recordCount, column.getPosition(), validator.toString(), value);
-									}
-								}
-
-								// Set the value (if there is a return object and the column has a return property)
-								if (hasReturnObject && column.getReturnObjectProperty() != null) {
-									beanUtil.set(value, column.getReturnObjectProperty(), column.getReturnObjectPropertyFormat());
-								}
-							}
-						} catch (ProcessorError e) {
-							recordProcessor.processError(e);
-							hasValidationErrors = true;
-						}
-					}
-
-					// Process the newly created bean
-					if (hasReturnObject && !hasValidationErrors) {
-						recordProcessor.processReturnObject(beanUtil.getBean());
-					}
-				} catch (ProcessorError e) {
-					recordProcessor.processError(e);
+			try {
+				// Check record count limits
+				if (hasMaximumRecords && recordCount > ruleSet.getMaximumRecords().intValue()) {
+					throw new TooManyRecordsError(ruleSet.getMaximumRecords().intValue());
 				}
-			}
 
-			// Check record count limits
-			if (ruleSet.getMinimumRecords() != null && recordCount < ruleSet.getMinimumRecords().intValue()) {
-				recordProcessor.processError(new TooFewRecordsError(ruleSet.getMinimumRecords().intValue()));
+				if (hasReturnObject) {
+					beanUtil = new SimpleBeanUtil(ruleSet.getReturnObjectClass());
+				}
+
+				// Execute column validations
+				boolean hasValidationErrors = false;
+				for (Iterator iterator = ruleSet.getColumns().iterator(); iterator.hasNext();) {
+					try {
+						Column column = (Column) iterator.next();
+
+						String value = null;
+
+						try {
+							value = (String) elements.get(column.getPosition() - 1);
+						} catch (IndexOutOfBoundsException e) {
+							throw new ColumnNotFoundError(recordCount, column.getPosition());
+						}
+
+						// Check if it is mandatory
+						if (column.isMandatory() && TextUtil.isEmptyString(value)) {
+							throw new MandatoryElementError(recordCount, column.getPosition());
+						}
+
+						if (!TextUtil.isEmptyString(value)) {
+							// Validate the value with all pre-format validators
+							for (Iterator iterator2 = column.getPreFormatValidators().iterator(); iterator2.hasNext();) {
+								Validator validator = (Validator) iterator2.next();
+
+								if (!validator.isValid(value)) {
+									throw new InvalidElementError(recordCount, column.getPosition(), validator.toString(), value);
+								}
+							}
+
+							// Format the value
+							for (Iterator iterator2 = column.getFormatters().iterator(); iterator2.hasNext();) {
+								Formatter formatter = (Formatter) iterator2.next();
+
+								value = formatter.format(value);
+							}
+
+							// Validate the value with all post-format validators
+							for (Iterator iterator2 = column.getPostFormatValidators().iterator(); iterator2.hasNext();) {
+								Validator validator = (Validator) iterator2.next();
+
+								if (!validator.isValid(value)) {
+									throw new InvalidElementError(recordCount, column.getPosition(), validator.toString(), value);
+								}
+							}
+
+							// Set the value (if there is a return object and the column has a return property)
+							if (hasReturnObject && column.getReturnObjectProperty() != null) {
+								beanUtil.set(value, column.getReturnObjectProperty(), column.getReturnObjectPropertyFormat());
+							}
+						}
+					} catch (ProcessorError e) {
+						recordProcessor.processError(e);
+						hasValidationErrors = true;
+					}
+				}
+
+				// Process the newly created bean
+				if (hasReturnObject && !hasValidationErrors) {
+					recordProcessor.processReturnObject(beanUtil.getBean());
+				}
+			} catch (ProcessorError e) {
+				recordProcessor.processError(e);
 			}
-		} catch (ProcessorError e) {
-			throw e;
-		} catch (Exception e) {
-			throw new ProcessorError(e);
+		}
+
+		// Check record count limits
+		if (ruleSet.getMinimumRecords() != null && recordCount < ruleSet.getMinimumRecords().intValue()) {
+			recordProcessor.processError(new TooFewRecordsError(ruleSet.getMinimumRecords().intValue()));
 		}
 	}
 
