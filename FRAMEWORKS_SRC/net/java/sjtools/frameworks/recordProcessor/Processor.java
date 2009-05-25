@@ -39,23 +39,51 @@ import net.java.sjtools.util.TextUtil;
 
 public class Processor {
 
-	public static void process(InputStream inputStream, RuleSet ruleSet, RecordProcessor recordProcessor) throws Exception {
+	private RuleSet ruleSet = null;
+	private RecordProcessor recordProcessor = null;
+	private SimpleBeanUtil beanUtil = null;
+
+	private boolean hasMaximumRecords = false;
+	private boolean hasReturnObject = false;
+
+	public Processor(RuleSet ruleSet, RecordProcessor recordProcessor) throws ProcessorError {
+		// Check if RuleSet is not null
+		if (ruleSet == null) {
+			throw new ProcessorError("RuleSet is null");
+		}
+
 		// Check if RecordProcessor is not null
 		if (recordProcessor == null) {
 			throw new ProcessorError("RecordProcessor is null");
 		}
 
-		// Get the return object		
-		SimpleBeanUtil beanUtil = null;
-		boolean hasReturnObject = ruleSet.getReturnObjectClass() != null;
+		this.ruleSet = ruleSet;
+		this.recordProcessor = recordProcessor;
 
+		// Check if there is an object to return		
+		if (ruleSet.getReturnObjectClass() != null) {
+			hasReturnObject = true;
+			beanUtil = new SimpleBeanUtil(ruleSet.getReturnObjectClass());
+		}
+
+		if (ruleSet.getMaximumRecords() != null) {
+			hasMaximumRecords = true;
+		}
+	}
+
+	public void process(InputStream inputStream) throws Exception {
 		// Splitter initialization
 		ruleSet.getSplitter().init(inputStream);
 
-		boolean hasMaximumRecords = ruleSet.getMaximumRecords() != null;
+		Column column = null;
+		Validator validator = null;
+		Formatter formatter = null;
 
 		int recordCount = 0;
 		List elements = null;
+		String value = null;
+		boolean hasValidationErrors = false;
+
 		while ((elements = ruleSet.getSplitter().nextRecord()) != null) {
 			recordCount++;
 
@@ -66,16 +94,14 @@ public class Processor {
 				}
 
 				if (hasReturnObject) {
-					beanUtil = new SimpleBeanUtil(ruleSet.getReturnObjectClass());
+					beanUtil.initialize();
 				}
 
 				// Execute column validations
-				boolean hasValidationErrors = false;
+				hasValidationErrors = false;
 				for (Iterator iterator = ruleSet.getColumns().iterator(); iterator.hasNext();) {
 					try {
-						Column column = (Column) iterator.next();
-
-						String value = null;
+						column = (Column) iterator.next();
 
 						try {
 							value = (String) elements.get(column.getPosition() - 1);
@@ -83,15 +109,15 @@ public class Processor {
 							throw new ColumnNotFoundError(recordCount, column.getPosition());
 						}
 
-						// Check if it is mandatory
-						if (column.isMandatory() && TextUtil.isEmptyString(value)) {
-							throw new MandatoryElementError(recordCount, column.getPosition());
-						}
-
-						if (!TextUtil.isEmptyString(value)) {
+						if (TextUtil.isEmptyString(value)) {
+							// Check if it is mandatory
+							if (column.isMandatory()) {
+								throw new MandatoryElementError(recordCount, column.getPosition());
+							}
+						} else {
 							// Validate the value with all pre-format validators
 							for (Iterator iterator2 = column.getPreFormatValidators().iterator(); iterator2.hasNext();) {
-								Validator validator = (Validator) iterator2.next();
+								validator = (Validator) iterator2.next();
 
 								if (!validator.isValid(value)) {
 									throw new InvalidElementError(recordCount, column.getPosition(), validator.toString(), value);
@@ -100,14 +126,14 @@ public class Processor {
 
 							// Format the value
 							for (Iterator iterator2 = column.getFormatters().iterator(); iterator2.hasNext();) {
-								Formatter formatter = (Formatter) iterator2.next();
+								formatter = (Formatter) iterator2.next();
 
 								value = formatter.format(value);
 							}
 
 							// Validate the value with all post-format validators
 							for (Iterator iterator2 = column.getPostFormatValidators().iterator(); iterator2.hasNext();) {
-								Validator validator = (Validator) iterator2.next();
+								validator = (Validator) iterator2.next();
 
 								if (!validator.isValid(value)) {
 									throw new InvalidElementError(recordCount, column.getPosition(), validator.toString(), value);

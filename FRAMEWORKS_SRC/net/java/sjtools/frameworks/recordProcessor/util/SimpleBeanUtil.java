@@ -20,11 +20,13 @@
 package net.java.sjtools.frameworks.recordProcessor.util;
 
 import java.lang.reflect.Constructor;
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
+import net.java.sjtools.frameworks.recordProcessor.model.FieldAndMethod;
 import net.java.sjtools.frameworks.recordProcessor.model.error.ObjectCreationError;
 import net.java.sjtools.frameworks.recordProcessor.model.error.ProcessorError;
 import net.java.sjtools.time.SuperDate;
@@ -34,9 +36,21 @@ public class SimpleBeanUtil {
 	private Class beanClass = null;
 	private Object bean = null;
 
+	private Map fieldAndMethodMap = new HashMap();
+	private Map dateFormatMap = new HashMap();
+	private Map stringConstructorMap = new HashMap();
+	private Map stringStringConstructorMap = new HashMap();
+
 	public SimpleBeanUtil(String javaClass) throws ProcessorError {
 		try {
 			beanClass = Thread.currentThread().getContextClassLoader().loadClass(javaClass);
+		} catch (Exception e) {
+			throw new ProcessorError(e);
+		}
+	}
+
+	public void initialize() throws ProcessorError {
+		try {
 			bean = beanClass.newInstance();
 		} catch (Exception e) {
 			throw new ProcessorError(e);
@@ -45,18 +59,20 @@ public class SimpleBeanUtil {
 
 	public void set(String value, String property, String format) throws ProcessorError {
 		try {
-			Field field = beanClass.getDeclaredField(property);
+			FieldAndMethod fieldAndMethod = getFieldAndMethod(property);
 
-			Method method = beanClass.getMethod(getMethodName(property), new Class[] { field.getType() });
+			Object argument = getNewInstance(fieldAndMethod.getField().getType(), value, format);
 
-			Object argument = getNewInstance(field.getType(), value, format);
-
-			method.invoke(bean, new Object[] { argument });
+			fieldAndMethod.getMethod().invoke(bean, new Object[] { argument });
 		} catch (ProcessorError e) {
 			throw e;
 		} catch (Exception e) {
 			throw new ProcessorError(e);
 		}
+	}
+
+	public Object getBean() {
+		return bean;
 	}
 
 	private String getMethodName(String property) {
@@ -104,31 +120,44 @@ public class SimpleBeanUtil {
 		}
 
 		// Special cases:
-		// 1) if the class is Timestamp, Date, Calendar, etc, first create a SuperDate then the
-		//    proper class
+		// 1) Dates
 		if (objClass == SuperDate.class || objClass == Calendar.class || objClass == Date.class || objClass.getSuperclass() == Date.class) {
-			SuperDate tmpDate = new SuperDate(objValue, objFormat);
+			SimpleDateFormat simpleDateFormat = getSimpleDateFormat(objFormat);
 
-			if (objClass == Calendar.class) {
-				return tmpDate.getCalendar();
+			Date date = simpleDateFormat.parse(objValue);
+
+			if (simpleDateFormat.format(date).equals(objValue)) {
+				if (objClass == Date.class) {
+					return date;
+				}
+
+				if (objClass == Calendar.class) {
+					Calendar calendar = Calendar.getInstance();
+					calendar.setTime(date);
+					return calendar;
+				}
+
+				if (objClass == java.sql.Date.class) {
+					return new java.sql.Date(date.getTime());
+				}
+
+				SuperDate superDate = new SuperDate(date.getTime());
+
+				return superDate;
+			} else {
+				throw new ObjectCreationError(objClass.getName(), objValue, objFormat);
 			}
-
-			if (objClass == java.sql.Date.class) {
-				return new java.sql.Date(tmpDate.getTime());
-			}
-
-			return tmpDate;
 		}
 
 		// 2) class has to have a constructor (String value) or (String value, String format) - in this order
 		Constructor constructor = null;
 		try {
-			constructor = objClass.getConstructor(new Class[] { String.class });
+			constructor = getStringConstructor(objClass);
 
 			return constructor.newInstance(new String[] { objValue });
 		} catch (NoSuchMethodException e) {
 			try {
-				constructor = objClass.getConstructor(new Class[] { String.class, String.class });
+				constructor = getStringStringConstructor(objClass);
 
 				return constructor.newInstance(new String[] { objValue, objFormat });
 			} catch (NoSuchMethodException e1) {
@@ -137,7 +166,57 @@ public class SimpleBeanUtil {
 		}
 	}
 
-	public Object getBean() {
-		return bean;
+	private FieldAndMethod getFieldAndMethod(String property) throws SecurityException, NoSuchFieldException, NoSuchMethodException {
+		FieldAndMethod fieldAndMethod = (FieldAndMethod) fieldAndMethodMap.get(property);
+
+		if (fieldAndMethod == null) {
+			fieldAndMethod = new FieldAndMethod();
+
+			fieldAndMethod.setField(beanClass.getDeclaredField(property));
+
+			fieldAndMethod.setMethod(beanClass.getMethod(getMethodName(property), new Class[] { fieldAndMethod.getField().getType() }));
+
+			fieldAndMethodMap.put(property, fieldAndMethod);
+		}
+
+		return fieldAndMethod;
 	}
+
+	private SimpleDateFormat getSimpleDateFormat(String objFormat) throws Exception {
+		SimpleDateFormat simpleDateFormat = (SimpleDateFormat) dateFormatMap.get(objFormat);
+
+		if (simpleDateFormat == null) {
+			simpleDateFormat = new SimpleDateFormat(objFormat);
+			dateFormatMap.put(objFormat, simpleDateFormat);
+		}
+
+		return simpleDateFormat;
+	}
+
+	private Constructor getStringConstructor(Class objClass) throws SecurityException, NoSuchMethodException {
+		String objClassName = objClass.getName();
+
+		Constructor constructor = (Constructor) stringConstructorMap.get(objClassName);
+
+		if (constructor == null) {
+			constructor = objClass.getConstructor(new Class[] { String.class });
+			stringConstructorMap.put(objClassName, constructor);
+		}
+
+		return constructor;
+	}
+
+	private Constructor getStringStringConstructor(Class objClass) throws SecurityException, NoSuchMethodException {
+		String objClassName = objClass.getName();
+
+		Constructor constructor = (Constructor) stringStringConstructorMap.get(objClassName);
+
+		if (constructor == null) {
+			constructor = objClass.getConstructor(new Class[] { String.class, String.class });
+			stringStringConstructorMap.put(objClassName, constructor);
+		}
+
+		return constructor;
+	}
+
 }

@@ -19,27 +19,32 @@
  */
 package net.java.sjtools.frameworks.recordProcessor.validators;
 
-import net.java.sjtools.time.SuperDate;
+import java.text.SimpleDateFormat;
+
+import net.java.sjtools.frameworks.recordProcessor.model.error.ProcessorError;
 
 public class DateTimeValidator implements Validator {
 
-	private String format = null;
+	private SimpleDateFormat simpleDateFormat = null;
 
-	public DateTimeValidator(String format) {
-		this.format = format;
+	public DateTimeValidator(String format) throws ProcessorError {
+		try {
+			simpleDateFormat = new SimpleDateFormat(format);
+		} catch (Exception e) {
+			throw new ProcessorError(e);
+		}
 	}
 
 	public boolean isValid(String value) {
 		try {
-			new SuperDate(value, format);
-			return true;
+			return simpleDateFormat.format(simpleDateFormat.parse(value)).equals(value);
 		} catch (Exception e) {
 			return false;
 		}
 	}
 
 	public String toString() {
-		return "DateTimeValidator(" + format + ")";
+		return "DateTimeValidator(" + simpleDateFormat.toPattern() + ")";
 	}
 
 }
