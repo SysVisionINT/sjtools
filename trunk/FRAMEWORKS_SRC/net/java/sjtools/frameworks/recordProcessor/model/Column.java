@@ -19,12 +19,15 @@
  */
 package net.java.sjtools.frameworks.recordProcessor.model;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
 import net.java.sjtools.frameworks.recordProcessor.formatters.Formatter;
 
-public class Column {
+public class Column implements Serializable {
+
+	private static final long serialVersionUID = 3578470438519865227L;
 
 	private int position = -1;
 	private boolean mandatory = true;

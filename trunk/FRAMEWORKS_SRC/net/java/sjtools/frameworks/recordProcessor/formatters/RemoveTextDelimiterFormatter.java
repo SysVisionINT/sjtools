@@ -19,9 +19,13 @@
  */
 package net.java.sjtools.frameworks.recordProcessor.formatters;
 
+import java.io.Serializable;
+
 import net.java.sjtools.frameworks.recordProcessor.model.error.ProcessorError;
 
-public class RemoveTextDelimiterFormatter implements Formatter {
+public class RemoveTextDelimiterFormatter implements Formatter, Serializable {
+
+	private static final long serialVersionUID = -6156017261644405812L;
 
 	private String delimiter = null;
 

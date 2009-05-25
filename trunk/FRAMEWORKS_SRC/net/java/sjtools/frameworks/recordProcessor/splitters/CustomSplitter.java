@@ -20,12 +20,15 @@
 package net.java.sjtools.frameworks.recordProcessor.splitters;
 
 import java.io.InputStream;
+import java.io.Serializable;
 import java.lang.reflect.Method;
 import java.util.List;
 
 import net.java.sjtools.frameworks.recordProcessor.model.error.ProcessorError;
 
-public class CustomSplitter implements Splitter {
+public class CustomSplitter implements Splitter, Serializable {
+
+	private static final long serialVersionUID = 2799506306737427494L;
 
 	private Object customSplitterObject = null;
 	private Method customSplitterInit = null;

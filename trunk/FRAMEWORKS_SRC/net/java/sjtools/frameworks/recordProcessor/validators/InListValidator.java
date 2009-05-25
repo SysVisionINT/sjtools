@@ -19,12 +19,15 @@
  */
 package net.java.sjtools.frameworks.recordProcessor.validators;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
 import net.java.sjtools.util.TextUtil;
 
-public class InListValidator implements Validator {
+public class InListValidator implements Validator, Serializable {
+
+	private static final long serialVersionUID = -7939345321749330478L;
 
 	private List validValues = new ArrayList();
 

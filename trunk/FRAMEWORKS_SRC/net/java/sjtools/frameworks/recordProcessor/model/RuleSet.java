@@ -19,12 +19,15 @@
  */
 package net.java.sjtools.frameworks.recordProcessor.model;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
 import net.java.sjtools.frameworks.recordProcessor.splitters.Splitter;
 
-public class RuleSet {
+public class RuleSet implements Serializable {
+
+	private static final long serialVersionUID = -8478911447456009968L;
 
 	private String name = null;
 	private Splitter splitter = null;
