@@ -22,12 +22,15 @@ package net.java.sjtools.frameworks.recordProcessor.splitters;
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.Serializable;
 import java.util.List;
 
 import net.java.sjtools.frameworks.recordProcessor.model.error.InvalidRecordError;
 import net.java.sjtools.frameworks.recordProcessor.model.error.ProcessorError;
 
-public abstract class LineSplitter implements Splitter {
+public abstract class LineSplitter implements Splitter, Serializable {
+
+	private static final long serialVersionUID = 5903433242576100103L;
 
 	private BufferedReader reader = null;
 

@@ -19,10 +19,16 @@
  */
 package net.java.sjtools.frameworks.recordProcessor.model;
 
+import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
-public class RuleSets {
+import net.java.sjtools.frameworks.recordProcessor.model.error.RuleSetError;
+
+public class RuleSets implements Serializable {
+
+	private static final long serialVersionUID = -6806742098010681241L;
 
 	private List ruleSets = new ArrayList();
 
@@ -32,6 +38,26 @@ public class RuleSets {
 
 	public List getRuleSets() {
 		return ruleSets;
+	}
+
+	public RuleSet getRuleSet(String name) throws RuleSetError {
+		RuleSet ruleSet = null;
+		boolean found = false;
+
+		for (Iterator iterator = ruleSets.iterator(); iterator.hasNext();) {
+			ruleSet = (RuleSet) iterator.next();
+
+			if (ruleSet.getName().equals(name)) {
+				found = true;
+				break;
+			}
+		}
+
+		if (!found) {
+			throw new RuleSetError(name);
+		}
+
+		return ruleSet;
 	}
 
 }

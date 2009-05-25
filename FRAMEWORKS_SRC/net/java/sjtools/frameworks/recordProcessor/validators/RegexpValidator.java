@@ -19,11 +19,14 @@
  */
 package net.java.sjtools.frameworks.recordProcessor.validators;
 
+import java.io.Serializable;
 import java.util.regex.Pattern;
 
 import net.java.sjtools.frameworks.recordProcessor.model.error.ProcessorError;
 
-public class RegexpValidator implements Validator {
+public class RegexpValidator implements Validator, Serializable {
+
+	private static final long serialVersionUID = 3738207300189759528L;
 
 	private Pattern pattern = null;
 

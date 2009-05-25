@@ -19,12 +19,15 @@
  */
 package net.java.sjtools.frameworks.recordProcessor.splitters;
 
+import java.io.Serializable;
 import java.util.List;
 
 import net.java.sjtools.frameworks.recordProcessor.model.error.InvalidRecordError;
 import net.java.sjtools.util.TextUtil;
 
-public class TokenLineSplitter extends LineSplitter {
+public class TokenLineSplitter extends LineSplitter implements Serializable {
+
+	private static final long serialVersionUID = -7350747531275072173L;
 
 	private Integer elementCount = null;
 	private String token = null;

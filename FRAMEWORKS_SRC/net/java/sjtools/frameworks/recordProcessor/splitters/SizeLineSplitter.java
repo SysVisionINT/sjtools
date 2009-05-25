@@ -19,13 +19,16 @@
  */
 package net.java.sjtools.frameworks.recordProcessor.splitters;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
 import net.java.sjtools.frameworks.recordProcessor.model.error.InvalidRecordError;
 import net.java.sjtools.util.TextUtil;
 
-public class SizeLineSplitter extends LineSplitter {
+public class SizeLineSplitter extends LineSplitter implements Serializable {
+
+	private static final long serialVersionUID = 3764127694687643872L;
 
 	private Integer elementCount = null;
 	private int elementLength = 0;

@@ -19,7 +19,11 @@
  */
 package net.java.sjtools.frameworks.recordProcessor.validators;
 
-public class FloatValidator implements Validator {
+import java.io.Serializable;
+
+public class FloatValidator implements Validator, Serializable {
+
+	private static final long serialVersionUID = -7124678386508577124L;
 
 	public boolean isValid(String value) {
 		try {

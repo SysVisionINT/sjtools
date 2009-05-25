@@ -19,7 +19,11 @@
  */
 package net.java.sjtools.frameworks.recordProcessor.validators;
 
-public class BiggerThanValidator implements Validator {
+import java.io.Serializable;
+
+public class BiggerThanValidator implements Validator, Serializable {
+
+	private static final long serialVersionUID = 5821460900573721858L;
 
 	private String value = null;
 

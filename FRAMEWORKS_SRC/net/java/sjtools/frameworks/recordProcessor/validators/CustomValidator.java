@@ -19,11 +19,14 @@
  */
 package net.java.sjtools.frameworks.recordProcessor.validators;
 
+import java.io.Serializable;
 import java.lang.reflect.Method;
 
 import net.java.sjtools.frameworks.recordProcessor.model.error.ProcessorError;
 
-public class CustomValidator implements Validator {
+public class CustomValidator implements Validator, Serializable {
+
+	private static final long serialVersionUID = 8001151871676624067L;
 
 	private Object customValidatorObject = null;
 	private Method customValidatorMethod = null;

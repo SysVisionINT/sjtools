@@ -19,11 +19,14 @@
  */
 package net.java.sjtools.frameworks.recordProcessor.validators;
 
+import java.io.Serializable;
 import java.text.SimpleDateFormat;
 
 import net.java.sjtools.frameworks.recordProcessor.model.error.ProcessorError;
 
-public class DateTimeValidator implements Validator {
+public class DateTimeValidator implements Validator, Serializable {
+
+	private static final long serialVersionUID = 3973990057154024917L;
 
 	private SimpleDateFormat simpleDateFormat = null;
 
