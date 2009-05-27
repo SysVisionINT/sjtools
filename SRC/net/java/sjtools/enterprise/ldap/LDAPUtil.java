@@ -132,7 +132,7 @@ public class LDAPUtil {
 		return buffer.toString();
 	}
 
-	private static String getUserName(String name) {
+	public static String getUserName(String name) {
 		int pos = name.indexOf("\\");
 
 		if (pos != -1) {
