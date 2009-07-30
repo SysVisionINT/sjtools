@@ -29,12 +29,20 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
+import net.java.sjtools.method.MethodCache;
+
 public class BeanUtil {
 
 	private Object obj = null;
+	private MethodCache cache = null;
 
 	public BeanUtil(Class clazz) throws InstantiationException, IllegalAccessException {
 		obj = clazz.newInstance();
+	}
+
+	public BeanUtil(Class clazz, MethodCache cache) throws InstantiationException, IllegalAccessException {
+		this(clazz);
+		this.cache = cache;
 	}
 
 	public BeanUtil(Object obj) {
@@ -43,6 +51,11 @@ public class BeanUtil {
 		}
 
 		this.obj = obj;
+	}
+
+	public BeanUtil(Object obj, MethodCache cache) {
+		this(obj);
+		this.cache = cache;
 	}
 
 	public Class[] getExtendsList() {
@@ -219,23 +232,37 @@ public class BeanUtil {
 	}
 
 	public Object invokeMethod(String methodName, Object[] args) throws SecurityException, NoSuchMethodException, IllegalArgumentException, IllegalAccessException, InvocationTargetException {
-
-		List methods = getMethods(methodName);
 		Method method = null;
+		Class[] parameters = getClasses(args);
 
-		if (methods.size() == 1) {
-			method = (Method) methods.get(0);
-		} else {
-			Class[] clazzs = new Class[args.length];
+		if (cache != null) {
+			method = cache.get(obj.getClass(), methodName, parameters);
+		}
 
-			for (int i = 0; i < args.length; i++) {
-				clazzs[i] = args[i].getClass();
+		if (method == null) {
+			List methods = getMethods(methodName);
+
+			if (methods.size() == 1) {
+				method = (Method) methods.get(0);
+			} else {
+				method = obj.getClass().getMethod(methodName, parameters);
 			}
 
-			method = obj.getClass().getMethod(methodName, clazzs);
+			if (cache != null) {
+				cache.add(obj.getClass(), methodName, parameters, method);
+			}
 		}
 
 		return method.invoke(obj, args);
+	}
+
+	private Class[] getClasses(Object[] args) {
+		Class[] clazzs = new Class[args.length];
+
+		for (int i = 0; i < args.length; i++) {
+			clazzs[i] = args[i].getClass();
+		}
+		return clazzs;
 	}
 
 	public int hashCode() {
@@ -320,20 +347,32 @@ public class BeanUtil {
 
 	public void set(String propertyName, Object value) throws NoSuchMethodException, IllegalArgumentException, IllegalAccessException, InvocationTargetException {
 		String name = getMethodName("set", propertyName);
-		List list = getMethods(name);
+
 		Method method = null;
 
-		if (list.isEmpty()) {
-			throw new NoSuchMethodException();
+		if (cache != null) {
+			method = cache.get(obj.getClass(), name, value.getClass());
 		}
 
-		if (list.size() == 1) {
-			method = (Method) list.get(0);
-		} else {
-			method = getSetMethod(name, value.getClass());
+		if (method == null) {
+			List list = getMethods(name);
 
-			if (method == null) {
-				throw new NoSuchMethodException(name);
+			if (list.isEmpty()) {
+				throw new NoSuchMethodException();
+			}
+
+			if (list.size() == 1) {
+				method = (Method) list.get(0);
+			} else {
+				method = getSetMethod(name, value.getClass());
+
+				if (method == null) {
+					throw new NoSuchMethodException(name);
+				}
+			}
+
+			if (cache != null) {
+				cache.add(obj.getClass(), name, value.getClass(), method);
 			}
 		}
 
@@ -386,7 +425,7 @@ public class BeanUtil {
 
 		for (int i = 0; i < list.size() - 1; i++) {
 			obj = bu.get((String) list.get(i));
-			bu = new BeanUtil(obj);
+			bu = new BeanUtil(obj, beanUtil.cache);
 		}
 
 		return bu;
@@ -401,7 +440,7 @@ public class BeanUtil {
 		return bu.get(pn);
 	}
 
-	public static Object getPropertyValue(Object obj, String propertyName) throws Exception {
-		return getPropertyValue(new BeanUtil(obj), propertyName);
+	public static Object getPropertyValue(MethodCache cache, Object obj, String propertyName) throws Exception {
+		return getPropertyValue(new BeanUtil(obj, cache), propertyName);
 	}
 }

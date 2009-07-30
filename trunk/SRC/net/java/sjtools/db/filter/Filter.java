@@ -35,6 +35,7 @@ import java.util.List;
 
 import net.java.sjtools.db.filter.operation.Operation;
 import net.java.sjtools.db.filter.order.Order;
+import net.java.sjtools.method.MethodCache;
 import net.java.sjtools.util.BeanUtil;
 
 public class Filter implements Comparator, Serializable {
@@ -43,6 +44,7 @@ public class Filter implements Comparator, Serializable {
 	private Expression where = null;
 
 	private List orderBy = new ArrayList();
+	MethodCache cache = new MethodCache();
 
 	public void setWhere(Expression where) {
 		this.where = where;
@@ -161,7 +163,7 @@ public class Filter implements Comparator, Serializable {
 			for (Iterator i = input.iterator(); i.hasNext();) {
 				obj = i.next();
 
-				if (where.isTrue(new BeanUtil(obj))) {
+				if (where.isTrue(new BeanUtil(obj, cache))) {
 					output.add(obj);
 				}
 			}
@@ -178,15 +180,15 @@ public class Filter implements Comparator, Serializable {
 
 	public boolean isValid(Object object) throws Exception {
 		if (hasWhere()) {
-			return where.isTrue(new BeanUtil(object));
+			return where.isTrue(new BeanUtil(object, cache));
 		}
 
 		return true;
 	}
 
 	public int compare(Object obj1, Object obj2) {
-		BeanUtil bean1 = new BeanUtil(obj1);
-		BeanUtil bean2 = new BeanUtil(obj2);
+		BeanUtil bean1 = new BeanUtil(obj1, cache);
+		BeanUtil bean2 = new BeanUtil(obj2, cache);
 
 		Order order = null;
 		int ret = 0;
