@@ -28,7 +28,16 @@ public class LDAPConfig implements Serializable {
 	private String url = null;
 	private String login = null;
 	private String password = null;
+	private long timeout = 30000;
 	
+	public long getTimeout() {
+		return timeout;
+	}
+
+	public void setTimeout(long timeout) {
+		this.timeout = timeout;
+	}
+
 	public String getLogin() {
 		return login;
 	}
