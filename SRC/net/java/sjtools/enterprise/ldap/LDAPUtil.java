@@ -62,6 +62,9 @@ public class LDAPUtil {
 		env.put(Context.SECURITY_PRINCIPAL, config.getLogin());
 		env.put(Context.SECURITY_CREDENTIALS, config.getPassword());
 		env.put(Context.REFERRAL, "follow");
+		env.put("com.sun.jndi.ldap.connect.pool", "true");
+		env.put("com.sun.jndi.ldap.connect.timeout", String.valueOf(config.getTimeout()));
+		env.put("com.sun.jndi.ldap.read.timeout", String.valueOf(config.getTimeout()));
 
 		DirContext ctx = null;
 
