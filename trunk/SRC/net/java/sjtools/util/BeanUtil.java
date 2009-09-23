@@ -367,7 +367,7 @@ public class BeanUtil {
 				if (value == null) {
 					throw new NoSuchMethodException(name);
 				}
-				
+
 				method = getSetMethod(name, value.getClass());
 
 				if (method == null) {
@@ -375,7 +375,7 @@ public class BeanUtil {
 				}
 			}
 
-			if (cache != null) {
+			if (cache != null && value != null) {
 				cache.add(obj.getClass(), name, value.getClass(), method);
 			}
 		}
