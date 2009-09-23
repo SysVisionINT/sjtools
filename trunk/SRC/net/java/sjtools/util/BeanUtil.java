@@ -350,7 +350,7 @@ public class BeanUtil {
 
 		Method method = null;
 
-		if (cache != null) {
+		if (cache != null && value != null) {
 			method = cache.get(obj.getClass(), name, value.getClass());
 		}
 
@@ -364,6 +364,10 @@ public class BeanUtil {
 			if (list.size() == 1) {
 				method = (Method) list.get(0);
 			} else {
+				if (value == null) {
+					throw new NoSuchMethodException(name);
+				}
+				
 				method = getSetMethod(name, value.getClass());
 
 				if (method == null) {
