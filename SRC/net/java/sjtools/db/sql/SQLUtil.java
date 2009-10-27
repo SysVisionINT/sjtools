@@ -64,6 +64,37 @@ public class SQLUtil {
 
 		return buffer.toString();
 	}
+	
+	public static String getSelectCount(String sql, Filter filter) {
+		String workingSQL = " ".concat(cleanSQL(sql));
+
+		String from = getFromClause(workingSQL);
+		String where = getWhereClause(workingSQL);
+
+		StringBuffer buffer = new StringBuffer();
+
+		buffer.append(SELECT);
+		buffer.append(" count(*) ");
+		buffer.append(FROM);
+		buffer.append(from);
+		buffer.append(WHERE);
+
+		if (filter != null && filter.hasWhere()) {
+			if (where != null) {
+				buffer.append("(");
+				buffer.append(where);
+				buffer.append(") AND ");
+			}
+
+			buffer.append("(");
+			buffer.append(filter.getWhereSQL());
+			buffer.append(")");
+		} else if (where != null) {
+			buffer.append(where);
+		}
+
+		return buffer.toString();
+	}	
 
 	public static String getUpdatedSelect(String sql, Filter filter) {
 		if (TextUtil.isEmptyString(sql) || filter == null) {
