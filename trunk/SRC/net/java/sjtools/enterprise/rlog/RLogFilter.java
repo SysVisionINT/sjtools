@@ -52,7 +52,7 @@ public class RLogFilter implements Filter {
 	}
 
 	public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
-		if (request.getAttribute(REQUEST_ATTRIBUTE) != null) {
+		if (request.getAttribute(REQUEST_ATTRIBUTE) == null) {
 			request.setAttribute(REQUEST_ATTRIBUTE, defaultLogName);
 
 			RLog.init(defaultLog);
