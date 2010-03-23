@@ -26,6 +26,7 @@ import java.util.Random;
 import net.java.sjtools.logging.Log;
 import net.java.sjtools.logging.LogFactory;
 import net.java.sjtools.logging.util.LogConfigReader;
+import net.java.sjtools.util.TextUtil;
 
 public class RLog {
 	private static final String DEFAULT_LOG_PROPERTY = "sjtools.logging.plus.default.logger";
@@ -33,6 +34,7 @@ public class RLog {
 
 	private static ThreadLocal localLog = new ThreadLocal();
 	private static ThreadLocal localID = new ThreadLocal();
+	private static ThreadLocal localApplID = new ThreadLocal();
 
 	private static String baseRequestID = null;
 
@@ -123,6 +125,20 @@ public class RLog {
 
 		return id;
 	}
+	
+	public static Object getApplID() {
+		Object id = localApplID.get();
+
+		if (id != null) {
+			return id;
+		}
+
+		return null;
+	}	
+	
+	public static void setApplID(Object id) {
+		localApplID.set(id);
+	}		
 
 	private static String getMessage(Object msg) {
 		StringBuffer buffer = new StringBuffer();
@@ -130,7 +146,18 @@ public class RLog {
 		buffer.append(getCurrentMethod());
 		buffer.append("[");
 		buffer.append(getRequestID());
-		buffer.append("] - ");
+		buffer.append("]");
+		
+		Object applID = getApplID();
+		
+		if (applID != null) {
+			buffer.append("{");
+			buffer.append(TextUtil.toString(applID));
+			buffer.append("}");
+		}
+		
+		buffer.append(" - ");
+		
 		buffer.append(msg);
 
 		return buffer.toString();
@@ -182,6 +209,7 @@ public class RLog {
 	public static void init(Log log) {
 		localLog.set(log);
 		localID.set(getBaseRequestID().concat(Long.toHexString(getNextID())));
+		localApplID.set(null);
 	}
 
 	public static void changeLog(Log log) {
