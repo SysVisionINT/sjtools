@@ -19,20 +19,25 @@
  */
 package net.java.sjtools.enterprise.ldap;
 
+import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
 
+import javax.naming.AuthenticationException;
 import javax.naming.Context;
 import javax.naming.NamingEnumeration;
 import javax.naming.directory.Attributes;
 import javax.naming.directory.DirContext;
 import javax.naming.directory.InitialDirContext;
+import javax.naming.directory.InvalidAttributeValueException;
 import javax.naming.directory.SearchControls;
 import javax.naming.directory.SearchResult;
 
-import net.java.sjtools.error.ApplicationError;
-import net.java.sjtools.error.UnexpectedError;
+import net.java.sjtools.enterprise.ldap.error.LDAPException;
+import net.java.sjtools.enterprise.ldap.error.LDAPInvalidUserError;
+import net.java.sjtools.enterprise.ldap.error.LDAPUserLockError;
+import net.java.sjtools.enterprise.ldap.error.LDAPUserNotExistsError;
 import net.java.sjtools.logging.Log;
 import net.java.sjtools.logging.LogFactory;
 import net.java.sjtools.util.ContextUtil;
@@ -45,8 +50,18 @@ public class LDAPUtil {
 	private static final String MAIL = "mail";
 	private static final String GROUPS = "memberOf";
 	private static final String[] returnedAtts = { NAME, MAIL, GROUPS };
+	
+	public static void validate(String login, String password, LDAPValidationConfig config) throws LDAPException {
+		LDAPConfig ldap = new LDAPConfig();
+		ldap.setUrl(config.getUrl());
+		ldap.setLogin(TextUtil.replace(config.getGenericUserDN(), "{user}", login));
+		ldap.setPassword(password);
+		ldap.setSearchBase(ldap.getLogin());
+		
+		getUserData(login, ldap);
+	}
 
-	public static LDAPData getUserData(String userName, LDAPConfig config) throws ApplicationError {
+	public static LDAPData getUserData(String userName, LDAPConfig config) throws LDAPException {
 		if (log.isDebugEnabled()) {
 			log.debug("getUserData(" + userName + ", ...)");
 		}
@@ -73,7 +88,7 @@ public class LDAPUtil {
 
 			SearchControls searchCtls = new SearchControls();
 			searchCtls.setSearchScope(SearchControls.SUBTREE_SCOPE);
-			searchCtls.setReturningAttributes(returnedAtts);
+			searchCtls.setReturningAttributes(getReturningAttributes(config));
 
 			NamingEnumeration answer = ctx
 					.search(config.getSearchBase(), getUserFilter(data.getUserName()), searchCtls);
@@ -113,16 +128,65 @@ public class LDAPUtil {
 							}
 						}
 					}
+					
+					if (!config.getRequestAttributeList().isEmpty()) {
+						String attributeName = null;
+						
+						for (Iterator i = config.getRequestAttributeList().iterator(); i.hasNext();) {
+							attributeName = (String) i.next();
+							
+							if (attrId.equals(attributeName)) {
+								List valueList = new ArrayList();
+			
+								NamingEnumeration attrEnumeration = attrs.get(attrId).getAll();
+
+								while (attrEnumeration.hasMoreElements()) {
+									valueList.add(attrEnumeration.nextElement());
+								}								
+								
+								data.setAttributeValue(attributeName, valueList);
+							}
+						}
+					}
 				}
 			}
+		} catch (InvalidAttributeValueException e) {
+			if (e.getMessage() != null && e.getMessage().indexOf("Exceed password retry limit") >= 0) {
+				log.error("User " + userName + " is locked", e);
+				throw new LDAPUserLockError();
+			} else {
+				log.error("Error reading data for user " + userName, e);
+				throw new LDAPException("Error reading data for user " + userName, e);
+			}
+		} catch (AuthenticationException e) {
+			if (e.getResolvedObj() == null) {
+				log.error("User " + userName + " not exists", e);
+				throw new LDAPUserNotExistsError();
+			} else {
+				log.error("Password is wrong for user " + userName, e);
+				throw new LDAPInvalidUserError();
+			}
 		} catch (Exception e) {
-			log.error("Erro ao tentar obter os dados referentes ao user " + userName, e);
-			throw new UnexpectedError(e);
+			log.error("Error reading data for user " + userName, e);
+			throw new LDAPException("Error reading data for user " + userName, e);
 		} finally {
 			ContextUtil.close(ctx);
 		}
 
 		return data;
+	}
+
+	private static String[] getReturningAttributes(LDAPConfig config) {
+		if (config.getRequestAttributeList().isEmpty()) {
+			return returnedAtts;
+		}
+		
+		String[] ret = new String[returnedAtts.length + config.getRequestAttributeList().size()];
+		
+		System.arraycopy(returnedAtts, 0, ret, 0, returnedAtts.length);
+		System.arraycopy(config.getRequestAttributeList().toArray(new String[config.getRequestAttributeList().size()]), 0, ret, returnedAtts.length, config.getRequestAttributeList().size());
+		
+		return ret;
 	}
 
 	private static String getUserFilter(String userName) {

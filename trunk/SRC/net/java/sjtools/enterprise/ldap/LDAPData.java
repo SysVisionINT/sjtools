@@ -21,7 +21,9 @@ package net.java.sjtools.enterprise.ldap;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class LDAPData implements Serializable{
 	private static final long serialVersionUID = 8204288624954499617L;
@@ -30,6 +32,7 @@ public class LDAPData implements Serializable{
 	private String name = null;
 	private String mail = null;
 	private List groups = new ArrayList();
+	private Map attributeMap = new HashMap();
 
 	public String getName() {
 		return name;
@@ -65,5 +68,13 @@ public class LDAPData implements Serializable{
 
 	public void setMail(String mail) {
 		this.mail = mail;
+	}
+	
+	public void setAttributeValue(String name, List value) {
+		attributeMap.put(name, value);
+	}
+	
+	public List getAttributeValue(String name) {
+		return (List) attributeMap.get(name);
 	}
 }

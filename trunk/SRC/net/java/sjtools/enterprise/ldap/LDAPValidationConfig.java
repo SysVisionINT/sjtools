@@ -20,50 +20,12 @@
 package net.java.sjtools.enterprise.ldap;
 
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.List;
 
-public class LDAPConfig implements Serializable {
-	private static final long serialVersionUID = -709769950872395071L;
+public class LDAPValidationConfig implements Serializable {
+	private static final long serialVersionUID = -3034003851324019975L;
 	
-	private String searchBase = null;
 	private String url = null;
-	private String login = null;
-	private String password = null;
-	private long timeout = 30000;
-	private List attributeList = new ArrayList();
-	
-	public long getTimeout() {
-		return timeout;
-	}
-
-	public void setTimeout(long timeout) {
-		this.timeout = timeout;
-	}
-
-	public String getLogin() {
-		return login;
-	}
-	
-	public void setLogin(String login) {
-		this.login = login;
-	}
-	
-	public String getPassword() {
-		return password;
-	}
-	
-	public void setPassword(String password) {
-		this.password = password;
-	}
-	
-	public String getSearchBase() {
-		return searchBase;
-	}
-	
-	public void setSearchBase(String searchBase) {
-		this.searchBase = searchBase;
-	}
+	private String genericUserDN = null;
 	
 	public String getUrl() {
 		return url;
@@ -73,11 +35,11 @@ public class LDAPConfig implements Serializable {
 		this.url = url;
 	}
 	
-	public void addRequestAttribute(String name) {
-		attributeList.add(name);
+	public String getGenericUserDN() {
+		return genericUserDN;
 	}
 	
-	public List getRequestAttributeList() {
-		return attributeList;
+	public void setGenericUserDN(String genericUserDN) {
+		this.genericUserDN = genericUserDN;
 	}
 }
