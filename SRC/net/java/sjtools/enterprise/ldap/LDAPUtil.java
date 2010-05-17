@@ -57,6 +57,7 @@ public class LDAPUtil {
 		ldap.setLogin(TextUtil.replace(config.getGenericUserDN(), "{user}", login));
 		ldap.setPassword(password);
 		ldap.setSearchBase(ldap.getLogin());
+		ldap.setTimeout(config.getTimeout());
 		
 		getUserData(login, ldap);
 	}

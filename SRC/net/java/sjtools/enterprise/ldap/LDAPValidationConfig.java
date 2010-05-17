@@ -26,6 +26,15 @@ public class LDAPValidationConfig implements Serializable {
 	
 	private String url = null;
 	private String genericUserDN = null;
+	private long timeout = 30000;
+	
+	public long getTimeout() {
+		return timeout;
+	}
+
+	public void setTimeout(long timeout) {
+		this.timeout = timeout;
+	}
 	
 	public String getUrl() {
 		return url;
