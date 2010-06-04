@@ -89,4 +89,12 @@ public class FastDataSource implements DataSource {
 	public Connection getConnection(String user, String password) throws SQLException {
 		throw new SQLException("Method not supported!");
 	}
+
+	public boolean isWrapperFor(Class arg0) throws SQLException {
+		throw new SQLException("Method not supported!");
+	}
+
+	public Object unwrap(Class arg0) throws SQLException {
+		throw new SQLException("Method not supported!");
+	}
 }

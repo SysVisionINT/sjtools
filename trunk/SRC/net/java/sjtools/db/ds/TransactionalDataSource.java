@@ -151,4 +151,12 @@ public class TransactionalDataSource implements DataSource, ConnectionListener {
 		connection.closeConnection();
 		connection = null;
 	}
+
+	public boolean isWrapperFor(Class arg0) throws SQLException {
+		throw new SQLException("Method not supported!");
+	}
+
+	public Object unwrap(Class arg0) throws SQLException {
+		throw new SQLException("Method not supported!");
+	}
 }
