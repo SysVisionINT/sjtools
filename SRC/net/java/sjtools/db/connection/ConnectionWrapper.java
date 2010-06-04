@@ -19,15 +19,23 @@
  */
 package net.java.sjtools.db.connection;
 
+import java.sql.Array;
+import java.sql.Blob;
 import java.sql.CallableStatement;
+import java.sql.Clob;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
+import java.sql.NClob;
 import java.sql.PreparedStatement;
+import java.sql.SQLClientInfoException;
 import java.sql.SQLException;
 import java.sql.SQLWarning;
+import java.sql.SQLXML;
 import java.sql.Savepoint;
 import java.sql.Statement;
+import java.sql.Struct;
 import java.util.Map;
+import java.util.Properties;
 
 public class ConnectionWrapper implements Connection {
 	private Connection realConnection = null;
@@ -182,6 +190,60 @@ public class ConnectionWrapper implements Connection {
 
 	public PreparedStatement prepareStatement(String sql, String[] columnNames) throws SQLException {
 		return realConnection.prepareStatement(sql, columnNames);
+	}
+
+	public Array createArrayOf(String arg0, Object[] arg1) throws SQLException {
+		return realConnection.createArrayOf(arg0, arg1);
+	}
+
+	public Blob createBlob() throws SQLException {
+		// TODO Auto-generated method stub
+		return realConnection.createBlob();
+	}
+
+	public Clob createClob() throws SQLException {
+		return realConnection.createClob();
+	}
+
+	public NClob createNClob() throws SQLException {
+		return realConnection.createNClob();
+	}
+
+	public SQLXML createSQLXML() throws SQLException {
+		return realConnection.createSQLXML();
+	}
+
+	public Struct createStruct(String arg0, Object[] arg1) throws SQLException {
+		return realConnection.createStruct(arg0, arg1);
+	}
+
+	public Properties getClientInfo() throws SQLException {
+		return realConnection.getClientInfo();
+	}
+
+	public String getClientInfo(String arg0) throws SQLException {
+		return realConnection.getClientInfo(arg0);
+	}
+
+	public boolean isValid(int arg0) throws SQLException {
+		return realConnection.isValid(arg0);
+	}
+
+	public void setClientInfo(Properties arg0) throws SQLClientInfoException {
+		realConnection.setClientInfo(arg0);
+	}
+
+	public void setClientInfo(String arg0, String arg1)
+			throws SQLClientInfoException {
+		realConnection.setClientInfo(arg0, arg1);
+	}
+
+	public boolean isWrapperFor(Class arg0) throws SQLException {
+		return realConnection.isWrapperFor(arg0);
+	}
+
+	public Object unwrap(Class arg0) throws SQLException {
+		return realConnection.unwrap(arg0);
 	}
 
 }
