@@ -19,18 +19,28 @@
  */
 package net.java.sjtools.mail.attach;
 
+import java.io.File;
+
 import javax.activation.DataSource;
 import javax.activation.FileDataSource;
 
-public class FileAttach implements MailAttach {	
+public class FileAttach implements MailAttach {
 	private static final long serialVersionUID = -7068229410504491599L;
-	
+
 	private DataSource dataSource = null;
 	private String fileName = null;
-	
+
 	public FileAttach(String fileName) {
+		this(new File(fileName));
+	}
+
+	public FileAttach(File file) {
+		this(file, file.getName());
+	}
+
+	public FileAttach(File file, String fileName) {
 		this.fileName = fileName;
-		dataSource = new FileDataSource(fileName);
+		dataSource = new FileDataSource(file);
 	}
 
 	public DataSource getData() {
