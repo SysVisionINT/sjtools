@@ -36,7 +36,6 @@ import javax.naming.directory.SearchResult;
 
 import net.java.sjtools.enterprise.ldap.error.LDAPException;
 import net.java.sjtools.enterprise.ldap.error.LDAPInvalidUserError;
-import net.java.sjtools.enterprise.ldap.error.LDAPQueryWithNoResultsError;
 import net.java.sjtools.enterprise.ldap.error.LDAPUserLockError;
 import net.java.sjtools.enterprise.ldap.error.LDAPUserNotExistsError;
 import net.java.sjtools.logging.Log;
@@ -94,13 +93,9 @@ public class LDAPUtil {
 
 			NamingEnumeration answer = ctx
 					.search(config.getSearchBase(), getUserFilter(data.getUserName()), searchCtls);
-			
-			boolean found = false;
 
 			while (answer.hasMoreElements()) {
 				SearchResult sr = (SearchResult) answer.next();
-				
-				found = true;
 
 				Attributes attrs = sr.getAttributes();
 
@@ -156,13 +151,6 @@ public class LDAPUtil {
 					}
 				}
 			}
-			
-			if (!found) {
-				log.error("Query \""+ config.getSearchBase() + "\" did'not return any results, for user " + userName);
-				throw new LDAPQueryWithNoResultsError(userName, config.getSearchBase());
-			}
-		} catch (LDAPException e) {
-			throw e;
 		} catch (InvalidAttributeValueException e) {
 			if (e.getMessage() != null && e.getMessage().indexOf("Exceed password retry limit") >= 0) {
 				log.error("User " + userName + " is locked", e);
