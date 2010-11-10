@@ -27,6 +27,7 @@ import java.util.List;
 import javax.naming.AuthenticationException;
 import javax.naming.Context;
 import javax.naming.NamingEnumeration;
+import javax.naming.NamingException;
 import javax.naming.directory.Attributes;
 import javax.naming.directory.DirContext;
 import javax.naming.directory.InitialDirContext;
@@ -44,32 +45,66 @@ import net.java.sjtools.util.ContextUtil;
 import net.java.sjtools.util.TextUtil;
 
 public class LDAPUtil {
+
 	private static Log log = LogFactory.getLog(LDAPUtil.class);
 
 	private static final String NAME = "displayName";
 	private static final String MAIL = "mail";
 	private static final String GROUPS = "memberOf";
 	private static final String[] returnedAtts = { NAME, MAIL, GROUPS };
-	
+
 	public static void validate(String login, String password, LDAPValidationConfig config) throws LDAPException {
-		LDAPConfig ldap = new LDAPConfig();
-		ldap.setUrl(config.getUrl());
-		ldap.setLogin(TextUtil.replace(config.getGenericUserDN(), "{user}", login));
-		ldap.setPassword(password);
-		ldap.setSearchBase(ldap.getLogin());
-		ldap.setTimeout(config.getTimeout());
-		
-		getUserData(login, ldap);
+		if (log.isDebugEnabled()) {
+			log.debug("validate(" + login + ", ..., ...)");
+		}
+
+		String userName = TextUtil.replace(config.getGenericUserDN(), "{user}", login);
+
+		Hashtable env = new Hashtable();
+		env.put(Context.INITIAL_CONTEXT_FACTORY, "com.sun.jndi.ldap.LdapCtxFactory");
+		env.put(Context.PROVIDER_URL, config.getUrl());
+		env.put(Context.SECURITY_AUTHENTICATION, "simple");
+		env.put(Context.SECURITY_PRINCIPAL, userName);
+		env.put(Context.SECURITY_CREDENTIALS, password);
+		env.put(Context.REFERRAL, "follow");
+		env.put("com.sun.jndi.ldap.connect.pool", "true");
+		env.put("com.sun.jndi.ldap.connect.timeout", String.valueOf(config.getTimeout()));
+		env.put("com.sun.jndi.ldap.read.timeout", String.valueOf(config.getTimeout()));
+
+		DirContext ctx = null;
+
+		try {
+			ctx = new InitialDirContext(env);
+
+			ctx.getAttributes(userName);
+		} catch (InvalidAttributeValueException e) {
+			if (e.getMessage() != null && e.getMessage().indexOf("Exceed password retry limit") >= 0) {
+				log.error("User " + login + " is locked", e);
+				throw new LDAPUserLockError();
+			} else {
+				log.error("Error reading data for user " + login, e);
+				throw new LDAPException("Error reading data for user " + login, e);
+			}
+		} catch (AuthenticationException e) {
+			if (e.getResolvedObj() == null) {
+				log.error("User " + login + " not exists", e);
+				throw new LDAPUserNotExistsError();
+			} else {
+				log.error("Password is wrong for user " + login, e);
+				throw new LDAPInvalidUserError();
+			}
+		} catch (Exception e) {
+			log.error("Error reading data for user " + login, e);
+			throw new LDAPException("Error reading data for user " + login, e);
+		} finally {
+			ContextUtil.close(ctx);
+		}
 	}
 
 	public static LDAPData getUserData(String userName, LDAPConfig config) throws LDAPException {
 		if (log.isDebugEnabled()) {
 			log.debug("getUserData(" + userName + ", ...)");
 		}
-
-		LDAPData data = new LDAPData();
-
-		data.setUserName(getUserName(userName));
 
 		Hashtable env = new Hashtable();
 		env.put(Context.INITIAL_CONTEXT_FACTORY, "com.sun.jndi.ldap.LdapCtxFactory");
@@ -83,6 +118,7 @@ public class LDAPUtil {
 		env.put("com.sun.jndi.ldap.read.timeout", String.valueOf(config.getTimeout()));
 
 		DirContext ctx = null;
+		LDAPData data = null;
 
 		try {
 			ctx = new InitialDirContext(env);
@@ -91,87 +127,127 @@ public class LDAPUtil {
 			searchCtls.setSearchScope(SearchControls.SUBTREE_SCOPE);
 			searchCtls.setReturningAttributes(getReturningAttributes(config));
 
-			NamingEnumeration answer = ctx
-					.search(config.getSearchBase(), getUserFilter(data.getUserName()), searchCtls);
+			String user = getUserName(userName);
+			String userFilter = getUserFilter(user);
 
-			while (answer.hasMoreElements()) {
-				SearchResult sr = (SearchResult) answer.next();
+			for (Iterator i = config.getDomainContextList().iterator(); i.hasNext();) {
+				NamingEnumeration answer = ctx.search((String) i.next(), userFilter, searchCtls);
 
-				Attributes attrs = sr.getAttributes();
+				data = getData(config.getRequestAttributeList(), answer);
 
-				NamingEnumeration enumeration = attrs.getIDs();
-
-				while (enumeration.hasMoreElements()) {
-					String attrId = (String) enumeration.nextElement();
-
-					if (attrId.equals(NAME)) {
-						data.setName((String) attrs.get(attrId).get());
-					}
-
-					if (attrId.equals(MAIL)) {
-						data.setMail((String) attrs.get(attrId).get());
-					}
-
-					if (attrId.equals(GROUPS)) {
-						NamingEnumeration groupEnumeration = attrs.get(attrId).getAll();
-
-						while (groupEnumeration.hasMoreElements()) {
-							String groupAttribute = (String) groupEnumeration.nextElement();
-
-							List groupPropertyList = TextUtil.split(groupAttribute, ",");
-
-							for (Iterator i = groupPropertyList.iterator(); i.hasNext();) {
-								String groupProperty = (String) i.next();
-
-								if (groupProperty.startsWith("CN=")) {
-									data.addGroup(groupProperty.substring(3));
-								}
-							}
-						}
-					}
-					
-					if (!config.getRequestAttributeList().isEmpty()) {
-						String attributeName = null;
-						
-						for (Iterator i = config.getRequestAttributeList().iterator(); i.hasNext();) {
-							attributeName = (String) i.next();
-							
-							if (attrId.equals(attributeName)) {
-								List valueList = new ArrayList();
+				if (data != null) {
+					data.setUserName(user);
+					break;
+				}
+			}
 			
-								NamingEnumeration attrEnumeration = attrs.get(attrId).getAll();
+			if (data == null) {
+				log.error("User " + user + " not exists");
+				throw new LDAPUserNotExistsError();
+			}
+		} catch (InvalidAttributeValueException e) {
+			if (e.getMessage() != null && e.getMessage().indexOf("Exceed password retry limit") >= 0) {
+				log.error("User " + config.getLogin() + " is locked", e);
+				throw new LDAPUserLockError();
+			} else {
+				log.error("Error reading data for user " + config.getLogin(), e);
+				throw new LDAPException("Error reading data for user " + config.getLogin(), e);
+			}
+		} catch (LDAPUserNotExistsError e) {
+			throw e;
+		} catch (AuthenticationException e) {
+			if (e.getResolvedObj() == null) {
+				log.error("User " + config.getLogin() + " not exists", e);
+				throw new LDAPUserNotExistsError();
+			} else {
+				log.error("Password is wrong for user " + config.getLogin(), e);
+				throw new LDAPInvalidUserError();
+			}
+		} catch (Exception e) {
+			log.error("Error reading data for user " + config.getLogin(), e);
+			throw new LDAPException("Error reading data for user " + config.getLogin(), e);
+		} finally {
+			ContextUtil.close(ctx);
+		}
 
-								while (attrEnumeration.hasMoreElements()) {
-									valueList.add(attrEnumeration.nextElement());
-								}								
-								
-								data.setAttributeValue(attributeName, valueList);
+		return data;
+	}
+
+	private static LDAPData getData(List requestAttributeList, NamingEnumeration answer) throws NamingException {
+		LDAPData data = null;
+
+		while (answer.hasMoreElements()) {
+			SearchResult sr = (SearchResult) answer.next();
+
+			Attributes attrs = sr.getAttributes();
+
+			NamingEnumeration enumeration = attrs.getIDs();
+
+			while (enumeration.hasMoreElements()) {
+				String attrId = (String) enumeration.nextElement();
+
+				if (attrId.equals(NAME)) {
+					if (data == null) {
+						data = new LDAPData();
+					}
+
+					data.setName((String) attrs.get(attrId).get());
+				}
+
+				if (attrId.equals(MAIL)) {
+					if (data == null) {
+						data = new LDAPData();
+					}
+
+					data.setMail((String) attrs.get(attrId).get());
+				}
+
+				if (attrId.equals(GROUPS)) {
+					NamingEnumeration groupEnumeration = attrs.get(attrId).getAll();
+
+					while (groupEnumeration.hasMoreElements()) {
+						String groupAttribute = (String) groupEnumeration.nextElement();
+
+						List groupPropertyList = TextUtil.split(groupAttribute, ",");
+
+						for (Iterator i = groupPropertyList.iterator(); i.hasNext();) {
+							String groupProperty = (String) i.next();
+
+							if (groupProperty.startsWith("CN=")) {
+								if (data == null) {
+									data = new LDAPData();
+								}
+
+								data.addGroup(groupProperty.substring(3));
 							}
 						}
 					}
 				}
+
+				if (!requestAttributeList.isEmpty()) {
+					String attributeName = null;
+
+					for (Iterator i = requestAttributeList.iterator(); i.hasNext();) {
+						attributeName = (String) i.next();
+
+						if (attrId.equals(attributeName)) {
+							List valueList = new ArrayList();
+
+							NamingEnumeration attrEnumeration = attrs.get(attrId).getAll();
+
+							while (attrEnumeration.hasMoreElements()) {
+								valueList.add(attrEnumeration.nextElement());
+							}
+
+							if (data == null) {
+								data = new LDAPData();
+							}
+
+							data.setAttributeValue(attributeName, valueList);
+						}
+					}
+				}
 			}
-		} catch (InvalidAttributeValueException e) {
-			if (e.getMessage() != null && e.getMessage().indexOf("Exceed password retry limit") >= 0) {
-				log.error("User " + userName + " is locked", e);
-				throw new LDAPUserLockError();
-			} else {
-				log.error("Error reading data for user " + userName, e);
-				throw new LDAPException("Error reading data for user " + userName, e);
-			}
-		} catch (AuthenticationException e) {
-			if (e.getResolvedObj() == null) {
-				log.error("User " + userName + " not exists", e);
-				throw new LDAPUserNotExistsError();
-			} else {
-				log.error("Password is wrong for user " + userName, e);
-				throw new LDAPInvalidUserError();
-			}
-		} catch (Exception e) {
-			log.error("Error reading data for user " + userName, e);
-			throw new LDAPException("Error reading data for user " + userName, e);
-		} finally {
-			ContextUtil.close(ctx);
 		}
 
 		return data;
@@ -181,12 +257,12 @@ public class LDAPUtil {
 		if (config.getRequestAttributeList().isEmpty()) {
 			return returnedAtts;
 		}
-		
+
 		String[] ret = new String[returnedAtts.length + config.getRequestAttributeList().size()];
-		
+
 		System.arraycopy(returnedAtts, 0, ret, 0, returnedAtts.length);
 		System.arraycopy(config.getRequestAttributeList().toArray(new String[config.getRequestAttributeList().size()]), 0, ret, returnedAtts.length, config.getRequestAttributeList().size());
-		
+
 		return ret;
 	}
 
