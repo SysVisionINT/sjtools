@@ -26,7 +26,7 @@ import java.util.List;
 public class LDAPConfig implements Serializable {
 	private static final long serialVersionUID = -709769950872395071L;
 	
-	private String searchBase = null;
+	private List domainContextList = new ArrayList();
 	private String url = null;
 	private String login = null;
 	private String password = null;
@@ -57,12 +57,16 @@ public class LDAPConfig implements Serializable {
 		this.password = password;
 	}
 	
-	public String getSearchBase() {
-		return searchBase;
+	public void setSearchBase(String searchBase) {
+		this.domainContextList.add(searchBase);
 	}
 	
-	public void setSearchBase(String searchBase) {
-		this.searchBase = searchBase;
+	public void setSearchBase(List contextList) {
+		this.domainContextList.addAll(contextList);
+	}
+	
+	public List getDomainContextList() {
+		return domainContextList;
 	}
 	
 	public String getUrl() {
