@@ -1,23 +1,23 @@
 /*
  * SJTools - SysVision Java Tools
- * 
- * Copyright (C) 2006 SysVision - Consultadoria e Desenvolvimento em Sistemas de Informática, Lda.  
- * 
+ *
+ * Copyright (C) 2006 SysVision - Consultadoria e Desenvolvimento em Sistemas de Informática, Lda.
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
  * version 2.1 of the License, or (at your option) any later version.
- * 
+ *
  * This library is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA
  */
-package net.java.sjtools.cache;
+package net.java.sjtools.cache.dynamic;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -25,10 +25,14 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import net.java.sjtools.cache.CacheEntry;
+import net.java.sjtools.cache.dynamic.error.CacheUnavailable;
+import net.java.sjtools.cache.dynamic.error.ObjectNotFound;
 import net.java.sjtools.thread.Lock;
-import net.java.sjtools.time.SuperTimer;
+import net.java.sjtools.time.timer.SuperTimer;
+import net.java.sjtools.time.timer.SuperTimerTask;
 
-public class Cache implements Runnable {
+public class Cache extends SuperTimerTask {
 	private CacheConfig myConfig = null;
 	private CacheFactory myHelper = null;
 	private Map myCache = null;
@@ -93,7 +97,7 @@ public class Cache implements Runnable {
 		if (!running) {
 			return;
 		}
-		
+
 		if (myConfig.getExpireTime() != CacheConfig.NEVER_EXPIRE) {
 			SuperTimer.getInstance().schedule(this, System.currentTimeMillis() + myConfig.getExpireTime());
 		}

@@ -1,18 +1,18 @@
 /*
  * SJTools - SysVision Java Tools
- * 
- * Copyright (C) 2006 SysVision - Consultadoria e Desenvolvimento em Sistemas de Informática, Lda.  
- * 
+ *
+ * Copyright (C) 2006 SysVision - Consultadoria e Desenvolvimento em Sistemas de Informática, Lda.
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
  * version 2.1 of the License, or (at your option) any later version.
- * 
+ *
  * This library is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA
@@ -25,80 +25,86 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import net.java.sjtools.pool.error.ObjectCreationException;
+import net.java.sjtools.pool.error.PoolUnavailableException;
+import net.java.sjtools.pool.error.WaitTimeExpiredException;
+import net.java.sjtools.pool.task.Expire;
+import net.java.sjtools.pool.task.Timeout;
+import net.java.sjtools.pool.task.Validate;
 import net.java.sjtools.thread.Lock;
-import net.java.sjtools.time.SuperTimer;
+import net.java.sjtools.time.timer.SuperTimer;
 
-public class Pool implements Runnable {
-	private PoolConfig myConfig = null;
-
-	private PoolFactory myFactory = null;
-
-	private Map myIdlList = new HashMap();
-
-	private Map myInUseList = new HashMap();
-
+public class Pool {
+	private PoolConfig config = null;
+	private PoolFactory factory = null;
+	private Map idlList = new HashMap();
+	private Map inUseList = new HashMap();
 	private boolean running = true;
-
-	private Lock myLock = null;
-
-	private long myNextIntervalValidation = 0;
-
-	private long myNextExpireTime = 0;
-
-	private long myNextTimeOut = 0;
+	private Lock lock = null;
 
 	public Pool(PoolConfig config, PoolFactory factory) {
 		setPoolConfig(config);
 		setPoolFactory(factory);
 
-		myLock = new Lock(this);
+		lock = new Lock(this);
 
-		myLock.getWriteLock();
-		fillPool();
-		myLock.releaseLock();
+		try {
+			lock.getWriteLock();
+			fillPool();
+		} finally {
+			lock.releaseLock();
+		}
 	}
 
-	public void run() {
+	public void processValidation() {
 		if (!running) {
 			return;
 		}
 
-		long now = System.currentTimeMillis();
-
-		if (now >= myNextIntervalValidation) {
-			myLock.getWriteLock();
+		try {
+			lock.getWriteLock();
 			testIdlList();
 			fillPool();
-			myLock.releaseLock();
-			myNextIntervalValidation = now + myConfig.getValidationTime();
+		} finally {
+			lock.releaseLock();
+		}
+	}
+
+	public void processExpires() {
+		if (!running) {
+			return;
 		}
 
-		if (now >= myNextExpireTime) {
-			myLock.getWriteLock();
-			pruneList(myIdlList, myConfig.getExpireTime(), false);
-			myLock.releaseLock();
-			myNextExpireTime = now + myConfig.getExpireTime();
+		try {
+			lock.getWriteLock();
+			pruneList(idlList, config.getExpireTime());
+		} finally {
+			lock.releaseLock();
+		}
+	}
+
+	public void processTimeouts() {
+		if (!running) {
+			return;
 		}
 
-		if (now >= myNextTimeOut) {
-			myLock.getWriteLock();
-			pruneList(myInUseList, myConfig.getTimeOut(), true);
+		try {
+			lock.getWriteLock();
+			pruneList(inUseList, config.getTimeOut());
 			fillPool();
-			myLock.releaseLock();
-			myNextTimeOut = now + myConfig.getTimeOut();
+		} finally {
+			lock.releaseLock();
 		}
-
-		schedule();
 	}
 
 	private void testIdlList() {
 		List removeList = new ArrayList();
 		Object obj = null;
 
-		for (Iterator i = myIdlList.keySet().iterator(); i.hasNext();) {
+		for (Iterator i = idlList.keySet().iterator(); i.hasNext();) {
 			obj = i.next();
 
-			if (!myFactory.validateObject(obj)) {
+			if (!factory.validateObject(obj)) {
 				removeList.add(obj);
 			}
 		}
@@ -106,49 +112,50 @@ public class Pool implements Runnable {
 		for (Iterator i = removeList.iterator(); i.hasNext();) {
 			obj = i.next();
 
-			myFactory.destroyObject(obj);
-			myIdlList.remove(obj);
+			factory.destroyObject(obj);
+			idlList.remove(obj);
 		}
 	}
 
 	public int getPoolSize() {
-		myLock.getReadLock();
-		int currentSize = myIdlList.size() + myInUseList.size();
-		myLock.releaseLock();
-
-		return currentSize;
-	}
-
-	public int getObjectsInUse() {
-		myLock.getReadLock();
-		int currentSize = myInUseList.size();
-		myLock.releaseLock();
-
-		return currentSize;
-	}
-
-	public int getObjectsIdle() {
-		myLock.getReadLock();
-		int currentSize = myIdlList.size();
-		myLock.releaseLock();
-
-		return currentSize;
-	}
-
-	private void fillPool() {
-		int currentSize = myIdlList.size() + myInUseList.size();
-		int minSize = myConfig.getMinimalSize();
-
-		for (; currentSize < minSize; currentSize++) {
-			try {
-				myIdlList.put(myFactory.createObject(), new Long(System
-						.currentTimeMillis()));
-			} catch (ObjectCreationException e) {
-			}
+		try {
+			lock.getReadLock();
+			return idlList.size() + inUseList.size();
+		} finally {
+			lock.releaseLock();
 		}
 	}
 
-	private void pruneList(Map list, long time, boolean ignoreMinimal) {
+	public int getObjectsInUse() {
+		try {
+			lock.getReadLock();
+			return inUseList.size();
+		} finally {
+			lock.releaseLock();
+		}
+	}
+
+	public int getObjectsIdle() {
+		try {
+			lock.getReadLock();
+			return idlList.size();
+		} finally {
+			lock.releaseLock();
+		}
+	}
+
+	private void fillPool() {
+		int currentSize = idlList.size() + inUseList.size();
+		int minSize = config.getMinimalSize();
+
+		for (; currentSize < minSize; currentSize++) {
+			try {
+				idlList.put(factory.createObject(), new Long(System.currentTimeMillis()));
+			} catch (ObjectCreationException e) {}
+		}
+	}
+
+	private void pruneList(Map list, long time) {
 		List removeList = new ArrayList();
 		Object obj = null;
 		long now = System.currentTimeMillis();
@@ -162,51 +169,30 @@ public class Pool implements Runnable {
 		}
 
 		if (!removeList.isEmpty()) {
-			int currentSize = myIdlList.size() + myInUseList.size();
 			Iterator i = removeList.iterator();
 
-			while (i.hasNext()
-					&& (ignoreMinimal || (currentSize > myConfig
-							.getMinimalSize()))) {
+			while (i.hasNext()) {
 				obj = i.next();
 
-				myFactory.destroyObject(obj);
+				factory.destroyObject(obj);
 				list.remove(obj);
-				currentSize--;
 			}
 		}
 	}
 
 	private void schedule() {
-		long next = 0;
-		long now = System.currentTimeMillis();
+		SuperTimer timer = SuperTimer.getInstance();
 
-		if (myNextIntervalValidation == 0) {
-			if (myConfig.isValidateOnInterval()) {
-				myNextIntervalValidation = now + myConfig.getValidationTime();
-			} else {
-				myNextIntervalValidation = Long.MAX_VALUE;
-			}
-
-			if ((myConfig.getExpireTime() != PoolConfig.NEVER_EXPIRE)) {
-				myNextExpireTime = now + myConfig.getExpireTime();
-			} else {
-				myNextExpireTime = Long.MAX_VALUE;
-			}
-
-			if ((myConfig.getTimeOut() != PoolConfig.NEVER_TIMEOUT)) {
-				myNextTimeOut = now + myConfig.getTimeOut();
-			} else {
-				myNextTimeOut = Long.MAX_VALUE;
-			}
+		if (config.isValidateOnInterval()) {
+			timer.schedule(new Validate(this), config.getValidationTime(), config.getValidationTime());
 		}
 
-		next = (myNextIntervalValidation < myNextExpireTime ? myNextIntervalValidation
-				: myNextExpireTime);
-		next = (next < myNextTimeOut ? next : myNextTimeOut);
+		if (config.getExpireTime() != PoolConfig.NEVER_EXPIRE) {
+			timer.schedule(new Expire(this), config.getExpireTime(), config.getExpireTime());
+		}
 
-		if (next != Long.MAX_VALUE) {
-			SuperTimer.getInstance().schedule(this, next);
+		if (config.getTimeOut() != PoolConfig.NEVER_TIMEOUT) {
+			timer.schedule(new Timeout(this), config.getTimeOut(), config.getTimeOut());
 		}
 	}
 
@@ -219,21 +205,23 @@ public class Pool implements Runnable {
 
 		clear();
 
-		myConfig = null;
-		myFactory = null;
-		myIdlList = null;
-		myInUseList = null;
+		config = null;
+		factory = null;
+		idlList = null;
+		inUseList = null;
 	}
 
 	public void clear() {
-		myLock.getWriteLock();
-		pruneList(myIdlList, -1, true);
-		pruneList(myInUseList, -1, true);
-		myLock.releaseLock();
+		try {
+			lock.getWriteLock();
+			pruneList(idlList, -1);
+			pruneList(inUseList, -1);
+		} finally {
+			lock.releaseLock();
+		}
 	}
 
-	public Object borrowObject() throws PoolUnavailableException,
-			WaitTimeExpiredException, ObjectCreationException {
+	public Object borrowObject() throws PoolUnavailableException, WaitTimeExpiredException, ObjectCreationException {
 		if (!running) {
 			throw new PoolUnavailableException();
 		}
@@ -241,34 +229,35 @@ public class Pool implements Runnable {
 		Object obj = null;
 		long wait = Long.MAX_VALUE;
 
-		if (myConfig.getWaitTime() != PoolConfig.WAIT_FOREVER) {
-			wait = System.currentTimeMillis() + myConfig.getWaitTime();
+		if (config.getWaitTime() != PoolConfig.WAIT_FOREVER) {
+			wait = System.currentTimeMillis() + config.getWaitTime();
 		}
 
 		while (obj == null && System.currentTimeMillis() < wait) {
 			obj = getFirstObject();
 
 			if (obj == null) {
-				if (myInUseList.size() <= myConfig.getMaxSize()
-						|| myConfig.getMaxSize() == PoolConfig.NO_MAX_SIZE) {
-					obj = myFactory.createObject();
+				if (inUseList.size() <= config.getMaxSize() || config.getMaxSize() == PoolConfig.NO_MAX_SIZE) {
+					obj = factory.createObject();
 				}
 			}
 
-			if (myConfig.isValidateOnBorrow() && !myFactory.validateObject(obj)) {
-				myFactory.destroyObject(obj);
+			if (config.isValidateOnBorrow() && !factory.validateObject(obj)) {
+				factory.destroyObject(obj);
 				obj = null;
 			}
-
 		}
 
 		if (obj == null) {
 			throw new WaitTimeExpiredException();
 		}
 
-		myLock.getWriteLock();
-		myInUseList.put(obj, new Long(System.currentTimeMillis()));
-		myLock.releaseLock();
+		try {
+			lock.getWriteLock();
+			inUseList.put(obj, new Long(System.currentTimeMillis()));
+		} finally {
+			lock.releaseLock();
+		}
 
 		return obj;
 	}
@@ -276,17 +265,19 @@ public class Pool implements Runnable {
 	private Object getFirstObject() {
 		Object obj = null;
 
-		myLock.getWriteLock();
+		try {
+			lock.getWriteLock();
 
-		if (!myIdlList.isEmpty()) {
-			obj = myIdlList.keySet().iterator().next();
+			if (!idlList.isEmpty()) {
+				obj = idlList.keySet().iterator().next();
 
-			if (myIdlList.remove(obj) == null) {
-				obj = null;
+				if (idlList.remove(obj) == null) {
+					obj = null;
+				}
 			}
+		} finally {
+			lock.releaseLock();
 		}
-
-		myLock.releaseLock();
 
 		return obj;
 	}
@@ -296,54 +287,56 @@ public class Pool implements Runnable {
 			return;
 		}
 
-		myLock.getWriteLock();
-		myInUseList.remove(obj);
+		try {
+			lock.getWriteLock();
+			inUseList.remove(obj);
 
-		if (myConfig.isValidateOnReturn()) {
-			if (!myFactory.validateObject(obj)) {
-				myFactory.destroyObject(obj);
-				myLock.releaseLock();
+			if (config.isValidateOnReturn()) {
+				if (!factory.validateObject(obj)) {
+					factory.destroyObject(obj);
+					lock.releaseLock();
 
-				return;
+					return;
+				}
 			}
-		}
 
-		myIdlList.put(obj, new Long(System.currentTimeMillis()));
-		myLock.releaseLock();
+			idlList.put(obj, new Long(System.currentTimeMillis()));
+		} finally {
+			lock.releaseLock();
+		}
 	}
 
 	public void invalidade(Object obj) {
-		myLock.getWriteLock();
-		myFactory.destroyObject(obj);
-		myInUseList.remove(obj);
-		myIdlList.remove(obj);
-		myLock.releaseLock();
+		try {
+			lock.getWriteLock();
+			factory.destroyObject(obj);
+			inUseList.remove(obj);
+			idlList.remove(obj);
+		} finally {
+			lock.releaseLock();
+		}
 	}
 
 	public PoolConfig getPoolConfig() {
-		return myConfig;
+		return config;
 	}
 
 	public PoolFactory getPoolFactory() {
-		return myFactory;
+		return factory;
 	}
 
 	public boolean isRunning() {
 		return running;
 	}
 
-	public void setPoolConfig(PoolConfig config) {
-		myConfig = config;
-
-		myNextIntervalValidation = 0;
-		myNextExpireTime = 0;
-		myNextTimeOut = 0;
+	private void setPoolConfig(PoolConfig config) {
+		this.config = config;
 
 		schedule();
 	}
 
 	public void setPoolFactory(PoolFactory factory) {
-		myFactory = factory;
-		myFactory.setPool(this);
+		this.factory = factory;
+		factory.setPool(this);
 	}
 }

@@ -17,43 +17,11 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA
  */
-package net.java.sjtools.thread.pool;
+package net.java.sjtools.thread.provider;
 
-import net.java.sjtools.pool.Pool;
-import net.java.sjtools.pool.PoolFactory;
 import net.java.sjtools.thread.SuperThread;
 
-public class ThreadFactory implements PoolFactory, ThreadListener {
-	private Pool pool = null;
-
-	public Object createObject() {
-		SuperThread st = new SuperThread(this);
-
-		st.setDaemon(true);
-		st.setName("ThreadPool(" + st.getName() + ")");
-		st.start();
-
-		return st;
-	}
-
-	public boolean validateObject(Object obj) {
-		return ((SuperThread)obj).getStatus() != SuperThread.STOP;
-	}
-
-	public void destroyObject(Object obj) {
-		((SuperThread)obj).die();
-	}
-
-	public void done(SuperThread thread) {
-		if (pool.isRunning()) {
-			pool.returnObject(thread);
-		} else {
-			destroyObject(thread);
-		}
-	}
-
-	public void setPool(Pool pool) {
-		this.pool = pool;
-	}
-
+public interface ThreadProvider {
+	public SuperThread getThread();
+	public void close();
 }

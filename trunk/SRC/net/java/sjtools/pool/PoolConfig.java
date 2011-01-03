@@ -1,18 +1,18 @@
 /*
  * SJTools - SysVision Java Tools
- * 
- * Copyright (C) 2006 SysVision - Consultadoria e Desenvolvimento em Sistemas de Informática, Lda.  
- * 
+ *
+ * Copyright (C) 2006 SysVision - Consultadoria e Desenvolvimento em Sistemas de Informática, Lda.
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
  * version 2.1 of the License, or (at your option) any later version.
- * 
+ *
  * This library is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA
@@ -31,7 +31,7 @@ public class PoolConfig {
 	public static final long NEVER_EXPIRE = Long.MAX_VALUE;
 
 	/**
-	 * Quando usado como TimeOut indica que os objectos fornecidos e nunca devolvidos nunca são considerados 
+	 * Quando usado como TimeOut indica que os objectos fornecidos e nunca devolvidos nunca são considerados
 	 * recuperaveis
 	 */
 	public static final long NEVER_TIMEOUT = Long.MAX_VALUE;
@@ -43,13 +43,13 @@ public class PoolConfig {
 
 	private int minimalSize = 0;
 	private int maxSize = NO_MAX_SIZE;
-	private long timeOut = 60000;
-	private long expireTime = 120000;
+	private long timeOut = NEVER_TIMEOUT;
+	private long expireTime = NEVER_EXPIRE;
 	private long validationTime = 180000;
 	private boolean validateOnBorrow = false;
 	private boolean validateOnInterval = false;
-	private boolean validateOnReturn = false;	
-	private long waitTime = 1000;
+	private boolean validateOnReturn = false;
+	private long waitTime = WAIT_FOREVER;
 
 	/**
 	 * Returns the expireTime.
