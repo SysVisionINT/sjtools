@@ -17,9 +17,19 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA
  */
-package net.java.sjtools.cache;
+package net.java.sjtools.pool.error;
 
-public interface CacheFactory {
-	public Object getObject(Object name) throws ObjectNotFound;
-	public void destroyObject(Object obj);
+import net.java.sjtools.error.ApplicationError;
+
+public class WaitTimeExpiredException extends ApplicationError {
+	private static final long serialVersionUID = 7922261241408097664L;
+
+	public WaitTimeExpiredException() {
+		super("The waiting time for an object expired");
+	}
+
+	public WaitTimeExpiredException(String message) {
+		super(message);
+	}
+
 }

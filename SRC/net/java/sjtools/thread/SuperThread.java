@@ -1,23 +1,25 @@
 /*
  * SJTools - SysVision Java Tools
- * 
- * Copyright (C) 2006 SysVision - Consultadoria e Desenvolvimento em Sistemas de Informática, Lda.  
- * 
+ *
+ * Copyright (C) 2006 SysVision - Consultadoria e Desenvolvimento em Sistemas de Informática, Lda.
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
  * version 2.1 of the License, or (at your option) any later version.
- * 
+ *
  * This library is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA
  */
 package net.java.sjtools.thread;
+
+import net.java.sjtools.thread.pool.ThreadListener;
 
 public class SuperThread extends Thread {
     public static final int WAITING = 1;
@@ -30,7 +32,6 @@ public class SuperThread extends Thread {
     private int status = WAITING;
     private Runnable task = null;
     private ThreadListener listener = null;
-    private ThreadContext context = null;
 
     private static synchronized String getThreadName() {
         if (threadNumber == Integer.MAX_VALUE) {
@@ -68,11 +69,8 @@ public class SuperThread extends Thread {
 
                 if (listener != null) {
                     listener.done(this);
-                }
-
-                if (context != null) {
-                    context.clearContext();
-                    context = null;
+                } else {
+                	status = STOPPING;
                 }
             }
         }
@@ -105,14 +103,6 @@ public class SuperThread extends Thread {
         } else {
             return false;
         }
-    }
-
-    public void setThreadContext(ThreadContext threadContext) {
-        context = threadContext;
-    }
-
-    public ThreadContext getThreadContext() {
-        return context;
     }
 
     public boolean equals(Object obj) {

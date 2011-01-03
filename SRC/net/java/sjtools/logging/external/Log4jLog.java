@@ -19,9 +19,9 @@
  */
 package net.java.sjtools.logging.external;
 
-import org.apache.log4j.Logger;
-
 import net.java.sjtools.logging.Log;
+
+import org.apache.log4j.Logger;
 
 public class Log4jLog implements Log {
 	private static final long serialVersionUID = -5315912616364251912L;

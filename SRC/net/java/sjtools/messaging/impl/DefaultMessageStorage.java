@@ -23,8 +23,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 import net.java.sjtools.messaging.Message;
-import net.java.sjtools.messaging.model.StorageRecord;
 import net.java.sjtools.messaging.model.MessageStorage;
+import net.java.sjtools.messaging.model.StorageRecord;
 import net.java.sjtools.thread.Lock;
 
 public class DefaultMessageStorage  implements MessageStorage {

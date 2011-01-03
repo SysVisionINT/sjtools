@@ -17,13 +17,19 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA
  */
-package net.java.sjtools.pool;
+package net.java.sjtools.cache.dynamic.error;
 
-import net.java.sjtools.pool.error.ObjectCreationException;
+import net.java.sjtools.error.ApplicationError;
 
-public interface PoolFactory {
-	public Object createObject() throws ObjectCreationException;
-	public boolean validateObject(Object obj);
-	public void destroyObject(Object obj);
-	public void setPool(Pool pool);
+public class ObjectNotFound extends ApplicationError {
+	private static final long serialVersionUID = 6411841232842211197L;
+
+	public ObjectNotFound() {
+		super("Object not found");
+	}
+
+	public ObjectNotFound(String message) {
+		super(message);
+	}
+
 }

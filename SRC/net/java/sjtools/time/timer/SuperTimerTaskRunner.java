@@ -17,43 +17,23 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA
  */
-package net.java.sjtools.thread.pool;
+package net.java.sjtools.time.timer;
 
-import net.java.sjtools.pool.Pool;
-import net.java.sjtools.pool.PoolFactory;
+import java.util.TimerTask;
+
 import net.java.sjtools.thread.SuperThread;
 
-public class ThreadFactory implements PoolFactory, ThreadListener {
-	private Pool pool = null;
+public class SuperTimerTaskRunner extends TimerTask {
+	private SuperTimerTask task = null;
 
-	public Object createObject() {
-		SuperThread st = new SuperThread(this);
-
-		st.setDaemon(true);
-		st.setName("ThreadPool(" + st.getName() + ")");
-		st.start();
-
-		return st;
+	protected SuperTimerTaskRunner(SuperTimerTask task) {
+		this.task = task;
+		task.setRunner(this);
 	}
 
-	public boolean validateObject(Object obj) {
-		return ((SuperThread)obj).getStatus() != SuperThread.STOP;
-	}
+	public void run() {
+		SuperThread thread = SuperTimer.getInstance().getProvider().getThread();
 
-	public void destroyObject(Object obj) {
-		((SuperThread)obj).die();
+		thread.start(task);
 	}
-
-	public void done(SuperThread thread) {
-		if (pool.isRunning()) {
-			pool.returnObject(thread);
-		} else {
-			destroyObject(thread);
-		}
-	}
-
-	public void setPool(Pool pool) {
-		this.pool = pool;
-	}
-
 }

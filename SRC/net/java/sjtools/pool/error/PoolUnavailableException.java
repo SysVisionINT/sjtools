@@ -17,13 +17,19 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA
  */
-package net.java.sjtools.pool;
+package net.java.sjtools.pool.error;
 
-import net.java.sjtools.pool.error.ObjectCreationException;
+import net.java.sjtools.error.ApplicationError;
 
-public interface PoolFactory {
-	public Object createObject() throws ObjectCreationException;
-	public boolean validateObject(Object obj);
-	public void destroyObject(Object obj);
-	public void setPool(Pool pool);
+public class PoolUnavailableException extends ApplicationError {
+	private static final long serialVersionUID = -8881041146539686642L;
+
+	public PoolUnavailableException() {
+		super("The pool is no longer available");
+	}
+
+	public PoolUnavailableException(String message) {
+		super(message);
+	}
+
 }

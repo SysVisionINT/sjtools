@@ -17,18 +17,18 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA
  */
-package net.java.sjtools.cache;
+package net.java.sjtools.cache.dynamic.error;
 
 import net.java.sjtools.error.ApplicationError;
 
-public class ObjectNotFound extends ApplicationError {
-	private static final long serialVersionUID = 6411841232842211197L;
+public class CacheUnavailable extends ApplicationError {
+	private static final long serialVersionUID = 4632554419785590558L;
 
-	public ObjectNotFound() {
-		super("Object not found");
+	public CacheUnavailable() {
+		super("The cache is no longer available");
 	}
 
-	public ObjectNotFound(String message) {
+	public CacheUnavailable(String message) {
 		super(message);
 	}
 
