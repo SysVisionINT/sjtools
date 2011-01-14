@@ -1,18 +1,18 @@
 /*
  * SJTools - SysVision Java Tools
- * 
- * Copyright (C) 2006 SysVision - Consultadoria e Desenvolvimento em Sistemas de Informática, Lda.  
- * 
+ *
+ * Copyright (C) 2006 SysVision - Consultadoria e Desenvolvimento em Sistemas de Informática, Lda.
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
  * version 2.1 of the License, or (at your option) any later version.
- * 
+ *
  * This library is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA
@@ -135,6 +135,10 @@ public class TextUtil {
 	}
 
 	public static String toString(Collection list) {
+		return toString(list, true);
+	}
+
+	public static String toString(Collection list, boolean includePackage) {
 		if (list == null) {
 			return "null";
 		}
@@ -146,13 +150,17 @@ public class TextUtil {
 				buffer.append(", ");
 			}
 
-			buffer.append(toString(i.next()));
+			buffer.append(toString(i.next(), includePackage));
 		}
 
 		return buffer.toString();
 	}
 
 	public static String toString(Map map) {
+		return toString(map, true);
+	}
+
+	public static String toString(Map map, boolean includePackage) {
 		if (map == null) {
 			return "null";
 		}
@@ -168,15 +176,19 @@ public class TextUtil {
 
 			obj = i.next();
 
-			buffer.append(toString(obj));
+			buffer.append(toString(obj, includePackage));
 			buffer.append("=");
-			buffer.append(toString(map.get(obj)));
+			buffer.append(toString(map.get(obj), includePackage));
 		}
 
 		return buffer.toString();
 	}
 
 	public static String toString(Object[] array) {
+		return toString(array, true);
+	}
+
+	public static String toString(Object[] array, boolean includePackage) {
 		if (array == null) {
 			return "null";
 		}
@@ -192,13 +204,17 @@ public class TextUtil {
 				buffer.append(", ");
 			}
 
-			buffer.append(toString(array[i]));
+			buffer.append(toString(array[i], includePackage));
 		}
 
 		return buffer.toString();
 	}
 
 	public static String toString(Object obj) {
+		return toString(obj, true);
+	}
+
+	public static String toString(Object obj, boolean includePackage) {
 		if (obj == null) {
 			return "null";
 		}
@@ -229,7 +245,7 @@ public class TextUtil {
 			return obj.toString();
 		}
 
-		return beanUtil.toString();
+		return beanUtil.toString(includePackage);
 	}
 
 	public static String trim(String text) {
