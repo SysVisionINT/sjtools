@@ -97,13 +97,17 @@ public class BeanUtil {
 	}
 
 	public String toString() {
+		return toString(true);
+	}
+
+	public String toString(boolean includePackage) {
 		if (implementsMethod("toString", new Class[0])) {
 			return obj.toString();
 		}
 
 		StringBuffer buffer = new StringBuffer();
 
-		buffer.append(getClassName());
+		buffer.append(getClassName(includePackage));
 		buffer.append("(");
 
 		Class clazz = obj.getClass();
@@ -152,7 +156,7 @@ public class BeanUtil {
 
 				buffer.append(fieldName);
 				buffer.append("=");
-				appendObject(buffer, value);
+				appendObject(buffer, value, includePackage);
 
 				count++;
 			} catch (Exception e) {
@@ -177,7 +181,7 @@ public class BeanUtil {
 
 				buffer.append(fields[i].getName());
 				buffer.append("=");
-				appendObject(buffer, value);
+				appendObject(buffer, value, includePackage);
 
 				count++;
 			} catch (Exception e) {
@@ -190,7 +194,7 @@ public class BeanUtil {
 		return buffer.toString();
 	}
 
-	private void appendObject(StringBuffer buffer, Object value) {
+	private void appendObject(StringBuffer buffer, Object value, boolean includePackage) {
 		if (value != null) {
 			if (value.getClass().isArray()) {
 				buffer.append("[");
@@ -200,20 +204,20 @@ public class BeanUtil {
 						buffer.append(", ");
 					}
 
-					buffer.append(TextUtil.toString(Array.get(value, j)));
+					buffer.append(TextUtil.toString(Array.get(value, j), includePackage));
 				}
 
 				buffer.append("]");
 			} else if (value instanceof Collection) {
 				buffer.append("[");
-				buffer.append(TextUtil.toString((Collection) value));
+				buffer.append(TextUtil.toString((Collection) value, includePackage));
 				buffer.append("]");
 			} else if (value instanceof Map) {
 				buffer.append("{");
-				buffer.append(TextUtil.toString((Map) value));
+				buffer.append(TextUtil.toString((Map) value, includePackage));
 				buffer.append("}");
 			} else {
-				buffer.append(TextUtil.toString(value));
+				buffer.append(TextUtil.toString(value, includePackage));
 			}
 		} else {
 			buffer.append("null");
@@ -275,6 +279,22 @@ public class BeanUtil {
 
 	public String getClassName() {
 		return obj.getClass().getName();
+	}
+
+	public String getClassName(boolean includePackage) {
+		String className = getClassName();
+
+		if (includePackage) {
+			return className;
+		}
+
+		int pos = className.lastIndexOf(".");
+
+		if (pos < 0) {
+			return className;
+		}
+
+		return className.substring(pos + 1);
 	}
 
 	public Object get(String propertyName) throws SecurityException, NoSuchMethodException, IllegalArgumentException, IllegalAccessException, InvocationTargetException {
