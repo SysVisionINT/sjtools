@@ -47,6 +47,8 @@ public class CustomSplitter implements Splitter, Serializable {
 			if (customSplitterNextRecord.getReturnType() != List.class) {
 				throw new ProcessorError("Method " + nextRecordMethod + " of class " + javaClass + " has to return a List");
 			}
+		} catch (ProcessorError e) {
+			throw e;
 		} catch (Exception e) {
 			throw new ProcessorError(e);
 		}

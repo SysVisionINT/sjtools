@@ -22,7 +22,7 @@
 
 <!ELEMENT rule-sets (rule-set+)>
 
-<!ELEMENT rule-set ((token-line-splitter|size-line-splitter|custom-splitter), column*)>
+<!ELEMENT rule-set ((token-line-splitter|size-line-splitter|csv-splitter|custom-splitter), column*)>
 
 <!ATTLIST rule-set name CDATA #REQUIRED
                    minimum-records CDATA ""
@@ -39,6 +39,13 @@
 
 <!ATTLIST size-line-splitter element-count CDATA ""
                              element-length CDATA #REQUIRED>
+
+<!ELEMENT csv-splitter EMPTY>
+
+<!ATTLIST csv-splitter element-count CDATA ""
+                       separator CDATA ","
+                       quote CDATA "&quot;"
+                       skip-header (true|false) "false">
 
 <!ELEMENT custom-splitter EMPTY>
 
