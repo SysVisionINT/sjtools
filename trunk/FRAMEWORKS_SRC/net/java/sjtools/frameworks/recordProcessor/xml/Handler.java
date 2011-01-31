@@ -28,6 +28,7 @@ import net.java.sjtools.frameworks.recordProcessor.model.Column;
 import net.java.sjtools.frameworks.recordProcessor.model.RuleSet;
 import net.java.sjtools.frameworks.recordProcessor.model.RuleSets;
 import net.java.sjtools.frameworks.recordProcessor.model.error.ProcessorError;
+import net.java.sjtools.frameworks.recordProcessor.splitters.CSVSplitter;
 import net.java.sjtools.frameworks.recordProcessor.splitters.CustomSplitter;
 import net.java.sjtools.frameworks.recordProcessor.splitters.SizeLineSplitter;
 import net.java.sjtools.frameworks.recordProcessor.splitters.TokenLineSplitter;
@@ -110,6 +111,22 @@ public class Handler extends SimpleHandler {
 				int elementLength = Integer.parseInt(attributes.getValue("element-length"));
 
 				((RuleSet) currentObject).setSplitter(new SizeLineSplitter(elementCount, elementLength));
+
+				return null;
+			} else if (elementType.equals("csv-splitter")) {
+				String auxElementCount = attributes.getValue("element-count");
+				Integer elementCount = null;
+				if (!TextUtil.isEmptyString(auxElementCount)) {
+					elementCount = new Integer(auxElementCount);
+				}
+
+				String separator = attributes.getValue("separator");
+
+				String quote = attributes.getValue("quote");
+
+				boolean skipHeader = new Boolean(attributes.getValue("skip-header")).booleanValue();
+
+				((RuleSet) currentObject).setSplitter(new CSVSplitter(elementCount, separator, quote, skipHeader));
 
 				return null;
 			} else if (elementType.equals("custom-splitter")) {

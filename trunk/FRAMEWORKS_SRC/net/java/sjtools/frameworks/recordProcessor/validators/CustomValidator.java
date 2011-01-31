@@ -40,6 +40,8 @@ public class CustomValidator implements Validator, Serializable {
 			if (customValidatorMethod.getReturnType() != Boolean.TYPE && customValidatorMethod.getReturnType() != Boolean.class) {
 				throw new ProcessorError("Method " + method + " of class " + javaClass + " has to return a (Bb)oolean");
 			}
+		} catch (ProcessorError e) {
+			throw e;
 		} catch (Exception e) {
 			throw new ProcessorError(e);
 		}

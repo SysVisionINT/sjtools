@@ -42,6 +42,8 @@ public class CustomFormatter implements Formatter, Serializable {
 			if (customFormatterFormat.getReturnType() != String.class) {
 				throw new ProcessorError("Method " + formatMethod + " of class " + javaClass + " has to return a String");
 			}
+		} catch (ProcessorError e) {
+			throw e;
 		} catch (Exception e) {
 			throw new ProcessorError(e);
 		}
