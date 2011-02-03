@@ -100,6 +100,10 @@ public class CSVSplitter implements Splitter, Serializable {
 
 				record.append(ch);
 
+				if (!quotedField && lastCh == '\r' && ch != '\n') {
+					field.append(lastCh);
+				}
+
 				if (!quotedField || lastCh == quote) {
 					if (ch == separator || ch == '\n') {
 						ret.add(field.toString());
@@ -139,7 +143,10 @@ public class CSVSplitter implements Splitter, Serializable {
 				}
 
 				lastCh = ch;
-				field.append(ch);
+
+				if (quotedField || ch != '\r') {
+					field.append(ch);
+				}
 			}
 
 			if (ret != null && elementCount != null && elementCount.intValue() != ret.size()) {
