@@ -22,7 +22,7 @@ package net.java.sjtools.mail.util;
 import java.util.regex.Pattern;
 
 public class EmailUtil {
-	
+
 	/**
 	 * Regras de validação:
 	 *    pointFollowedByPoint - dois pontos (..) seguidos
@@ -42,12 +42,9 @@ public class EmailUtil {
 			return false;
 		}
 
-		email = email.trim();
-
-		return true && 
-			!pointFollowedByPoint.matcher(email).matches() && 
-			!pointFollowedByAt.matcher(email).matches() && 
-			!atFollowedByPoint.matcher(email).matches()	&& 
+		return !pointFollowedByPoint.matcher(email).matches() &&
+			!pointFollowedByAt.matcher(email).matches() &&
+			!atFollowedByPoint.matcher(email).matches() &&
 			regularEmailPattern.matcher(email).matches();
 	}
 
