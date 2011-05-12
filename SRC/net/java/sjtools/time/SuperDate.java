@@ -24,6 +24,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.Locale;
 
 import net.java.sjtools.time.error.InvalidMonthDayException;
 
@@ -43,14 +44,18 @@ public class SuperDate extends Timestamp {
 	}
 
 	public SuperDate(String date, String format) throws ParseException {
+		this(date, format, Locale.getDefault());
+	}
+
+	public SuperDate(String date, String format, Locale locale) throws ParseException {
 		this();
 
-		SimpleDateFormat sdf = new SimpleDateFormat(format);
+		SimpleDateFormat sdf = new SimpleDateFormat(format, locale);
 		Date dt = sdf.parse(date);
 
 		this.setTime(dt.getTime());
 
-		if (!getFormatedDate(format).equals(date)) {
+		if (!getFormatedDate(format, locale).equals(date)) {
 			throw new ParseException("Invalid format " + format + " for " + date, 0);
 		}
 	}
@@ -71,7 +76,11 @@ public class SuperDate extends Timestamp {
 	}
 
 	public String getFormatedDate(String format) {
-		SimpleDateFormat sdf = new SimpleDateFormat(format);
+		return getFormatedDate(format, Locale.getDefault());
+	}
+
+	public String getFormatedDate(String format, Locale locale) {
+		SimpleDateFormat sdf = new SimpleDateFormat(format, locale);
 		return sdf.format(this);
 	}
 
