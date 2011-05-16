@@ -22,6 +22,7 @@ package net.java.sjtools.util;
 import java.text.ParseException;
 import java.util.Date;
 import java.util.Locale;
+import java.util.TimeZone;
 
 import net.java.sjtools.time.SuperDate;
 
@@ -37,12 +38,12 @@ public class DateUtil {
 	 * @return <strong>true</strong> se <I>inputDate</I> respeitar </I>format</I>
 	 */
 	public static boolean isValidDate(String inputDate, String format) {
-		return isValidDate(inputDate, format, Locale.getDefault());
+		return isValidDate(inputDate, format, Locale.getDefault(), TimeZone.getDefault());
 	}
 
-	public static boolean isValidDate(String inputDate, String format, Locale locale) {
+	public static boolean isValidDate(String inputDate, String format, Locale locale, TimeZone zone) {
 		try {
-			new SuperDate(inputDate, format, locale);
+			new SuperDate(inputDate, format, locale, zone);
 
 			return true;
 		} catch (ParseException e) {
