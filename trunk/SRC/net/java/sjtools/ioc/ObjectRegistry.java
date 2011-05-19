@@ -33,7 +33,7 @@ import net.java.sjtools.thread.Lock;
 import net.java.sjtools.util.BeanUtil;
 
 public class ObjectRegistry {
-	public static final int OBLECT_NAME = 0;
+	public static final int OBJECT_NAME = 0;
 	public static final int CLASS_NAME = 0;
 
 	private static Log log = LogFactory.getLog(ObjectRegistry.class);
@@ -142,7 +142,7 @@ public class ObjectRegistry {
 						continue;
 					}
 
-					if (type == OBLECT_NAME) {
+					if (type == OBJECT_NAME) {
 						if (isObjectDefined(propertyName)) {
 							parameterValue = getObject(propertyName);
 
