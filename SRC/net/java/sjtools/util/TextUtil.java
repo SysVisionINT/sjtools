@@ -26,10 +26,13 @@ import java.util.List;
 import java.util.Map;
 
 public class TextUtil {
-
+	private static final String DEFAULT_INCLUDE_PACKAGE = "defaultIncludePackage";
+	
 	public static final int ALLIGN_CENTER = 0;
 	public static final int ALLIGN_LEFT = -1;
 	public static final int ALLIGN_RIGHT = 1;
+	
+	private static boolean defaultIncludePackage = true;
 
 	public static boolean isEmptyString(String txt) {
 		return (txt == null || txt.length() == 0);
@@ -135,7 +138,7 @@ public class TextUtil {
 	}
 
 	public static String toString(Collection list) {
-		return toString(list, true);
+		return toString(list, defaultIncludePackage);
 	}
 
 	public static String toString(Collection list, boolean includePackage) {
@@ -157,7 +160,7 @@ public class TextUtil {
 	}
 
 	public static String toString(Map map) {
-		return toString(map, true);
+		return toString(map, defaultIncludePackage);
 	}
 
 	public static String toString(Map map, boolean includePackage) {
@@ -185,7 +188,7 @@ public class TextUtil {
 	}
 
 	public static String toString(Object[] array) {
-		return toString(array, true);
+		return toString(array, defaultIncludePackage);
 	}
 
 	public static String toString(Object[] array, boolean includePackage) {
@@ -211,7 +214,7 @@ public class TextUtil {
 	}
 
 	public static String toString(Object obj) {
-		return toString(obj, true);
+		return toString(obj, defaultIncludePackage);
 	}
 
 	public static String toString(Object obj, boolean includePackage) {
@@ -269,6 +272,22 @@ public class TextUtil {
 			return null;
 		} else {
 			return text.toUpperCase();
+		}
+	}
+	
+	public static boolean isDefaultIncludePackage() {
+		return defaultIncludePackage;
+	}
+
+	public static void setDefaultIncludePackage(boolean defaultIncludePackage) {
+		TextUtil.defaultIncludePackage = defaultIncludePackage;
+	}
+
+	static {
+		String value = SJToolsConfigReader.getParameter(DEFAULT_INCLUDE_PACKAGE);
+		
+		if (value != null) {
+			setDefaultIncludePackage(Boolean.getBoolean(value));
 		}
 	}
 }
