@@ -29,7 +29,7 @@ import net.java.sjtools.util.PropertyReader;
 import net.java.sjtools.util.ResourceUtil;
 
 public class SJToolsConfigReader {
-	private static final String LOGGER_CONFIG_FILE = "sjtools-config.properties";
+	private static final String SJTOOLS_CONFIG_FILE = "sjtools-config.properties";
 
 	private static Properties properties = null;
 	private static Lock lock = null;
@@ -84,7 +84,7 @@ public class SJToolsConfigReader {
 		Properties props = null;
 
 		try {
-			InputStream is = ResourceUtil.getContextResourceInputStream(LOGGER_CONFIG_FILE);
+			InputStream is = ResourceUtil.getContextResourceInputStream(SJTOOLS_CONFIG_FILE);
 
 			if (is != null) {
 				props = PropertyReader.getProperties(is);
@@ -95,7 +95,7 @@ public class SJToolsConfigReader {
 			properties = props;
 			lock = new Lock(properties);
 		} catch (Exception e) {
-			throw new LogConfigurationError("Error reading configuration file " + LOGGER_CONFIG_FILE);
+			throw new LogConfigurationError("Error reading configuration file " + SJTOOLS_CONFIG_FILE);
 		}
 	}
 }
