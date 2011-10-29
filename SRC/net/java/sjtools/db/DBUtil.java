@@ -27,14 +27,20 @@ import java.sql.SQLException;
 import javax.naming.NamingException;
 import javax.sql.DataSource;
 
-import net.java.sjtools.util.JNDIUtil;
+import net.java.sjtools.db.ds.DataSourceFactory;
 
 public class DBUtil {
 	public static Connection getConnection(String jndiName) throws NamingException, SQLException {
-		DataSource dataSource = (DataSource) JNDIUtil.getJNDIObject(jndiName);
+		DataSource dataSource = DataSourceFactory.getDataSource(jndiName);
 
 		return getConnection(dataSource);
 	}
+	
+	public static Connection getConnection(String driver, String url, String user, String password) throws SQLException {
+		DataSource dataSource = DataSourceFactory.getDataSource(driver, url, user, password);
+
+		return getConnection(dataSource);
+	}	
 	
 	public static Connection getConnection(DataSource dataSource) throws SQLException {
 		if (dataSource != null) {

@@ -22,17 +22,19 @@ package net.java.sjtools.db.ds;
 import java.sql.Connection;
 import java.sql.SQLException;
 
+import javax.sql.DataSource;
+
 import net.java.sjtools.db.connection.FastConnection;
 import net.java.sjtools.db.error.SQLError;
 
-public class TransactionalDataSource extends DataSourceImpl {
-	private static final long serialVersionUID = 4609941383579876104L;
-
+public class TransactionManager {
 	private static ThreadLocal connection = new ThreadLocal();
 	private static ThreadLocal transaction = new ThreadLocal();
 
-	public TransactionalDataSource(String driver, String url, String user, String password) {
-		super(driver, url, user, password);
+	private DataSource dataSource = null;
+	
+	public TransactionManager(DataSource ds) {
+		dataSource = ds;
 	}
 
 	public void startTransaction() throws SQLError {
@@ -41,7 +43,7 @@ public class TransactionalDataSource extends DataSourceImpl {
 		Connection con = null;
 
 		try {
-			con = super.getConnection();
+			con = dataSource.getConnection();
 		} catch (SQLException e) {
 			throw new SQLError(e);
 		}
@@ -119,11 +121,7 @@ public class TransactionalDataSource extends DataSourceImpl {
 		if (isInTransaction()) {
 			return (Connection) connection.get();
 		} else {
-			return super.getConnection();
+			return dataSource.getConnection();
 		}
-	}
-
-	public static TransactionalDataSource getInstance(String driver, String url, String user, String password) {
-		return new TransactionalDataSource(driver, url, user, password);
 	}
 }
