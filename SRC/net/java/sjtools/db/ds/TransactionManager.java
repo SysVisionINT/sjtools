@@ -19,6 +19,7 @@
  */
 package net.java.sjtools.db.ds;
 
+import java.io.PrintWriter;
 import java.sql.Connection;
 import java.sql.SQLException;
 
@@ -27,7 +28,7 @@ import javax.sql.DataSource;
 import net.java.sjtools.db.connection.FastConnection;
 import net.java.sjtools.db.error.SQLError;
 
-public class TransactionManager {
+public class TransactionManager implements DataSource {
 	private static ThreadLocal connection = new ThreadLocal();
 	private static ThreadLocal transaction = new ThreadLocal();
 
@@ -123,5 +124,25 @@ public class TransactionManager {
 		} else {
 			return dataSource.getConnection();
 		}
+	}
+
+	public Connection getConnection(String username, String password) throws SQLException {
+		throw new SQLException("Method not supported!");
+	}
+
+	public PrintWriter getLogWriter() throws SQLException {
+		return dataSource.getLogWriter();
+	}
+
+	public int getLoginTimeout() throws SQLException {
+		return dataSource.getLoginTimeout();
+	}
+
+	public void setLogWriter(PrintWriter out) throws SQLException {
+		dataSource.setLogWriter(out);
+	}
+
+	public void setLoginTimeout(int seconds) throws SQLException {
+		dataSource.setLoginTimeout(seconds);
 	}
 }

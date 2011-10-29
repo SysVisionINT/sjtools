@@ -39,19 +39,6 @@ public class DataSourceImpl implements DataSource, Serializable {
 	private String userName = null;
 	private String userPassword = null;
 	
-	public String getDataBaseURL() {
-		return dataBaseURL;
-	}
-
-	public String getDriverClass() {
-		return driverClass;
-	}
-
-	public String getUserName() {
-		return userName;
-	}
-
-	
 	public DataSourceImpl() {
 	}
 	
@@ -70,6 +57,18 @@ public class DataSourceImpl implements DataSource, Serializable {
 		userPassword = password;
 	}	
 
+	public String getDataBaseURL() {
+		return dataBaseURL;
+	}
+
+	public String getDriverClass() {
+		return driverClass;
+	}
+
+	public String getUserName() {
+		return userName;
+	}
+	
 	public int getLoginTimeout() throws SQLException {
 		throw new SQLException("Method not supported!");
 	}
