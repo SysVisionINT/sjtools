@@ -27,9 +27,12 @@ import jxl.write.NumberFormats;
 import jxl.write.WritableCellFormat;
 import jxl.write.WritableSheet;
 import net.java.sjtools.frameworks.excel.error.XLSException;
+import net.java.sjtools.frameworks.excel.format.XLSDateFormat;
 
 public class XLSSheet {
 	private static WritableCellFormat integerFormat = null;
+	private static WritableCellFormat moneyFormat = null;
+	private static WritableCellFormat percentageFormat = null;
 	private static WritableCellFormat floatFormat = null;
 	private static WritableCellFormat dateFormat = null;
 
@@ -41,7 +44,7 @@ public class XLSSheet {
 		this.sheet = sheet;
 	}
 
-	public void newLine() {
+	public void newRow() {
 		row++;
 		column = 0;
 	}
@@ -101,15 +104,41 @@ public class XLSSheet {
 			throw new XLSException("Error adding a value to cell: " + value, e);
 		}
 	}
+	
+	public void addMoneyCell(double value) throws XLSException {
+		try {
+			sheet.addCell(new Number(column, row, value, moneyFormat));
+			column++;
+		} catch (Exception e) {
+			throw new XLSException("Error adding a value to cell: " + value, e);
+		}
+	}
+	
+	public void addPercentageCell(double value) throws XLSException {
+		try {
+			sheet.addCell(new Number(column, row, value, percentageFormat));
+			column++;
+		} catch (Exception e) {
+			throw new XLSException("Error adding a value to cell: " + value, e);
+		}
+	}
 
 	public void addCell(java.util.Date value) throws XLSException {
+		addCell(value, dateFormat);
+	}
+	
+	public void addCell(java.util.Date value, XLSDateFormat format) throws XLSException {
+		addCell(value, (WritableCellFormat)format.getNativeFormat());
+	}
+	
+	private void addCell(java.util.Date value, WritableCellFormat format) throws XLSException {
 		if (value == null) {
 			addFreeCell();
 			return;
 		}
 		
 		try {
-			sheet.addCell(new DateTime(column, row, value, dateFormat));
+			sheet.addCell(new DateTime(column, row, value, format));
 			column++;
 		} catch (Exception e) {
 			throw new XLSException("Error adding a value to cell: " + value, e);
@@ -118,6 +147,8 @@ public class XLSSheet {
 
 	static {
 		integerFormat = new WritableCellFormat(NumberFormats.INTEGER);
+		moneyFormat = new WritableCellFormat(NumberFormats.ACCOUNTING_FLOAT);
+		percentageFormat = new WritableCellFormat(NumberFormats.PERCENT_FLOAT);
 		floatFormat = new WritableCellFormat(NumberFormats.FLOAT);
 		dateFormat = new WritableCellFormat(DateFormats.DEFAULT);
 	}
