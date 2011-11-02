@@ -38,7 +38,7 @@
 					<attribute name="Implementation-Edition" value="Standalone"/>
 					<attribute name="Implementation-Version" value="${version.id}"/>
 					<attribute name="Implementation-Vendor" value="SysVision - Consultadoria e Desenvolvimento em Sistemas de Informatica, Lda"/>
-					<attribute name="Implementation-URL" value="https://sjtools.dev.java.net/"/>
+					<attribute name="Implementation-URL" value="http://java.net/projects/sjtools/"/>
 					<attribute name="Implementation-License" value="Lesser General Public License (LGPL)"/>
 				</section>
 			</manifest>
@@ -57,7 +57,7 @@
 					<attribute name="Implementation-Edition" value="Enterprise"/>
 					<attribute name="Implementation-Version" value="${version.id}"/>
 					<attribute name="Implementation-Vendor" value="SysVision - Consultadoria e Desenvolvimento em Sistemas de Informatica, Lda"/>
-					<attribute name="Implementation-URL" value="https://sjtools.dev.java.net/"/>
+					<attribute name="Implementation-URL" value="http://java.net/projects/sjtools/"/>
 					<attribute name="Implementation-License" value="Lesser General Public License (LGPL)"/>
 				</section>
 			</manifest>
@@ -75,7 +75,7 @@
 					<attribute name="Implementation-Edition" value="Struts extensions"/>
 					<attribute name="Implementation-Version" value="${version.id}"/>
 					<attribute name="Implementation-Vendor" value="SysVision - Consultadoria e Desenvolvimento em Sistemas de Informatica, Lda"/>
-					<attribute name="Implementation-URL" value="https://sjtools.dev.java.net/"/>
+					<attribute name="Implementation-URL" value="http://java.net/projects/sjtools/"/>
 					<attribute name="Implementation-License" value="Lesser General Public License (LGPL)"/>
 				</section>
 			</manifest>
@@ -91,7 +91,7 @@
 					<attribute name="Implementation-Edition" value="Frameworks: Record Processor"/>
 					<attribute name="Implementation-Version" value="${version.id}"/>
 					<attribute name="Implementation-Vendor" value="SysVision - Consultadoria e Desenvolvimento em Sistemas de Informatica, Lda"/>
-					<attribute name="Implementation-URL" value="https://sjtools.dev.java.net/"/>
+					<attribute name="Implementation-URL" value="http://java.net/projects/sjtools/"/>
 					<attribute name="Implementation-License" value="Lesser General Public License (LGPL)"/>
 				</section>
 			</manifest>
@@ -110,7 +110,7 @@
 					<attribute name="Implementation-Edition" value="Frameworks: Excel"/>
 					<attribute name="Implementation-Version" value="${version.id}"/>
 					<attribute name="Implementation-Vendor" value="SysVision - Consultadoria e Desenvolvimento em Sistemas de Informatica, Lda"/>
-					<attribute name="Implementation-URL" value="https://sjtools.dev.java.net/"/>
+					<attribute name="Implementation-URL" value="http://java.net/projects/sjtools/"/>
 					<attribute name="Implementation-License" value="Lesser General Public License (LGPL)"/>
 				</section>
 			</manifest>
