@@ -102,6 +102,22 @@
     			<include name="recordprocessor.dtd"/>
 			</fileset>
 		</jar>
+		
+		<jar jarfile="${dist}/sjtools-excel.jar">
+			<manifest>
+				<section name="net/java/sjtools">
+					<attribute name="Implementation-Title" value="SJTools - SysVision Java Tools"/>
+					<attribute name="Implementation-Edition" value="Frameworks: Excel"/>
+					<attribute name="Implementation-Version" value="${version.id}"/>
+					<attribute name="Implementation-Vendor" value="SysVision - Consultadoria e Desenvolvimento em Sistemas de Informatica, Lda"/>
+					<attribute name="Implementation-URL" value="https://sjtools.dev.java.net/"/>
+					<attribute name="Implementation-License" value="Lesser General Public License (LGPL)"/>
+				</section>
+			</manifest>
+			<fileset dir="${classes}">
+				<include name="**/frameworks/excel/**"/>
+			</fileset>
+		</jar>		
 	</target>
 
 
