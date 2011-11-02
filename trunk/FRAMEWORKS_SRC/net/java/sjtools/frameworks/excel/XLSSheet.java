@@ -103,6 +103,11 @@ public class XLSSheet {
 	}
 
 	public void addCell(java.util.Date value) throws XLSException {
+		if (value == null) {
+			addFreeCell();
+			return;
+		}
+		
 		try {
 			sheet.addCell(new DateTime(column, row, value, dateFormat));
 			column++;
