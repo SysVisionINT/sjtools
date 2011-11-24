@@ -25,4 +25,5 @@ public interface TFTFile {
 	public String getFileName();
 	public Date getLastModify();
 	public boolean isDirectory();
+	public long getSize();
 }
