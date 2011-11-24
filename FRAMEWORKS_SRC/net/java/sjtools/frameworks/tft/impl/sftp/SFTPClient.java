@@ -128,7 +128,7 @@ public class SFTPClient extends AbstractProtocolImpl {
 				file.setFileName(entry.getFilename());
 				
 				SftpATTRS attrs = entry.getAttrs();
-				
+				file.setSize(attrs.getSize());
 				file.setDirectory(attrs.isDir());
 				file.setLastModify(new Date(((long)attrs.getMTime()) * 1000));
 				

@@ -30,6 +30,7 @@ public class BaseFile implements TFTFile, Serializable  {
 	private String fileName = null;
 	private Date lastModify = null;
 	private boolean directory = false;
+	private long size = 0;
 
 	public String getFileName() {
 		return fileName;
@@ -53,5 +54,13 @@ public class BaseFile implements TFTFile, Serializable  {
 
 	public void setDirectory(boolean directory) {
 		this.directory = directory;
+	}
+	
+	public long getSize() {
+		return size;
+	}
+
+	public void setSize(long size) {
+		this.size = size;
 	}
 }
