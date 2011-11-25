@@ -38,11 +38,11 @@ import net.java.sjtools.frameworks.tft.util.TFTUtil;
 import net.java.sjtools.io.SuperFile;
 import net.java.sjtools.util.StreamUtil;
 
-public class FileClient extends AbstractProtocolImpl {
+public class FileClientImpl extends AbstractProtocolImpl {
 
 	private SuperFile currentDir = null;
 
-	public FileClient(URLData data) {
+	public FileClientImpl(URLData data) {
 		super(data);
 	}
 
