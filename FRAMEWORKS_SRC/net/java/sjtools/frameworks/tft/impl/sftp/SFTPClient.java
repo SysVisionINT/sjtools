@@ -85,7 +85,7 @@ public class SFTPClient extends AbstractProtocolImpl {
 			sftp = null;
 			session = null;
 
-			throw new TFTException("Error connecting to '" + getURLData().toString() + "' with user '" + login + "'", e);
+			throw new TFTException("Error connecting to '" + getURLData().getUrl() + "' with user '" + login + "'", e);
 		}
 	}
 
@@ -161,7 +161,7 @@ public class SFTPClient extends AbstractProtocolImpl {
 		try {
 			return sftp.get(fileName);
 		} catch (SftpException e) {
-			throw new TFTException("Error executing: put(InputStream, '" + fileName + "')", e);
+			throw new TFTException("Error executing: get('" + fileName + "')", e);
 		}
 	}
 
@@ -186,6 +186,18 @@ public class SFTPClient extends AbstractProtocolImpl {
 			sftp.rename(oldFileName, newFileName);
 		} catch (SftpException e) {
 			throw new TFTException("Error executing: rename('" + oldFileName + "', '" + newFileName + "')", e);
+		}
+	}
+
+	public void mkdir(String path) throws TFTException {
+		if (session == null || !session.isConnected()) {
+			throw new NotConnectedError();
+		}
+		
+		try {
+			sftp.mkdir(path);
+		} catch (SftpException e) {
+			throw new TFTException("Error executing: mkdir('" + path + "')", e);
 		}
 	}
 }

@@ -33,6 +33,8 @@ public interface TFTClient {
 	public void disconnect();
 
 	public void chdir(String path) throws TFTException;
+	
+	public void mkdir(String path) throws TFTException;
 
 	public Collection list() throws TFTException;
 	

@@ -20,15 +20,26 @@
 package net.java.sjtools.frameworks.tft.impl;
 
 import java.io.Serializable;
+import java.util.Properties;
 
 public class URLData implements Serializable {
 	private static final long serialVersionUID = -2768146720807293580L;
 	
+	private String url = null;
 	private String protocol = null;
 	private String serverName = null;
 	private Integer portNumber = null;
 	private String path = null;
+	private Properties properties = new Properties();
 	
+	public URLData(String url) {
+		this.url = url;
+	}
+	
+	public String getUrl() {
+		return url;
+	}
+
 	public String getProtocol() {
 		return protocol;
 	}
@@ -60,25 +71,16 @@ public class URLData implements Serializable {
 	public void setPath(String path) {
 		this.path = path;
 	}
-
-	public String toString() {
-		// <protocolo>://<servidor>[:<porto>][/<caminho>]
-		StringBuffer buffer = new StringBuffer();
-		
-		buffer.append(getProtocol());
-		buffer.append(URLUtil.SERVER);
-		buffer.append(getServerName());
-		
-		if (getPortNumber() != null) {
-			buffer.append(URLUtil.PORT);
-			buffer.append(getPortNumber());
-		}
-		
-		if (getPath() != null) {
-			buffer.append(URLUtil.PATH);
-			buffer.append(getPath());
-		}
-		
-		return buffer.toString();
+	
+	public void setProperty(String name, String value) {
+		properties.setProperty(name, value);
+	}
+	
+	public String getProperty(String name) {
+		return properties.getProperty(name);
+	}
+	
+	public Properties getProperties() {
+		return properties;
 	}
 }
