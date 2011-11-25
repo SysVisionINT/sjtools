@@ -55,5 +55,8 @@ public class Protocol {
 
 	static {
 		protocolMap.put("sftp", new Protocol("sftp", "net.java.sjtools.frameworks.tft.impl.sftp.SFTPClient"));
+		protocolMap.put("file", new Protocol("sftp", "net.java.sjtools.frameworks.tft.impl.file.FileClient"));
+		protocolMap.put("http", new Protocol("http", "net.java.sjtools.frameworks.tft.impl.http.HTTPClient"));
+		protocolMap.put("https", new Protocol("https", "net.java.sjtools.frameworks.tft.impl.http.HTTPClient"));
 	}
 }
