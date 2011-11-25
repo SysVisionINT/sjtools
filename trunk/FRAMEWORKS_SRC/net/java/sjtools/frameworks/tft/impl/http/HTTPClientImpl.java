@@ -40,7 +40,7 @@ import org.apache.commons.httpclient.methods.DeleteMethod;
 import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.commons.httpclient.methods.PutMethod;
 
-public class HTTPClient extends AbstractProtocolImpl {
+public class HTTPClientImpl extends AbstractProtocolImpl {
 
 	private static final String TIMEOUT = "timeout";
 	private static final String PROXY_HOST = "proxyHost";
@@ -51,7 +51,7 @@ public class HTTPClient extends AbstractProtocolImpl {
 	private HttpMethod currentMethod = null;
 	private String currentDir = null;
 
-	public HTTPClient(URLData data) {
+	public HTTPClientImpl(URLData data) {
 		super(data);
 	}
 
