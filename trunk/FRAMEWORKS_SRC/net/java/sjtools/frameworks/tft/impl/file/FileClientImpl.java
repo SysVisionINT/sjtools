@@ -75,7 +75,11 @@ public class FileClientImpl extends AbstractProtocolImpl {
 			throw new NotConnectedError();
 		}
 
-		currentDir = new SuperFile(currentDir, path);
+		if (path.startsWith("/")) {
+			currentDir = new SuperFile(path);
+		} else {
+			currentDir = new SuperFile(currentDir, path);
+		}
 	}
 
 	public void mkdir(String path) throws TFTException {
