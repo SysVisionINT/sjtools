@@ -36,7 +36,7 @@ public class OlderThanFilter implements TFTFileFilter {
 	}
 
 	public boolean accept(TFTFile file) {
-		return sd.before(file.getLastModify());
+		return sd.after(file.getLastModify());
 	}
 
 }
