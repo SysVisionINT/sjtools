@@ -19,22 +19,26 @@
  */
 package net.java.sjtools.frameworks.excel;
 
-import jxl.write.DateFormats;
 import jxl.write.DateTime;
 import jxl.write.Label;
 import jxl.write.Number;
-import jxl.write.NumberFormats;
 import jxl.write.WritableCellFormat;
 import jxl.write.WritableSheet;
 import net.java.sjtools.frameworks.excel.error.XLSException;
 import net.java.sjtools.frameworks.excel.format.XLSDateFormat;
+import net.java.sjtools.frameworks.excel.format.XLSFormat;
+import net.java.sjtools.frameworks.excel.format.base.DateFormat;
+import net.java.sjtools.frameworks.excel.format.base.FloatFormat;
+import net.java.sjtools.frameworks.excel.format.base.IntegerFormat;
+import net.java.sjtools.frameworks.excel.format.base.MoneyFormat;
+import net.java.sjtools.frameworks.excel.format.base.PercentageFormat;
 
 public class XLSSheet {
-	private static WritableCellFormat integerFormat = null;
-	private static WritableCellFormat moneyFormat = null;
-	private static WritableCellFormat percentageFormat = null;
-	private static WritableCellFormat floatFormat = null;
-	private static WritableCellFormat dateFormat = null;
+	private static XLSFormat integerFormat = null;
+	private static XLSFormat moneyFormat = null;
+	private static XLSFormat percentageFormat = null;
+	private static XLSFormat floatFormat = null;
+	private static XLSFormat dateFormat = null;
 
 	private WritableSheet sheet = null;
 	private int row = 0;
@@ -58,15 +62,6 @@ public class XLSSheet {
 		this.column = column;
 	}
 
-	public void addCell(String value) throws XLSException {
-		try {
-			sheet.addCell(new Label(column, row, value));
-			column++;
-		} catch (Exception e) {
-			throw new XLSException("Error adding a value to cell: " + value, e);
-		}
-	}
-
 	public void addCell(Object value) throws XLSException {
 		if (value == null) {
 			addFreeCell();
@@ -86,10 +81,54 @@ public class XLSSheet {
 			addCell(value.toString());
 		}
 	}
+	
+	public void addCell(Object value, XLSFormat format) throws XLSException {
+		if (value == null) {
+			addFreeCell();
+		} else if (value instanceof String) {
+			addCell((String) value, format);
+		} else if (value instanceof java.lang.Number) {
+			java.lang.Number x = (java.lang.Number) value;
+
+			if (value instanceof Float || value instanceof Double) {
+				addCell(x.doubleValue(), format);
+			} else {
+				addCell(x.longValue(), format);
+			}
+		} else if (value instanceof java.util.Date) {
+			addCell((java.util.Date) value, format);
+		} else {
+			addCell(value.toString(), format);
+		}
+	}	
+	
+	public void addCell(String value) throws XLSException {
+		addCell(value, null);
+	}
+	
+	public void addCell(String value, XLSFormat format) throws XLSException {
+		try {
+			WritableCellFormat nativeFormat = (WritableCellFormat)format.getNativeFormat();
+			
+			if (nativeFormat == null) {
+				sheet.addCell(new Label(column, row, value));
+			} else {
+				sheet.addCell(new Label(column, row, value, nativeFormat));
+			}
+			
+			column++;
+		} catch (Exception e) {
+			throw new XLSException("Error adding a value to cell: " + value, e);
+		}
+	}	
 
 	public void addCell(long value) throws XLSException {
+		addCell(value, integerFormat);
+	}
+	
+	public void addCell(long value, XLSFormat format) throws XLSException {
 		try {
-			sheet.addCell(new Number(column, row, value, integerFormat));
+			sheet.addCell(new Number(column, row, value, (WritableCellFormat)format.getNativeFormat()));
 			column++;
 		} catch (Exception e) {
 			throw new XLSException("Error adding a value to cell: " + value, e);
@@ -97,8 +136,12 @@ public class XLSSheet {
 	}
 
 	public void addCell(double value) throws XLSException {
+		addCell(value, floatFormat);
+	}
+	
+	public void addCell(double value, XLSFormat format) throws XLSException {
 		try {
-			sheet.addCell(new Number(column, row, value, floatFormat));
+			sheet.addCell(new Number(column, row, value, (WritableCellFormat)format.getNativeFormat()));
 			column++;
 		} catch (Exception e) {
 			throw new XLSException("Error adding a value to cell: " + value, e);
@@ -106,8 +149,12 @@ public class XLSSheet {
 	}
 	
 	public void addMoneyCell(double value) throws XLSException {
+		addMoneyCell(value, moneyFormat);
+	}
+	
+	public void addMoneyCell(double value, XLSFormat format) throws XLSException {
 		try {
-			sheet.addCell(new Number(column, row, value, moneyFormat));
+			sheet.addCell(new Number(column, row, value, (WritableCellFormat)format.getNativeFormat()));
 			column++;
 		} catch (Exception e) {
 			throw new XLSException("Error adding a value to cell: " + value, e);
@@ -115,8 +162,12 @@ public class XLSSheet {
 	}
 	
 	public void addPercentageCell(double value) throws XLSException {
+		addPercentageCell(value, percentageFormat);
+	}
+	
+	public void addPercentageCell(double value, XLSFormat format) throws XLSException {
 		try {
-			sheet.addCell(new Number(column, row, value, percentageFormat));
+			sheet.addCell(new Number(column, row, value, (WritableCellFormat)format.getNativeFormat()));
 			column++;
 		} catch (Exception e) {
 			throw new XLSException("Error adding a value to cell: " + value, e);
@@ -128,17 +179,17 @@ public class XLSSheet {
 	}
 	
 	public void addCell(java.util.Date value, XLSDateFormat format) throws XLSException {
-		addCell(value, (WritableCellFormat)format.getNativeFormat());
+		addCell(value, format);
 	}
 	
-	private void addCell(java.util.Date value, WritableCellFormat format) throws XLSException {
+	public void addCell(java.util.Date value, XLSFormat format) throws XLSException {
 		if (value == null) {
 			addFreeCell();
 			return;
 		}
 		
 		try {
-			sheet.addCell(new DateTime(column, row, value, format));
+			sheet.addCell(new DateTime(column, row, value, (WritableCellFormat)format.getNativeFormat()));
 			column++;
 		} catch (Exception e) {
 			throw new XLSException("Error adding a value to cell: " + value, e);
@@ -146,10 +197,10 @@ public class XLSSheet {
 	}
 
 	static {
-		integerFormat = new WritableCellFormat(NumberFormats.INTEGER);
-		moneyFormat = new WritableCellFormat(NumberFormats.ACCOUNTING_FLOAT);
-		percentageFormat = new WritableCellFormat(NumberFormats.PERCENT_FLOAT);
-		floatFormat = new WritableCellFormat(NumberFormats.FLOAT);
-		dateFormat = new WritableCellFormat(DateFormats.DEFAULT);
+		integerFormat = new IntegerFormat();
+		moneyFormat = new MoneyFormat();
+		percentageFormat = new PercentageFormat();
+		floatFormat = new FloatFormat();
+		dateFormat = new DateFormat();
 	}
 }
