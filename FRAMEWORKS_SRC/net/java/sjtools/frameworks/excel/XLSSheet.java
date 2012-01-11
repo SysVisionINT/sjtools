@@ -108,12 +108,10 @@ public class XLSSheet {
 	
 	public void addCell(String value, XLSFormat format) throws XLSException {
 		try {
-			WritableCellFormat nativeFormat = (WritableCellFormat)format.getNativeFormat();
-			
-			if (nativeFormat == null) {
+			if (format == null) {
 				sheet.addCell(new Label(column, row, value));
 			} else {
-				sheet.addCell(new Label(column, row, value, nativeFormat));
+				sheet.addCell(new Label(column, row, value, (WritableCellFormat)format.getNativeFormat()));
 			}
 			
 			column++;
