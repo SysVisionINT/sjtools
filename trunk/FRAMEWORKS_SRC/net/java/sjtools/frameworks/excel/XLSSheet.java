@@ -19,6 +19,7 @@
  */
 package net.java.sjtools.frameworks.excel;
 
+import jxl.CellView;
 import jxl.write.DateTime;
 import jxl.write.Label;
 import jxl.write.Number;
@@ -60,6 +61,12 @@ public class XLSSheet {
 	public void gotoCell(int row, int column) {
 		this.row = row;
 		this.column = column;
+	}
+	
+	public void setColumnSize(int column, int size) {
+		CellView view = sheet.getColumnView(column);
+		view.setSize(size);
+	    sheet.setColumnView(column, view);
 	}
 
 	public void addCell(Object value) throws XLSException {
