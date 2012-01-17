@@ -24,6 +24,10 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Enumeration;
+import java.util.List;
 import java.util.Properties;
 
 import net.java.sjtools.thread.Lock;
@@ -95,6 +99,22 @@ public class ConfigFile {
 				lock.releaseLock();
 			}
 		}
+	}
+	
+	public Collection getParameterList() {
+		validate();
+		
+		List parameters = new ArrayList();
+		
+		lock.getReadLock();
+		
+		for (Enumeration i = properties.propertyNames(); i.hasMoreElements();) {
+			parameters.add((String) i.nextElement());
+		}
+		
+		lock.releaseLock();
+		
+		return parameters;
 	}
 	
 	public String getParameter(String parameterName) {
