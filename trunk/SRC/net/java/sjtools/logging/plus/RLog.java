@@ -26,6 +26,7 @@ import java.util.Random;
 import net.java.sjtools.logging.Log;
 import net.java.sjtools.logging.LogFactory;
 import net.java.sjtools.logging.util.LogConfigReader;
+import net.java.sjtools.time.SuperDate;
 import net.java.sjtools.util.TextUtil;
 
 public class RLog {
@@ -35,6 +36,7 @@ public class RLog {
 	private static ThreadLocal localLog = new ThreadLocal();
 	private static ThreadLocal localID = new ThreadLocal();
 	private static ThreadLocal localApplID = new ThreadLocal();
+	private static ThreadLocal localTimestamp = new ThreadLocal();
 
 	private static String baseRequestID = null;
 
@@ -136,6 +138,16 @@ public class RLog {
 		return null;
 	}	
 	
+	public static SuperDate getInitTimestamp() {
+		SuperDate ts = (SuperDate) localTimestamp.get();
+
+		if (ts != null) {
+			return ts;
+		}
+
+		return null;
+	}		
+	
 	public static void setApplID(Object id) {
 		localApplID.set(id);
 	}		
@@ -210,6 +222,7 @@ public class RLog {
 		localLog.set(log);
 		localID.set(getBaseRequestID().concat(Long.toHexString(getNextID())));
 		localApplID.set(null);
+		localTimestamp.set(new SuperDate());
 	}
 
 	public static void changeLog(Log log) {
