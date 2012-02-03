@@ -26,6 +26,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -249,7 +250,17 @@ public class BeanUtil {
 			if (methods.size() == 1) {
 				method = (Method) methods.get(0);
 			} else {
-				method = obj.getClass().getMethod(methodName, parameters);
+				try {
+					method = obj.getClass().getMethod(methodName, parameters);
+				} catch (NoSuchMethodException e) {
+					methods = filterMethods(methods, args);
+
+					if (methods.size() == 1) {
+						method = (Method) methods.get(0);
+					} else {
+						throw e;
+					}
+				}
 			}
 
 			if (cache != null) {
@@ -258,6 +269,34 @@ public class BeanUtil {
 		}
 
 		return method.invoke(obj, args);
+	}
+
+	private List filterMethods(List methods, Object[] args) {
+		List retList = new ArrayList();
+		
+		for (Iterator i = methods.iterator(); i.hasNext();) {
+			Method method = (Method) i.next();
+			
+			Class[] parameters = method.getParameterTypes();
+			
+			if (parameters.length != args.length) {
+				continue;
+			}
+			
+			boolean ok = true;
+			
+			for (int j = 0; j < args.length && ok; j++) {
+				if (!(parameters[j].isAssignableFrom(args[j].getClass()))) {
+					ok = false;
+				}
+			}
+			
+			if (ok) {
+				retList.add(method);
+			}
+		}
+		
+		return retList;
 	}
 
 	private Class[] getClasses(Object[] args) {
