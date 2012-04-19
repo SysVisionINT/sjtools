@@ -42,6 +42,10 @@ public class RLog {
 
 	private static long lastID = 0;
 
+	public static boolean isTraceEnabled() {
+		return getCurrentLog().isTraceEnabled();
+	}	
+	
 	public static boolean isDebugEnabled() {
 		return getCurrentLog().isDebugEnabled();
 	}
@@ -62,6 +66,14 @@ public class RLog {
 		return getCurrentLog().isWarnEnabled();
 	}
 
+	public static void trace(Object obj) {
+		getCurrentLog().trace(getMessage(obj));
+	}
+
+	public static void trace(Object obj, Throwable throwable) {
+		getCurrentLog().trace(getMessage(obj), throwable);
+	}	
+	
 	public static void debug(Object obj) {
 		getCurrentLog().debug(getMessage(obj));
 	}

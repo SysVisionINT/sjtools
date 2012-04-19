@@ -24,18 +24,21 @@ import java.io.Serializable;
 public class Level implements Serializable {
 	private static final long serialVersionUID = -9115588506016027984L;
 	
-	private static final int DEBUG_CODE = 1;
-	private static final int INFO_CODE = 2;
-	private static final int WARN_CODE = 3;
-	private static final int ERROR_CODE = 4;
-	private static final int FATAL_CODE = 5;
+	private static final int TRACE_CODE = 1;
+	private static final int DEBUG_CODE = 2;
+	private static final int INFO_CODE = 3;
+	private static final int WARN_CODE = 4;
+	private static final int ERROR_CODE = 5;
+	private static final int FATAL_CODE = 6;
 
+	private static final String TRACE_MSG = "TRACE";
 	private static final String DEBUG_MSG = "DEBUG";
 	private static final String INFO_MSG = "INFO";
 	private static final String WARN_MSG = "WARN";
 	private static final String ERROR_MSG = "ERROR";
 	private static final String FATAL_MSG = "FATAL";
 	
+	public static final Level TRACE = new Level(TRACE_CODE);
 	public static final Level DEBUG = new Level(DEBUG_CODE);
 	public static final Level INFO = new Level(INFO_CODE);
 	public static final Level WARN = new Level(WARN_CODE);
@@ -49,6 +52,10 @@ public class Level implements Serializable {
 	public static Level getLevel(String levelName) {
 		if (levelName == null) {
 			return DEFAULT_LEVEL;
+		}
+		
+		if (levelName.equalsIgnoreCase(TRACE_MSG)) {
+			return TRACE;
 		}
 		
 		if (levelName.equalsIgnoreCase(DEBUG_MSG)) {
@@ -98,6 +105,8 @@ public class Level implements Serializable {
 
 	public String toString() {
 		switch (level) {
+		case TRACE_CODE:
+			return TRACE_MSG;			
 		case DEBUG_CODE:
 			return DEBUG_MSG;
 		case INFO_CODE:

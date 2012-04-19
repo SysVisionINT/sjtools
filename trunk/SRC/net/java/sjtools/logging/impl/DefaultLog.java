@@ -36,6 +36,10 @@ public class DefaultLog implements Log {
 		this.formater = formater;
 	}
 
+	public boolean isTraceEnabled() {
+		return getLevel().isLoggable(Level.TRACE);
+	}
+	
 	public boolean isDebugEnabled() {
 		return getLevel().isLoggable(Level.DEBUG);
 	}
@@ -55,6 +59,16 @@ public class DefaultLog implements Log {
 	public boolean isWarnEnabled() {
 		return getLevel().isLoggable(Level.WARN);
 	}
+	
+	public void trace(Object message) {
+		trace(message, null);
+	}
+
+	public void trace(Object message, Throwable throwable) {
+		if (isTraceEnabled()) {
+			formater.write(getLoggerName(), Level.TRACE, message, throwable);
+		}
+	}	
 
 	public void debug(Object message) {
 		debug(message, null);
@@ -112,5 +126,5 @@ public class DefaultLog implements Log {
 
 	public String getLoggerName() {
 		return loggerName;
-	}	
+	}
 }

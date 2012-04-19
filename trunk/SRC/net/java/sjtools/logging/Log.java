@@ -24,6 +24,8 @@ import java.io.Serializable;
 public interface Log extends Serializable {
 	public String getLoggerName();
 	
+	public boolean isTraceEnabled();
+	
     public boolean isDebugEnabled();
 
     public boolean isErrorEnabled();
@@ -34,6 +36,10 @@ public interface Log extends Serializable {
 
     public boolean isWarnEnabled();    
 
+    public void trace(Object message);
+
+    public void trace(Object message, Throwable t);    
+    
     public void debug(Object message);
 
     public void debug(Object message, Throwable t);

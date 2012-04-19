@@ -48,6 +48,10 @@ public class Log4jLog implements Log {
 		
 		logger = Logger.getLogger(loggerName);
 	}
+	
+	public boolean isTraceEnabled() {
+		return getLogger().isTraceEnabled();
+	}
 
 	public boolean isDebugEnabled() {
 		return getLogger().isDebugEnabled();
@@ -68,6 +72,14 @@ public class Log4jLog implements Log {
 	public boolean isWarnEnabled() {
 		return true;
 	}
+	
+	public void trace(Object message) {
+		getLogger().trace(message);
+	}
+
+	public void trace(Object message, Throwable t) {
+		getLogger().trace(message, t);
+	}		
 
 	public void debug(Object message) {
 		getLogger().debug(message);
@@ -111,5 +123,5 @@ public class Log4jLog implements Log {
 	
 	public String getLoggerName() {
 		return loggerName;
-	}	
+	}
 }
