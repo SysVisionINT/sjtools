@@ -50,6 +50,10 @@ public class JDKLog implements Log {
 		logger = Logger.getLogger(loggerName);
 	}
 	
+	public boolean isTraceEnabled() {
+		return getLogger().isLoggable(Level.FINEST);
+	}
+	
 	public boolean isDebugEnabled() {
 		return getLogger().isLoggable(Level.FINE);
 	}
@@ -69,6 +73,14 @@ public class JDKLog implements Log {
 	public boolean isWarnEnabled() {
 		return getLogger().isLoggable(Level.WARNING);
 	}
+	
+	public void trace(Object message) {
+		getLogger().log(Level.FINEST, String.valueOf(message));
+	}
+
+	public void trace(Object message, Throwable t) {
+		getLogger().log(Level.FINEST, String.valueOf(message), t);
+	}	
 
 	public void debug(Object message) {
 		getLogger().log(Level.FINE, String.valueOf(message));
