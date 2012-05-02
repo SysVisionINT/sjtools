@@ -34,13 +34,8 @@ import net.java.sjtools.util.StreamUtil;
 public class TFTUtil {
 
 	public static void copyStream(InputStream input, OutputStream output) throws TFTException {
-		byte[] buffer = new byte[64000];
-		int count = 0;
-
 		try {
-			while ((count = input.read(buffer)) != -1) {
-				output.write(buffer, 0, count);
-			}
+			StreamUtil.copyStream(input, output);
 		} catch (IOException e) {
 			throw new TFTException("Error copying InputStream to OutputStream", e);
 		}
