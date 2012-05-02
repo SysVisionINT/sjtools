@@ -75,4 +75,13 @@ public class StreamUtil {
 			writer.close();
 		}
 	}
+
+	public static void copyStream(InputStream input, OutputStream output) throws IOException {
+		byte[] buffer = new byte[65536];
+		int count = 0;
+
+		while ((count = input.read(buffer)) != -1) {
+			output.write(buffer, 0, count);
+		}
+	}
 }
