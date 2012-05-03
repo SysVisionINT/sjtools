@@ -30,6 +30,7 @@ import net.java.sjtools.time.SuperDate;
 import net.java.sjtools.util.TextUtil;
 
 public class RLog {
+
 	private static final String DEFAULT_LOG_PROPERTY = "sjtools.logging.plus.default.logger";
 	private static final String DEFAULT_LOG_VALUE = "RLOG_DEFAULT_LOGGER";
 
@@ -44,8 +45,8 @@ public class RLog {
 
 	public static boolean isTraceEnabled() {
 		return getCurrentLog().isTraceEnabled();
-	}	
-	
+	}
+
 	public static boolean isDebugEnabled() {
 		return getCurrentLog().isDebugEnabled();
 	}
@@ -67,35 +68,67 @@ public class RLog {
 	}
 
 	public static void trace(Object obj) {
-		getCurrentLog().trace(getMessage(obj));
+		Log log = getCurrentLog();
+
+		if (log.isTraceEnabled()) {
+			log.trace(getMessage(obj));
+		}
 	}
 
 	public static void trace(Object obj, Throwable throwable) {
-		getCurrentLog().trace(getMessage(obj), throwable);
-	}	
-	
+		Log log = getCurrentLog();
+
+		if (log.isTraceEnabled()) {
+			log.trace(getMessage(obj), throwable);
+		}
+	}
+
 	public static void debug(Object obj) {
-		getCurrentLog().debug(getMessage(obj));
+		Log log = getCurrentLog();
+
+		if (log.isTraceEnabled()) {
+			log.debug(getMessage(obj));
+		}
 	}
 
 	public static void debug(Object obj, Throwable throwable) {
-		getCurrentLog().debug(getMessage(obj), throwable);
+		Log log = getCurrentLog();
+
+		if (log.isTraceEnabled()) {
+			log.debug(getMessage(obj), throwable);
+		}
 	}
 
 	public static void info(Object obj) {
-		getCurrentLog().info(getMessage(obj));
+		Log log = getCurrentLog();
+
+		if (log.isTraceEnabled()) {
+			log.info(getMessage(obj));
+		}
 	}
 
 	public static void info(Object obj, Throwable throwable) {
-		getCurrentLog().info(getMessage(obj), throwable);
+		Log log = getCurrentLog();
+
+		if (log.isTraceEnabled()) {
+			log.info(getMessage(obj), throwable);
+		}
 	}
 
 	public static void warn(Object obj) {
-		getCurrentLog().warn(getMessage(obj));
+		Log log = getCurrentLog();
+
+		if (log.isWarnEnabled()) {
+			log.warn(getMessage(obj));
+		}
 	}
 
 	public static void warn(Object obj, Throwable throwable) {
-		getCurrentLog().warn(getMessage(obj), throwable);
+		Log log = getCurrentLog();
+
+		if (log.isWarnEnabled()) {
+			log.warn(getMessage(obj), throwable);
+		}
 	}
 
 	public static void error(Object obj) {
@@ -125,6 +158,8 @@ public class RLog {
 			}
 
 			log = LogFactory.getLog(loggerName);
+
+			localLog.set(log);
 		}
 
 		return log;
@@ -139,7 +174,7 @@ public class RLog {
 
 		return id;
 	}
-	
+
 	public static Object getApplID() {
 		Object id = localApplID.get();
 
@@ -148,8 +183,8 @@ public class RLog {
 		}
 
 		return null;
-	}	
-	
+	}
+
 	public static SuperDate getInitTimestamp() {
 		SuperDate ts = (SuperDate) localTimestamp.get();
 
@@ -158,11 +193,11 @@ public class RLog {
 		}
 
 		return null;
-	}		
-	
+	}
+
 	public static void setApplID(Object id) {
 		localApplID.set(id);
-	}		
+	}
 
 	private static String getMessage(Object msg) {
 		StringBuffer buffer = new StringBuffer();
@@ -171,17 +206,17 @@ public class RLog {
 		buffer.append("[");
 		buffer.append(getRequestID());
 		buffer.append("]");
-		
+
 		Object applID = getApplID();
-		
+
 		if (applID != null) {
 			buffer.append("{");
 			buffer.append(TextUtil.toString(applID));
 			buffer.append("}");
 		}
-		
+
 		buffer.append(" - ");
-		
+
 		buffer.append(msg);
 
 		return buffer.toString();
