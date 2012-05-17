@@ -117,6 +117,16 @@ public class ConfigFile {
 		return parameters;
 	}
 	
+	public boolean isParameterDefined(String parameterName) {
+		validate();
+		
+		lock.getReadLock();
+		boolean defined = properties.containsKey(parameterName);
+		lock.releaseLock();
+		
+		return defined;
+	}
+	
 	public String getParameter(String parameterName) {
 		validate();
 		
@@ -125,6 +135,14 @@ public class ConfigFile {
 		lock.releaseLock();
 		
 		return value;
+	}
+	
+	public String getParameter(String parameterName, String defaultValue) {
+		if (! isParameterDefined(parameterName)) {
+			return defaultValue;
+		}
+		
+		return getParameter(parameterName);
 	}
 
 	public long getValidationInterval() {

@@ -22,8 +22,11 @@ package net.java.sjtools.config;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
+import java.util.TreeSet;
 
 public abstract class AbstractConfigReader {
 	private List configFileList = new ArrayList();
@@ -54,26 +57,52 @@ public abstract class AbstractConfigReader {
 		}
 	}	
 
-	public String getParameter(String parameterName) {
-		String value = null;
-		
-		for (Iterator i = configFileList.iterator(); i.hasNext() && value == null;) {
+	public Collection getParameterList() {
+		Set parameters = new TreeSet();
+
+		for (Iterator i = configFileList.iterator(); i.hasNext();) {
 			ConfigFile configFile = (ConfigFile) i.next();
 			
-			value = configFile.getParameter(parameterName);
+			parameters.addAll(configFile.getParameterList());
 		}
 		
-		return value;
+		return parameters;
+	}
+	
+	public boolean isParameterDefined(String parameterName) {
+		return getConfigFileWithParameter(parameterName) != null;
+	}	
+	
+	public String getParameter(String parameterName) {
+		ConfigFile configFile = getConfigFileWithParameter(parameterName);
+		
+		if (configFile != null) {
+			return configFile.getParameter(parameterName);
+		}
+		
+		return null;
+	}
+	
+	private ConfigFile getConfigFileWithParameter(String parameterName) {
+		for (Iterator i = configFileList.iterator(); i.hasNext();) {
+			ConfigFile configFile = (ConfigFile) i.next();
+			
+			if (configFile.isParameterDefined(parameterName)) {
+				return configFile;
+			}
+		}
+		
+		return null;
 	}
 	
 	public String getParameter(String parameterName, String defaultValue) {
-		String value = getParameter(parameterName);
+		ConfigFile configFile = getConfigFileWithParameter(parameterName);
 		
-		if (value == null) {
-			value = defaultValue;
+		if (configFile == null) {
+			return defaultValue;
 		}
 		
-		return value;
+		return configFile.getParameter(parameterName);
 	}
 	
 	public void setValidationInterval(long validationInterval) {
