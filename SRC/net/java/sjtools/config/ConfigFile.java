@@ -152,4 +152,8 @@ public class ConfigFile {
 	public void setValidationInterval(long validationInterval) {
 		this.validationInterval = validationInterval;
 	}
+	
+	public long getConfigDate() {
+		return this.configLastChangeDate;
+	}
 }
