@@ -112,4 +112,18 @@ public abstract class AbstractConfigReader {
 			configFile.setValidationInterval(validationInterval);
 		}
 	}	
+	
+	public long getConfigDate() {
+		long lastDate = 0;
+		
+		for (Iterator i = configFileList.iterator(); i.hasNext();) {
+			ConfigFile configFile = (ConfigFile) i.next();
+			
+			if (lastDate < configFile.getConfigDate()) {
+				lastDate = configFile.getConfigDate();
+			}
+		}
+		
+		return lastDate;
+	}
 }
