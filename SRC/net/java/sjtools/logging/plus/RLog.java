@@ -86,7 +86,7 @@ public class RLog {
 	public static void debug(Object obj) {
 		Log log = getCurrentLog();
 
-		if (log.isTraceEnabled()) {
+		if (log.isDebugEnabled()) {
 			log.debug(getMessage(obj));
 		}
 	}
@@ -94,7 +94,7 @@ public class RLog {
 	public static void debug(Object obj, Throwable throwable) {
 		Log log = getCurrentLog();
 
-		if (log.isTraceEnabled()) {
+		if (log.isDebugEnabled()) {
 			log.debug(getMessage(obj), throwable);
 		}
 	}
@@ -102,7 +102,7 @@ public class RLog {
 	public static void info(Object obj) {
 		Log log = getCurrentLog();
 
-		if (log.isTraceEnabled()) {
+		if (log.isInfoEnabled()) {
 			log.info(getMessage(obj));
 		}
 	}
@@ -110,7 +110,7 @@ public class RLog {
 	public static void info(Object obj, Throwable throwable) {
 		Log log = getCurrentLog();
 
-		if (log.isTraceEnabled()) {
+		if (log.isInfoEnabled()) {
 			log.info(getMessage(obj), throwable);
 		}
 	}
