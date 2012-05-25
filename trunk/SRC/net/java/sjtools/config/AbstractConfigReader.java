@@ -20,39 +20,51 @@
 package net.java.sjtools.config;
 
 import java.io.File;
-import java.io.FileNotFoundException;
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 
+import net.java.sjtools.config.error.ConfigurationError;
+import net.java.sjtools.time.SuperDate;
+import net.java.sjtools.util.DateUtil;
+import net.java.sjtools.util.NumberUtil;
+
 public abstract class AbstractConfigReader {
-	private List configFileList = new ArrayList();
+	private List configList = new ArrayList();
 	
-	public AbstractConfigReader(String resourceName) throws FileNotFoundException {
-		configFileList.add(new ConfigFile(resourceName));
+	public AbstractConfigReader(Configuration configuration) {
+		configList.add(configuration);
 	}
 	
-	public AbstractConfigReader(File configFile) throws FileNotFoundException {
-		configFileList.add(new ConfigFile(configFile));
+	public AbstractConfigReader(String resourceName) throws ConfigurationError {
+		configList.add(new ConfigFile(resourceName));
 	}
 	
-	public AbstractConfigReader(List configurations) throws FileNotFoundException {
+	public AbstractConfigReader(File configFile) throws ConfigurationError {
+		configList.add(new ConfigFile(configFile));
+	}
+	
+	public AbstractConfigReader(List configurations) throws ConfigurationError {
 		for (Iterator i = configurations.iterator(); i.hasNext();) {
 			Object obj = i.next();
 			
-			if (obj instanceof String) {
+			if (obj instanceof Configuration) {
+				configList.add(obj);
+			} else if (obj instanceof String) {
 				String resourceName = (String) obj;
 				
-				configFileList.add(new ConfigFile(resourceName));
+				configList.add(new ConfigFile(resourceName));
 			} else if (obj instanceof File) {
 				File configFile = (File) obj;
 				
-				configFileList.add(new ConfigFile(configFile));
+				configList.add(new ConfigFile(configFile));
 			} else {
-				throw new FileNotFoundException("ConfigFile " + obj.toString() + " not a resource name or a File");
+				throw new ConfigurationError("Unknown configuration type '" + obj.toString() + "'");
 			}
 		}
 	}	
@@ -60,35 +72,35 @@ public abstract class AbstractConfigReader {
 	public Collection getParameterList() {
 		Set parameters = new TreeSet();
 
-		for (Iterator i = configFileList.iterator(); i.hasNext();) {
-			ConfigFile configFile = (ConfigFile) i.next();
+		for (Iterator i = configList.iterator(); i.hasNext();) {
+			Configuration config = (Configuration) i.next();
 			
-			parameters.addAll(configFile.getParameterList());
+			parameters.addAll(config.getParameterList());
 		}
 		
 		return parameters;
 	}
 	
 	public boolean isParameterDefined(String parameterName) {
-		return getConfigFileWithParameter(parameterName) != null;
+		return getConfigurationWithParameter(parameterName) != null;
 	}	
 	
 	public String getParameter(String parameterName) {
-		ConfigFile configFile = getConfigFileWithParameter(parameterName);
+		Configuration config = getConfigurationWithParameter(parameterName);
 		
-		if (configFile != null) {
-			return configFile.getParameter(parameterName);
+		if (config != null) {
+			return config.getParameter(parameterName);
 		}
 		
 		return null;
 	}
 	
-	private ConfigFile getConfigFileWithParameter(String parameterName) {
-		for (Iterator i = configFileList.iterator(); i.hasNext();) {
-			ConfigFile configFile = (ConfigFile) i.next();
+	private Configuration getConfigurationWithParameter(String parameterName) {
+		for (Iterator i = configList.iterator(); i.hasNext();) {
+			Configuration config = (Configuration) i.next();
 			
-			if (configFile.isParameterDefined(parameterName)) {
-				return configFile;
+			if (config.isParameterDefined(parameterName)) {
+				return config;
 			}
 		}
 		
@@ -96,34 +108,138 @@ public abstract class AbstractConfigReader {
 	}
 	
 	public String getParameter(String parameterName, String defaultValue) {
-		ConfigFile configFile = getConfigFileWithParameter(parameterName);
+		Configuration config = getConfigurationWithParameter(parameterName);
 		
-		if (configFile == null) {
+		if (config == null) {
 			return defaultValue;
 		}
 		
-		return configFile.getParameter(parameterName);
+		return config.getParameter(parameterName);
 	}
 	
 	public void setValidationInterval(long validationInterval) {
-		for (Iterator i = configFileList.iterator(); i.hasNext();) {
-			ConfigFile configFile = (ConfigFile) i.next();
+		for (Iterator i = configList.iterator(); i.hasNext();) {
+			Configuration config = (Configuration) i.next();
 			
-			configFile.setValidationInterval(validationInterval);
+			config.setValidationInterval(validationInterval);
 		}
 	}	
 	
 	public long getConfigDate() {
 		long lastDate = 0;
 		
-		for (Iterator i = configFileList.iterator(); i.hasNext();) {
-			ConfigFile configFile = (ConfigFile) i.next();
+		for (Iterator i = configList.iterator(); i.hasNext();) {
+			Configuration config = (Configuration) i.next();
 			
-			if (lastDate < configFile.getConfigDate()) {
-				lastDate = configFile.getConfigDate();
+			if (lastDate < config.getConfigDate()) {
+				lastDate = config.getConfigDate();
 			}
 		}
 		
 		return lastDate;
 	}
+	
+	public Long getLong(String parameterName) throws ConfigurationError {
+		Configuration config = getConfigurationWithParameter(parameterName);
+		
+		if (config == null) {
+			return null;
+		} else {
+			String value = config.getParameter(parameterName);
+			
+			if (!NumberUtil.isValidLong(value)) {
+				throw new ConfigurationError("Parameter '" + parameterName + "' is not a valid Long");
+			}
+			
+			return new Long(value);
+		}
+	}
+	
+	public long getLong(String parameterName, long defaultValue) throws ConfigurationError {
+		Configuration config = getConfigurationWithParameter(parameterName);
+		
+		if (config == null) {
+			return defaultValue;
+		} else {
+			String value = config.getParameter(parameterName);
+			
+			if (!NumberUtil.isValidLong(value)) {
+				throw new ConfigurationError("Parameter '" + parameterName + "' is not a valid Long");
+			}
+			
+			return Long.parseLong(value);
+		}
+	}	
+	
+	public Double getDouble(String parameterName) throws ConfigurationError {
+		Configuration config = getConfigurationWithParameter(parameterName);
+		
+		if (config == null) {
+			return null;
+		} else {
+			String value = config.getParameter(parameterName);
+			
+			if (!NumberUtil.isValidDouble(value)) {
+				throw new ConfigurationError("Parameter '" + parameterName + "' is not a valid Double");
+			}
+			
+			return new Double(value);
+		}
+	}
+	
+	public double getDouble(String parameterName, double defaultValue) throws ConfigurationError {
+		Configuration config = getConfigurationWithParameter(parameterName);
+		
+		if (config == null) {
+			return defaultValue;
+		} else {
+			String value = config.getParameter(parameterName);
+			
+			if (!NumberUtil.isValidDouble(value)) {
+				throw new ConfigurationError("Parameter '" + parameterName + "' is not a valid Double");
+			}
+			
+			return Double.parseDouble(value);
+		}
+	}	
+	
+	public Date getDate(String parameterName, String format) throws ConfigurationError {
+		Configuration config = getConfigurationWithParameter(parameterName);
+		
+		if (config == null) {
+			return null;
+		} else {
+			String value = config.getParameter(parameterName);
+			
+			if (!DateUtil.isValidDate(value, format)) {
+				throw new ConfigurationError("Parameter '" + parameterName + "' is not a valid Date in format '" + format + "'");
+			}
+			
+			try {
+				return new SuperDate(config.getParameter(parameterName), format);
+			} catch (ParseException e) {
+				throw new ConfigurationError("Error parsing parameter '" + parameterName + "'", e);
+			}
+		}
+	}	
+	
+	public Date getDate(String parameterName, String format, Date defaultValue) throws ConfigurationError {
+		Configuration config = getConfigurationWithParameter(parameterName);
+		
+		if (config == null) {
+			return defaultValue;
+		} else {
+			String value = config.getParameter(parameterName);
+			
+			if (!DateUtil.isValidDate(value, format)) {
+				throw new ConfigurationError("Parameter '" + parameterName + "' is not a valid Date in format '" + format + "'");
+			}
+			
+			try {
+				return new SuperDate(config.getParameter(parameterName), format);
+			} catch (ParseException e) {
+				throw new ConfigurationError("Error parsing parameter '" + parameterName + "'", e);
+			}
+		}
+	}	
 }
