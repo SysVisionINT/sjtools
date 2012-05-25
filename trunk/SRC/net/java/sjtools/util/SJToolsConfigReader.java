@@ -19,83 +19,36 @@
  */
 package net.java.sjtools.util;
 
-import java.io.InputStream;
-import java.util.Iterator;
-import java.util.Properties;
-
+import net.java.sjtools.config.AbstractConfigReader;
+import net.java.sjtools.config.error.ConfigurationError;
 import net.java.sjtools.logging.error.LogConfigurationError;
-import net.java.sjtools.thread.Lock;
-import net.java.sjtools.util.PropertyReader;
-import net.java.sjtools.util.ResourceUtil;
 
-public class SJToolsConfigReader {
+public class SJToolsConfigReader extends AbstractConfigReader {
 	private static final String SJTOOLS_CONFIG_FILE = "sjtools-config.properties";
 
-	private static Properties properties = null;
-	private static Lock lock = null;
-
-	public static String getParameter(String parameter) {
-		if (properties == null) {
-			readProperties();
-		}
-
-		lock.getReadLock();
-		String value = properties.getProperty(parameter);
-		lock.releaseLock();
-
-		return value;
+	private static SJToolsConfigReader me = null; 
+	
+	private SJToolsConfigReader(String resourceName) throws ConfigurationError {
+		super(resourceName);
 	}
 
-	public static void setParameter(String parameter, String value) {
-		if (properties == null) {
-			readProperties();
+	public static SJToolsConfigReader getInstance() {
+		if (me == null) {
+			config();
 		}
-
-		lock.getWriteLock();
-		properties.setProperty(parameter, value);
-		lock.releaseLock();
+		
+		return me;
 	}
 
-	public static Properties getParameters(String parameter) {
-		Properties p = new Properties();
-
-		lock.getReadLock();
-
-		String key = null;
-
-		for (Iterator i = properties.keySet().iterator(); i.hasNext();) {
-			key = (String) i.next();
-
-			if (key.startsWith(parameter)) {
-				p.setProperty(key, properties.getProperty(key));
-			}
-		}
-
-		lock.releaseLock();
-
-		return p;
-	}
-
-	private static synchronized void readProperties() {
-		if (properties != null) {
+	private synchronized static void config() {
+		if (me != null) {
 			return;
 		}
-
-		Properties props = null;
-
+		
 		try {
-			InputStream is = ResourceUtil.getContextResourceInputStream(SJTOOLS_CONFIG_FILE);
-
-			if (is != null) {
-				props = PropertyReader.getProperties(is);
-			} else {
-				props = new Properties();
-			}
-
-			properties = props;
-			lock = new Lock(properties);
-		} catch (Exception e) {
-			throw new LogConfigurationError("Error reading configuration file " + SJTOOLS_CONFIG_FILE);
+			me = new SJToolsConfigReader(SJTOOLS_CONFIG_FILE);
+		} catch (ConfigurationError e) {
+			throw new LogConfigurationError("Error reading configuration file " + SJTOOLS_CONFIG_FILE, e);
 		}
 	}
 }

@@ -25,14 +25,14 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import net.java.sjtools.config.error.ConfigurationError;
+
 public class TextUtil {
 	private static final String DEFAULT_INCLUDE_PACKAGE = "defaultIncludePackage";
 	
 	public static final int ALLIGN_CENTER = 0;
 	public static final int ALLIGN_LEFT = -1;
 	public static final int ALLIGN_RIGHT = 1;
-	
-	private static boolean defaultIncludePackage = true;
 
 	public static boolean isEmptyString(String txt) {
 		return (txt == null || txt.length() == 0);
@@ -138,7 +138,7 @@ public class TextUtil {
 	}
 
 	public static String toString(Collection list) {
-		return toString(list, defaultIncludePackage);
+		return toString(list, isDefaultIncludePackage());
 	}
 
 	public static String toString(Collection list, boolean includePackage) {
@@ -160,7 +160,7 @@ public class TextUtil {
 	}
 
 	public static String toString(Map map) {
-		return toString(map, defaultIncludePackage);
+		return toString(map, isDefaultIncludePackage());
 	}
 
 	public static String toString(Map map, boolean includePackage) {
@@ -188,7 +188,7 @@ public class TextUtil {
 	}
 
 	public static String toString(Object[] array) {
-		return toString(array, defaultIncludePackage);
+		return toString(array, isDefaultIncludePackage());
 	}
 
 	public static String toString(Object[] array, boolean includePackage) {
@@ -214,7 +214,7 @@ public class TextUtil {
 	}
 
 	public static String toString(Object obj) {
-		return toString(obj, defaultIncludePackage);
+		return toString(obj, isDefaultIncludePackage());
 	}
 
 	public static String toString(Object obj, boolean includePackage) {
@@ -276,18 +276,14 @@ public class TextUtil {
 	}
 	
 	public static boolean isDefaultIncludePackage() {
-		return defaultIncludePackage;
+		try {
+			return SJToolsConfigReader.getInstance().getBoolean(DEFAULT_INCLUDE_PACKAGE, true);
+		} catch (ConfigurationError e) {
+			return true;
+		}
 	}
 
 	public static void setDefaultIncludePackage(boolean defaultIncludePackage) {
-		TextUtil.defaultIncludePackage = defaultIncludePackage;
-	}
-
-	static {
-		String value = SJToolsConfigReader.getParameter(DEFAULT_INCLUDE_PACKAGE);
-		
-		if (value != null) {
-			setDefaultIncludePackage(Boolean.getBoolean(value));
-		}
+		SJToolsConfigReader.getInstance().setParameter(DEFAULT_INCLUDE_PACKAGE, Boolean.toString(defaultIncludePackage));
 	}
 }

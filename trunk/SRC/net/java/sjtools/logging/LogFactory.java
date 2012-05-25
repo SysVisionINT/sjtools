@@ -60,7 +60,7 @@ public class LogFactory {
 			return;
 		}
 
-		String factoryName = LogConfigReader.getParameter(LOGGER_FACTORY_PROPERTY);
+		String factoryName = LogConfigReader.getInstance().getParameter(LOGGER_FACTORY_PROPERTY);
 
 		if (factoryName == null) {
 			factory = new DefaultFactory();

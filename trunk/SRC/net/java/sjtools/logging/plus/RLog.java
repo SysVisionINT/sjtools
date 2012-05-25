@@ -151,7 +151,7 @@ public class RLog {
 		Log log = (Log) localLog.get();
 
 		if (log == null) {
-			String loggerName = LogConfigReader.getParameter(DEFAULT_LOG_PROPERTY);
+			String loggerName = LogConfigReader.getInstance().getParameter(DEFAULT_LOG_PROPERTY);
 
 			if (loggerName == null) {
 				loggerName = DEFAULT_LOG_VALUE;

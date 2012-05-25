@@ -56,7 +56,7 @@ public class LogLevel implements Serializable {
 	}
 
 	private Level findLevel(String logger) {
-		Properties prop = LogConfigReader.getParameters(DEFAULT_LOGGER_LEVEL_PROPERTY);
+		Properties prop = LogConfigReader.getInstance().getParameters(DEFAULT_LOGGER_LEVEL_PROPERTY);
 
 		if (prop.isEmpty()) {
 			prop.setProperty(DEFAULT_LOGGER_LEVEL_PROPERTY, "ERROR");
@@ -83,7 +83,7 @@ public class LogLevel implements Serializable {
 	}
 
 	public void setLoggerLevel(String name, Level level) {
-		LogConfigReader.setParameter(name, level.toString());
+		LogConfigReader.getInstance().setParameter(name, level.toString());
 
 		lock.getWriteLock();
 		levelMap.clear();

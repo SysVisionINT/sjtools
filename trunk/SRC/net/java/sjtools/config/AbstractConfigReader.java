@@ -35,21 +35,30 @@ import net.java.sjtools.util.DateUtil;
 import net.java.sjtools.util.NumberUtil;
 
 public abstract class AbstractConfigReader {
+	private InMemoryConfig inMemoryConfig = new InMemoryConfig();
 	private List configList = new ArrayList();
 	
+	public AbstractConfigReader() {
+		configList.add(inMemoryConfig);
+	}
+	
 	public AbstractConfigReader(Configuration configuration) {
+		this();
+		
 		configList.add(configuration);
 	}
 	
 	public AbstractConfigReader(String resourceName) throws ConfigurationError {
-		configList.add(new ConfigFile(resourceName));
+		this(new ConfigFile(resourceName));
 	}
 	
 	public AbstractConfigReader(File configFile) throws ConfigurationError {
-		configList.add(new ConfigFile(configFile));
+		this(new ConfigFile(configFile));
 	}
 	
 	public AbstractConfigReader(List configurations) throws ConfigurationError {
+		this();
+		
 		for (Iterator i = configurations.iterator(); i.hasNext();) {
 			Object obj = i.next();
 			
@@ -203,6 +212,38 @@ public abstract class AbstractConfigReader {
 		}
 	}	
 	
+	public Boolean getBoolean(String parameterName) throws ConfigurationError {
+		Configuration config = getConfigurationWithParameter(parameterName);
+		
+		if (config == null) {
+			return null;
+		} else {
+			String value = config.getParameter(parameterName);
+			
+			if (!(value.equalsIgnoreCase("true") || value.equalsIgnoreCase("false"))) {
+				throw new ConfigurationError("Parameter '" + parameterName + "' is not a valid Boolean");
+			}
+			
+			return new Boolean(value);
+		}
+	}
+	
+	public boolean getBoolean(String parameterName, boolean defaultValue) throws ConfigurationError {
+		Configuration config = getConfigurationWithParameter(parameterName);
+		
+		if (config == null) {
+			return defaultValue;
+		} else {
+			String value = config.getParameter(parameterName);
+			
+			if (!(value.equalsIgnoreCase("true") || value.equalsIgnoreCase("false"))) {
+				throw new ConfigurationError("Parameter '" + parameterName + "' is not a valid Boolean");
+			}
+			
+			return Boolean.getBoolean(value);
+		}
+	}	
+	
 	public Date getDate(String parameterName, String format) throws ConfigurationError {
 		Configuration config = getConfigurationWithParameter(parameterName);
 		
@@ -242,4 +283,8 @@ public abstract class AbstractConfigReader {
 			}
 		}
 	}	
+	
+	public void setParameter(String parameterName, String value) {
+		inMemoryConfig.setParameter(parameterName, value);
+	}
 }
