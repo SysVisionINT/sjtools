@@ -19,83 +19,55 @@
  */
 package net.java.sjtools.logging.util;
 
-import java.io.InputStream;
 import java.util.Iterator;
 import java.util.Properties;
 
+import net.java.sjtools.config.AbstractConfigReader;
+import net.java.sjtools.config.error.ConfigurationError;
 import net.java.sjtools.logging.error.LogConfigurationError;
-import net.java.sjtools.thread.Lock;
-import net.java.sjtools.util.PropertyReader;
-import net.java.sjtools.util.ResourceUtil;
 
-public class LogConfigReader {
+public class LogConfigReader extends AbstractConfigReader {
 	private static final String LOGGER_CONFIG_FILE = "sjtools-logging.properties";
 
-	private static Properties properties = null;
-	private static Lock lock = null;
-
-	public static String getParameter(String parameter) {
-		if (properties == null) {
-			readProperties();
-		}
-
-		lock.getReadLock();
-		String value = properties.getProperty(parameter);
-		lock.releaseLock();
-
-		return value;
+	private static LogConfigReader me = null; 
+	
+	private LogConfigReader(String resourceName) throws ConfigurationError {
+		super(resourceName);
 	}
 
-	public static void setParameter(String parameter, String value) {
-		if (properties == null) {
-			readProperties();
+	public static LogConfigReader getInstance() {
+		if (me == null) {
+			config();
 		}
-
-		lock.getWriteLock();
-		properties.setProperty(parameter, value);
-		lock.releaseLock();
+		
+		return me;
 	}
 
-	public static Properties getParameters(String parameter) {
+	private synchronized static void config() {
+		if (me != null) {
+			return;
+		}
+		
+		try {
+			me = new LogConfigReader(LOGGER_CONFIG_FILE);
+		} catch (ConfigurationError e) {
+			throw new LogConfigurationError("Error reading configuration file " + LOGGER_CONFIG_FILE, e);
+		}
+	}
+	
+	public Properties getParameters(String parameter) {
 		Properties p = new Properties();
-
-		lock.getReadLock();
 
 		String key = null;
 
-		for (Iterator i = properties.keySet().iterator(); i.hasNext();) {
+		for (Iterator i = getParameterList().iterator(); i.hasNext();) {
 			key = (String) i.next();
 
 			if (key.startsWith(parameter)) {
-				p.setProperty(key, properties.getProperty(key));
+				p.setProperty(key, getParameter(key));
 			}
 		}
-
-		lock.releaseLock();
 
 		return p;
-	}
-
-	private static synchronized void readProperties() {
-		if (properties != null) {
-			return;
-		}
-
-		Properties props = null;
-
-		try {
-			InputStream is = ResourceUtil.getContextResourceInputStream(LOGGER_CONFIG_FILE);
-
-			if (is != null) {
-				props = PropertyReader.getProperties(is);
-			} else {
-				props = new Properties();
-			}
-
-			properties = props;
-			lock = new Lock(properties);
-		} catch (Exception e) {
-			throw new LogConfigurationError("Error reading configuration file " + LOGGER_CONFIG_FILE);
-		}
 	}
 }

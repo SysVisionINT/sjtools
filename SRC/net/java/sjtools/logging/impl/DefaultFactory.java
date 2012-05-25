@@ -40,7 +40,7 @@ public class DefaultFactory implements Factory {
 		logLevel = new LogLevel();
 
 		// Writer
-		String value = LogConfigReader.getParameter(DEFAULT_LOGGER_WRITER_PROPERTY);
+		String value = LogConfigReader.getInstance().getParameter(DEFAULT_LOGGER_WRITER_PROPERTY);
 		Writer writer = null;
 
 		if (value == null) {
@@ -54,7 +54,7 @@ public class DefaultFactory implements Factory {
 		}
 
 		// Formater
-		value = LogConfigReader.getParameter(DEFAULT_LOGGER_FORMATER_PROPERTY);
+		value = LogConfigReader.getInstance().getParameter(DEFAULT_LOGGER_FORMATER_PROPERTY);
 
 		if (value == null) {
 			formater = new DefaultFormater();
@@ -78,7 +78,7 @@ public class DefaultFactory implements Factory {
 		
 		for (int i = 0; i < config.getConfigParameters().length; i++) {
 			name = config.getConfigParameters()[i];
-			config.setConfigParameter(name, LogConfigReader.getParameter(name));
+			config.setConfigParameter(name, LogConfigReader.getInstance().getParameter(name));
 		}
 	}
 
