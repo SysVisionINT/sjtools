@@ -26,6 +26,7 @@ import java.util.List;
 import java.util.Map;
 
 import net.java.sjtools.config.error.ConfigurationError;
+import net.java.sjtools.formater.ToString;
 
 public class TextUtil {
 	private static final String DEFAULT_INCLUDE_PACKAGE = "defaultIncludePackage";
@@ -234,6 +235,10 @@ public class TextUtil {
 			return toString((Object[]) obj);
 		}
 
+		if (ToString.existFormater(obj.getClass())) {
+			return ToString.toString(obj, includePackage);
+		}
+		
 		if (obj.getClass().getPackage() != null) {
 			String packageName = obj.getClass().getPackage().getName();
 
