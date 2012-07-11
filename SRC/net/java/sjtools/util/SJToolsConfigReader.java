@@ -24,19 +24,24 @@ import net.java.sjtools.config.error.ConfigurationError;
 import net.java.sjtools.logging.error.LogConfigurationError;
 
 public class SJToolsConfigReader extends AbstractConfigReader {
+
 	private static final String SJTOOLS_CONFIG_FILE = "sjtools-config.properties";
 
-	private static SJToolsConfigReader me = null; 
-	
+	private static SJToolsConfigReader me = null;
+
 	private SJToolsConfigReader(String resourceName) throws ConfigurationError {
 		super(resourceName);
+	}
+	
+	private SJToolsConfigReader() {
+		super();
 	}
 
 	public static SJToolsConfigReader getInstance() {
 		if (me == null) {
 			config();
 		}
-		
+
 		return me;
 	}
 
@@ -44,11 +49,15 @@ public class SJToolsConfigReader extends AbstractConfigReader {
 		if (me != null) {
 			return;
 		}
-		
-		try {
-			me = new SJToolsConfigReader(SJTOOLS_CONFIG_FILE);
-		} catch (ConfigurationError e) {
-			throw new LogConfigurationError("Error reading configuration file " + SJTOOLS_CONFIG_FILE, e);
+
+		if (ResourceUtil.getContextResourceURL(SJTOOLS_CONFIG_FILE) != null) {
+			try {
+				me = new SJToolsConfigReader(SJTOOLS_CONFIG_FILE);
+			} catch (ConfigurationError e) {
+				throw new LogConfigurationError("Error reading configuration file " + SJTOOLS_CONFIG_FILE, e);
+			}
+		} else {
+			me = new SJToolsConfigReader();
 		}
 	}
 }
