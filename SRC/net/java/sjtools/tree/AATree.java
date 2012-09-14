@@ -3,9 +3,9 @@ package net.java.sjtools.tree;
 import java.util.Collection;
 import java.util.Iterator;
 
-public class AATree {
+public class AATree implements Tree {
 
-	private Node root = null;
+	private AANode root = null;
 
 	public AATree() {}
 
@@ -19,9 +19,9 @@ public class AATree {
 		root = insert(value, root);
 	}
 
-	private Node insert(Comparable value, Node node) {
+	private AANode insert(Comparable value, AANode node) {
 		if (node == null) {
-			node = new Node(value);
+			node = new AANode(value);
 		} else {
 			int cmp = value.compareTo(node.value);
 
@@ -38,9 +38,9 @@ public class AATree {
 		return node;
 	}
 
-	private Node skew(Node node) {
+	private AANode skew(AANode node) {
 		if (node.left != null && node.left.level == node.level) {
-			Node tmp = node.left;
+			AANode tmp = node.left;
 			node.left = tmp.right;
 			tmp.right = node;
 			node = tmp;
@@ -49,9 +49,9 @@ public class AATree {
 		return node;
 	}
 
-	private Node split(Node node) {
+	private AANode split(AANode node) {
 		if (node.right != null && node.right.right != null && node.right.right.level == node.level) {
-			Node tmp = node.right;
+			AANode tmp = node.right;
 			node.right = tmp.left;
 			tmp.left = node;
 
@@ -71,7 +71,7 @@ public class AATree {
 			return null;
 		}
 
-		Node current = root;
+		AANode current = root;
 
 		while (current != null) {
 			int cmp = value.compareTo(current.value);
@@ -86,5 +86,13 @@ public class AATree {
 		}
 
 		return null;
+	}
+
+	public boolean isEmpty() {
+		return root == null;
+	}
+
+	public void clean() {
+		root = null;
 	}
 }
