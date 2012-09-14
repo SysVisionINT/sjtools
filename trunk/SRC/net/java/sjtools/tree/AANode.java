@@ -1,12 +1,12 @@
 package net.java.sjtools.tree;
 
-public class Node {
+public class AANode {
 	protected Comparable value = null;
-	protected Node left = null;
-	protected Node right = null;
+	protected AANode left = null;
+	protected AANode right = null;
 	protected int level = 1;
 	
-	protected Node(Comparable value) {
+	protected AANode(Comparable value) {
 		this.value = value;
 	}
 }
