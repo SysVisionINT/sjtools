@@ -19,20 +19,10 @@
  */
 package net.java.sjtools.service.error;
 
-import net.java.sjtools.error.ApplicationError;
+public class ServiceCreationError extends ServiceLocaterError {
+	private static final long serialVersionUID = 3933725626074706065L;
 
-public class ServiceLocaterError extends ApplicationError {
-	private static final long serialVersionUID = -8148165350704966671L;
-
-	public ServiceLocaterError(Throwable error) {
-		super(error);
-	}
-
-	public ServiceLocaterError(String message, Throwable error) {
+	public ServiceCreationError(String message, Throwable error) {
 		super(message, error);
-	}
-
-	public ServiceLocaterError(String message) {
-		super(message);
 	}
 }
