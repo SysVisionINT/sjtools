@@ -31,5 +31,17 @@ public class URLUtil {
 	
 	public static File toFile(URL url) throws URISyntaxException {
 		return new File(toURI(url));
-	}	
+	}
+	
+	public static boolean isFile(URL url) throws URISyntaxException {
+		URI uri = toURI(url);
+		
+		String scheme = uri.getScheme();
+		
+		if ((scheme == null) || !scheme.equalsIgnoreCase("file")) {
+			return false;
+		}
+		
+		return true;
+	}
 }

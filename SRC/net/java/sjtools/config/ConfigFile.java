@@ -32,10 +32,11 @@ import net.java.sjtools.util.URLUtil;
 
 public class ConfigFile extends AbstractConfiguration {
 	private File configFile = null;
+	private String resourceName = null;
 	
 	public ConfigFile(File configFile) throws ConfigurationError {
 		super();
-		
+	
 		if (configFile == null || !configFile.exists()) {
 			throw new ConfigurationError("Configuration file '" + configFile.getAbsolutePath() + "' not found");
 		}
@@ -53,12 +54,22 @@ public class ConfigFile extends AbstractConfiguration {
 		}
 		
 		try {
-			setFile(URLUtil.toFile(url));
+			if (URLUtil.isFile(url)) {
+				setFile(URLUtil.toFile(url));
+			} else {
+				setResourceName(resourceName);
+			}
 		} catch (URISyntaxException e) {
 			throw new RuntimeException(e);
 		}
 	}
 	
+	private void setResourceName(String name) {
+		resourceName = name;
+		
+		loadResourceFile();
+	}
+
 	private void setFile(File config) {
 		configFile = config;
 		
@@ -66,6 +77,22 @@ public class ConfigFile extends AbstractConfiguration {
 	}
 
 	protected void updateIfModified() {
+		if (configFile != null) {
+			updateIfFileModified();
+		}
+	}
+
+	private void loadResourceFile() {
+		try {
+			Properties properties = PropertyReader.getProperties(ResourceUtil.getContextResourceInputStream(resourceName));
+			
+			setConfiguration(properties, System.currentTimeMillis());
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
+	}
+
+	private void updateIfFileModified() {
 		if (!configFile.exists()) {
 			throw new RuntimeException("File '" + configFile.getAbsolutePath() + "' not longer exists");
 		}
