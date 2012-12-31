@@ -47,10 +47,11 @@
                        quote CDATA "&quot;"
                        skip-header (true|false) "false">
 
-<!ELEMENT custom-splitter EMPTY>
+<!ELEMENT custom-splitter (parameter*)>
 
 <!ATTLIST custom-splitter java-class CDATA #REQUIRED
                           init-method CDATA "init"
+                          add-init-parameter-method CDATA ""
                           next-record-method CDATA "nextRecord">
 
 <!ELEMENT column (pre-format-validators?, formatters?, post-format-validators?, return-property?)>
@@ -118,3 +119,8 @@
 
 <!ATTLIST return-property name CDATA #REQUIRED
                           format CDATA "">
+
+<!ELEMENT parameter EMPTY>
+
+<!ATTLIST parameter name CDATA #REQUIRED
+                          value CDATA #REQUIRED>

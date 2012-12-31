@@ -132,11 +132,14 @@ public class Handler extends SimpleHandler {
 			} else if (elementType.equals("custom-splitter")) {
 				String javaClass = attributes.getValue("java-class");
 				String initMethod = attributes.getValue("init-method");
+				String addInitParameterMethod = attributes.getValue("add-init-parameter-method");
 				String nextRecordMethod = attributes.getValue("next-record-method");
 
-				((RuleSet) currentObject).setSplitter(new CustomSplitter(javaClass, initMethod, nextRecordMethod));
+				CustomSplitter splitter = new CustomSplitter(javaClass, initMethod, addInitParameterMethod, nextRecordMethod);
 
-				return null;
+				((RuleSet) currentObject).setSplitter(splitter);
+
+				return splitter;
 			} else if (elementType.equals("column")) {
 				int position = Integer.parseInt(attributes.getValue("position"));
 				boolean mandatory = new Boolean(attributes.getValue("mandatory")).booleanValue();
@@ -242,6 +245,15 @@ public class Handler extends SimpleHandler {
 				return null;
 			} else if (elementType.equals("custom-validator")) {
 				((List) currentObject).add(new CustomValidator(attributes.getValue("java-class"), attributes.getValue("method")));
+
+				return null;
+			} else if (elementType.equals("parameter")) {
+				String name = attributes.getValue("name");
+				String value = attributes.getValue("value");
+
+				if (currentObject instanceof CustomSplitter) {
+					((CustomSplitter) currentObject).addInitParameter(name, value);
+				}
 
 				return null;
 			}
