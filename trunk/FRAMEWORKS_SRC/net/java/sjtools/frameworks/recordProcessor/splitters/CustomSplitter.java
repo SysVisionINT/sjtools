@@ -25,6 +25,7 @@ import java.lang.reflect.Method;
 import java.util.List;
 
 import net.java.sjtools.frameworks.recordProcessor.model.error.ProcessorError;
+import net.java.sjtools.util.TextUtil;
 
 public class CustomSplitter implements Splitter, Serializable {
 
@@ -32,15 +33,20 @@ public class CustomSplitter implements Splitter, Serializable {
 
 	private Object customSplitterObject = null;
 	private Method customSplitterInit = null;
+	private Method customSplitterAddInitParameter = null;
 	private Method customSplitterNextRecord = null;
 
-	public CustomSplitter(String javaClass, String initMethod, String nextRecordMethod) throws ProcessorError {
+	public CustomSplitter(String javaClass, String initMethod, String addInitParameterMethod, String nextRecordMethod) throws ProcessorError {
 		try {
 			Class validatorClass = Thread.currentThread().getContextClassLoader().loadClass(javaClass);
 
 			customSplitterObject = validatorClass.newInstance();
 
 			customSplitterInit = validatorClass.getMethod(initMethod, new Class[] { InputStream.class });
+
+			if (!TextUtil.isEmptyString(addInitParameterMethod)) {
+				customSplitterAddInitParameter = validatorClass.getMethod(addInitParameterMethod, new Class[] { String.class, String.class });
+			}
 
 			customSplitterNextRecord = validatorClass.getMethod(nextRecordMethod, null);
 
@@ -54,13 +60,22 @@ public class CustomSplitter implements Splitter, Serializable {
 		}
 	}
 
+	public void addInitParameter(String name, String value) throws ProcessorError {
+		if (customSplitterAddInitParameter != null) {
+			try {
+				customSplitterAddInitParameter.invoke(customSplitterObject, new Object[] { name, value });
+			} catch (Exception e) {
+				throw new ProcessorError(e);
+			}
+		}
+	}
+
 	public void init(InputStream inputStream) throws ProcessorError {
 		try {
 			customSplitterInit.invoke(customSplitterObject, new Object[] { inputStream });
 		} catch (Exception e) {
 			throw new ProcessorError(e);
 		}
-
 	}
 
 	public List nextRecord() throws ProcessorError {
@@ -72,7 +87,7 @@ public class CustomSplitter implements Splitter, Serializable {
 	}
 
 	public String toString() {
-		return "CustomSplitter(" + customSplitterObject.getClass().getName() + ", " + customSplitterInit.getName() + ", " + customSplitterNextRecord.getName() + ")";
+		return "CustomSplitter(" + customSplitterObject.getClass().getName() + ", " + customSplitterInit.getName() + ", " + (customSplitterAddInitParameter == null ? "null" : customSplitterAddInitParameter.getName()) + ", " + customSplitterNextRecord.getName() + ")";
 	}
 
 }
