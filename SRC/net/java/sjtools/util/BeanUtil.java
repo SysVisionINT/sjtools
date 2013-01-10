@@ -470,7 +470,7 @@ public class BeanUtil {
 				}
 			}
 
-			classes[0] = clazz.getSuperclass();
+			classes[0] = classes[0].getSuperclass();
 		}
 
 		if (method == null) {

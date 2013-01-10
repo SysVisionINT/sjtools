@@ -20,13 +20,13 @@
 package net.java.sjtools.frameworks.recordProcessor.util;
 
 import java.lang.reflect.Constructor;
+import java.lang.reflect.Method;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
-import net.java.sjtools.frameworks.recordProcessor.model.FieldAndMethod;
 import net.java.sjtools.frameworks.recordProcessor.model.error.ObjectCreationError;
 import net.java.sjtools.frameworks.recordProcessor.model.error.ProcessorError;
 import net.java.sjtools.time.SuperDate;
@@ -36,7 +36,7 @@ public class SimpleBeanUtil {
 	private Class beanClass = null;
 	private Object bean = null;
 
-	private Map fieldAndMethodMap = new HashMap();
+	private Map methodMap = new HashMap();
 	private Map dateFormatMap = new HashMap();
 	private Map stringConstructorMap = new HashMap();
 	private Map stringStringConstructorMap = new HashMap();
@@ -57,18 +57,12 @@ public class SimpleBeanUtil {
 		}
 	}
 
-	public void set(String value, String property, String format) throws ProcessorError {
-		try {
-			FieldAndMethod fieldAndMethod = getFieldAndMethod(property);
+	public void set(String value, String property, String format) throws Exception {
+		Method method = getMethod(property);
 
-			Object argument = getNewInstance(fieldAndMethod.getField().getType(), value, format);
+		Object argument = getNewInstance(method.getParameterTypes()[0], value, format);
 
-			fieldAndMethod.getMethod().invoke(bean, new Object[] { argument });
-		} catch (ProcessorError e) {
-			throw e;
-		} catch (Exception e) {
-			throw new ProcessorError(e);
-		}
+		method.invoke(bean, new Object[] { argument });
 	}
 
 	public Object getBean() {
@@ -166,20 +160,35 @@ public class SimpleBeanUtil {
 		}
 	}
 
-	private FieldAndMethod getFieldAndMethod(String property) throws SecurityException, NoSuchFieldException, NoSuchMethodException {
-		FieldAndMethod fieldAndMethod = (FieldAndMethod) fieldAndMethodMap.get(property);
+	private Method getMethod(String property) throws NoSuchMethodException {
+		Method method = (Method) methodMap.get(property);
 
-		if (fieldAndMethod == null) {
-			fieldAndMethod = new FieldAndMethod();
+		if (method == null) {
+			Method[] methods = beanClass.getMethods();
 
-			fieldAndMethod.setField(beanClass.getDeclaredField(property));
+			String methodName = getMethodName(property);
 
-			fieldAndMethod.setMethod(beanClass.getMethod(getMethodName(property), new Class[] { fieldAndMethod.getField().getType() }));
+			boolean matchNotExists = true;
 
-			fieldAndMethodMap.put(property, fieldAndMethod);
+			for (int i = 0; i < methods.length; i++) {
+				if (methods[i].getName().equals(methodName) && methods[i].getParameterTypes().length == 1) {
+					if (matchNotExists) {
+						method = methods[i];
+						matchNotExists = false;
+					} else {
+						throw new NoSuchMethodException("There is more than one public method " + methodName + " with one parameter.");
+					}
+				}
+			}
+
+			if (method == null) {
+				throw new NoSuchMethodException(methodName);
+			}
+
+			methodMap.put(property, method);
 		}
 
-		return fieldAndMethod;
+		return method;
 	}
 
 	private SimpleDateFormat getSimpleDateFormat(String objFormat) throws Exception {

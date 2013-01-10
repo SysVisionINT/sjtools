@@ -33,6 +33,7 @@ import net.java.sjtools.frameworks.recordProcessor.model.error.MandatoryElementE
 import net.java.sjtools.frameworks.recordProcessor.model.error.ProcessorError;
 import net.java.sjtools.frameworks.recordProcessor.model.error.TooFewRecordsError;
 import net.java.sjtools.frameworks.recordProcessor.model.error.TooManyRecordsError;
+import net.java.sjtools.frameworks.recordProcessor.model.error.ValueSetError;
 import net.java.sjtools.frameworks.recordProcessor.util.SimpleBeanUtil;
 import net.java.sjtools.frameworks.recordProcessor.validators.Validator;
 import net.java.sjtools.util.TextUtil;
@@ -142,7 +143,11 @@ public class Processor {
 
 							// Set the value (if there is a return object and the column has a return property)
 							if (hasReturnObject && column.getReturnObjectProperty() != null) {
-								beanUtil.set(value, column.getReturnObjectProperty(), column.getReturnObjectPropertyFormat());
+								try {
+									beanUtil.set(value, column.getReturnObjectProperty(), column.getReturnObjectPropertyFormat());
+								} catch (Exception e) {
+									throw new ValueSetError(recordCount, column.getPosition(), column.getReturnObjectProperty(), value, column.getReturnObjectPropertyFormat(), e);
+								}
 							}
 						}
 					} catch (ProcessorError e) {

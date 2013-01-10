@@ -1,7 +1,7 @@
 /*
  * SJTools - SysVision Java Tools
  * 
- * Copyright (C) 2009 SysVision - Consultadoria e Desenvolvimento em Sistemas de Informática, Lda.  
+ * Copyright (C) 2013 SysVision - Consultadoria e Desenvolvimento em Sistemas de Informática, Lda.  
  * 
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -19,22 +19,24 @@
  */
 package net.java.sjtools.frameworks.recordProcessor.model.error;
 
-public class InvalidElementError extends ProcessorError {
+public class ValueSetError extends ProcessorError {
 
-	private static final long serialVersionUID = -2036956442665785032L;
+	private static final long serialVersionUID = 2460955870027230262L;
 
 	private int record = 0;
 	private int position = 0;
-	private String validator = null;
+	private String returnProperty = null;
 	private String value = null;
+	private String format = null;
 
-	public InvalidElementError(int record, int position, String validator, String value) {
-		super("Invalid element at record " + record + ", column " + position + ". Validator: " + validator + ". Value: " + value);
+	public ValueSetError(int record, int position, String returnProperty, String value, String format, Throwable throwable) {
+		super("Unable to set value for record " + record + ", column " + position + ". Return property: " + returnProperty + ". Value: " + value + ". Format: " + format, throwable);
 
 		this.record = record;
 		this.position = position;
-		this.validator = validator;
+		this.returnProperty = returnProperty;
 		this.value = value;
+		this.format = format;
 	}
 
 	public int getRecord() {
@@ -45,12 +47,16 @@ public class InvalidElementError extends ProcessorError {
 		return position;
 	}
 
-	public String getValidator() {
-		return validator;
+	public String getReturnProperty() {
+		return returnProperty;
 	}
 
 	public String getValue() {
 		return value;
+	}
+
+	public String getFormat() {
+		return format;
 	}
 
 }
