@@ -273,29 +273,29 @@ public class BeanUtil {
 
 	private List filterMethods(List methods, Object[] args) {
 		List retList = new ArrayList();
-		
+
 		for (Iterator i = methods.iterator(); i.hasNext();) {
 			Method method = (Method) i.next();
-			
+
 			Class[] parameters = method.getParameterTypes();
-			
+
 			if (parameters.length != args.length) {
 				continue;
 			}
-			
+
 			boolean ok = true;
-			
+
 			for (int j = 0; j < args.length && ok; j++) {
 				if (!(parameters[j].isAssignableFrom(args[j].getClass()))) {
 					ok = false;
 				}
 			}
-			
+
 			if (ok) {
 				retList.add(method);
 			}
 		}
-		
+
 		return retList;
 	}
 
@@ -456,7 +456,16 @@ public class BeanUtil {
 		while (method == null && classes[0] != null) {
 			try {
 				method = obj.getClass().getMethod(methodName, classes);
-			} catch (NoSuchMethodException e) {}
+			} catch (NoSuchMethodException e) {
+				Class[] primitive = new Class[1];
+				primitive[0] = getPrimitiveType(classes[0]);
+
+				if (primitive[0] != null) {
+					try {
+						method = obj.getClass().getMethod(methodName, primitive);
+					} catch (NoSuchMethodException e2) {}
+				}				
+			}
 
 			if (method == null) {
 				interfaces = classes[0].getInterfaces();
@@ -466,7 +475,16 @@ public class BeanUtil {
 
 					try {
 						method = obj.getClass().getMethod(methodName, classesI);
-					} catch (NoSuchMethodException e) {}
+					} catch (NoSuchMethodException e) {
+						Class[] primitive = new Class[1];
+						primitive[0] = getPrimitiveType(classesI[0]);
+
+						if (primitive[0] != null) {
+							try {
+								method = obj.getClass().getMethod(methodName, primitive);
+							} catch (NoSuchMethodException e2) {}
+						}	
+					}
 				}
 			}
 
@@ -478,6 +496,30 @@ public class BeanUtil {
 		}
 
 		return method;
+	}
+
+	private Class getPrimitiveType(Class clazz) {
+		Class primitive = null;
+
+		if (clazz.equals(Integer.class)) {
+			primitive = int.class;
+		} else if (clazz.equals(Boolean.class)) {
+			primitive = boolean.class;
+		} else if (clazz.equals(Character.class)) {
+			primitive = char.class;
+		} else if (clazz.equals(Byte.class)) {
+			primitive = byte.class;
+		} else if (clazz.equals(Short.class)) {
+			primitive = short.class;
+		} else if (clazz.equals(Long.class)) {
+			primitive = long.class;
+		} else if (clazz.equals(Float.class)) {
+			primitive = float.class;
+		} else if (clazz.equals(Double.class)) {
+			primitive = double.class;
+		}
+
+		return primitive;
 	}
 
 	public static BeanUtil getPropertyBean(BeanUtil beanUtil, String propertyName) throws Exception {
