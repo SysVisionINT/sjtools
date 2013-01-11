@@ -52,6 +52,7 @@
 <!ATTLIST custom-splitter java-class CDATA #REQUIRED
                           init-method CDATA "init"
                           add-init-parameter-method CDATA ""
+                          has-next-method CDATA "hasNext"
                           next-record-method CDATA "nextRecord">
 
 <!ELEMENT column (pre-format-validators?, formatters?, post-format-validators?, return-property?)>

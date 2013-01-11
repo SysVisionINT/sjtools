@@ -27,4 +27,8 @@ public interface RecordProcessor {
 
 	public void processError(ProcessorError error) throws Exception;
 
+	public void startRecord();
+
+	public void endRecord();
+
 }

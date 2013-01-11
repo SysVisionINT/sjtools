@@ -62,8 +62,16 @@ public class CSVSplitter implements Splitter, Serializable {
 	public void init(InputStream inputStream) throws ProcessorError {
 		this.inputStream = inputStream;
 
-		if (skipHeader) {
+		if (skipHeader && hasNext()) {
 			nextRecord(); // Return is ignored
+		}
+	}
+
+	public boolean hasNext() throws ProcessorError {
+		try {
+			return inputStream.available() != 0;
+		} catch (Exception e) {
+			throw new ProcessorError(e);
 		}
 	}
 

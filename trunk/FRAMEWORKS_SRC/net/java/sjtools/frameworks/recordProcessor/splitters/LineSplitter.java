@@ -23,9 +23,7 @@ import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Serializable;
-import java.util.List;
 
-import net.java.sjtools.frameworks.recordProcessor.model.error.InvalidRecordError;
 import net.java.sjtools.frameworks.recordProcessor.model.error.ProcessorError;
 
 public abstract class LineSplitter implements Splitter, Serializable {
@@ -33,6 +31,7 @@ public abstract class LineSplitter implements Splitter, Serializable {
 	private static final long serialVersionUID = 5903433242576100103L;
 
 	private BufferedReader reader = null;
+	private String line = null;
 
 	public void init(InputStream inputStream) throws ProcessorError {
 		try {
@@ -42,24 +41,17 @@ public abstract class LineSplitter implements Splitter, Serializable {
 		}
 	}
 
-	public List nextRecord() throws ProcessorError {
+	public boolean hasNext() throws ProcessorError {
 		try {
-			String line = reader.readLine();
+			line = reader.readLine();
 
-			List ret = null;
-
-			if (line != null) {
-				ret = split(line);
-			}
-
-			return ret;
-		} catch (ProcessorError e) {
-			throw e;
+			return line != null;
 		} catch (Exception e) {
 			throw new ProcessorError(e);
 		}
 	}
 
-	public abstract List split(String line) throws InvalidRecordError;
-
+	public String getLine() {
+		return line;
+	}
 }

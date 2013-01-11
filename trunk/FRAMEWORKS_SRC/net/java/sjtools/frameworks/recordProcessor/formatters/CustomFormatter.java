@@ -22,9 +22,10 @@ package net.java.sjtools.frameworks.recordProcessor.formatters;
 import java.io.Serializable;
 import java.lang.reflect.Method;
 
+import net.java.sjtools.frameworks.recordProcessor.model.ReflectionExceptionHandler;
 import net.java.sjtools.frameworks.recordProcessor.model.error.ProcessorError;
 
-public class CustomFormatter implements Formatter, Serializable {
+public class CustomFormatter extends ReflectionExceptionHandler implements Formatter, Serializable {
 
 	private static final long serialVersionUID = 5076022659942650928L;
 
@@ -53,7 +54,7 @@ public class CustomFormatter implements Formatter, Serializable {
 		try {
 			return (String) customFormatterFormat.invoke(customFormatterObject, new String[] { value });
 		} catch (Exception e) {
-			throw new ProcessorError(e);
+			throw handleException(e);
 		}
 	}
 

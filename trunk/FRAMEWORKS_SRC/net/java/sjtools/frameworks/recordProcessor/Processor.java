@@ -85,10 +85,14 @@ public class Processor {
 		String value = null;
 		boolean hasValidationErrors = false;
 
-		while ((elements = ruleSet.getSplitter().nextRecord()) != null) {
+		while (ruleSet.getSplitter().hasNext()) {
 			recordCount++;
 
+			recordProcessor.startRecord();
+
 			try {
+				elements = ruleSet.getSplitter().nextRecord();
+
 				// Check record count limits
 				if (hasMaximumRecords && recordCount > ruleSet.getMaximumRecords().intValue()) {
 					throw new TooManyRecordsError(ruleSet.getMaximumRecords().intValue());
@@ -163,6 +167,8 @@ public class Processor {
 			} catch (ProcessorError e) {
 				recordProcessor.processError(e);
 			}
+
+			recordProcessor.endRecord();
 		}
 
 		// Check record count limits
