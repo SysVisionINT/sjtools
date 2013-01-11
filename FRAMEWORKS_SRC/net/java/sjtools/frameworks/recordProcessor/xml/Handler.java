@@ -133,9 +133,10 @@ public class Handler extends SimpleHandler {
 				String javaClass = attributes.getValue("java-class");
 				String initMethod = attributes.getValue("init-method");
 				String addInitParameterMethod = attributes.getValue("add-init-parameter-method");
+				String hasNextMethod = attributes.getValue("has-next-method");
 				String nextRecordMethod = attributes.getValue("next-record-method");
 
-				CustomSplitter splitter = new CustomSplitter(javaClass, initMethod, addInitParameterMethod, nextRecordMethod);
+				CustomSplitter splitter = new CustomSplitter(javaClass, initMethod, addInitParameterMethod, hasNextMethod, nextRecordMethod);
 
 				((RuleSet) currentObject).setSplitter(splitter);
 

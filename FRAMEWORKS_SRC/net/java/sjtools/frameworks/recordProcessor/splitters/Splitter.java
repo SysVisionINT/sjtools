@@ -28,6 +28,8 @@ public interface Splitter {
 
 	public void init(InputStream inputStream) throws ProcessorError;
 
+	public boolean hasNext() throws ProcessorError;
+
 	public List nextRecord() throws ProcessorError;
 
 }

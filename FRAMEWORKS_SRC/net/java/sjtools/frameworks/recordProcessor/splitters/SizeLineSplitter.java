@@ -24,6 +24,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import net.java.sjtools.frameworks.recordProcessor.model.error.InvalidRecordError;
+import net.java.sjtools.frameworks.recordProcessor.model.error.ProcessorError;
 import net.java.sjtools.util.TextUtil;
 
 public class SizeLineSplitter extends LineSplitter implements Serializable {
@@ -38,28 +39,34 @@ public class SizeLineSplitter extends LineSplitter implements Serializable {
 		this.elementLength = elementLength;
 	}
 
-	public List split(String line) throws InvalidRecordError {
-		List ret = new ArrayList();
+	public List nextRecord() throws ProcessorError {
+		try {
+			List ret = new ArrayList();
 
-		if (!TextUtil.isEmptyString(line)) {
-			char[] lineArray = line.toCharArray();
+			if (!TextUtil.isEmptyString(getLine())) {
+				char[] lineArray = getLine().toCharArray();
 
-			StringBuffer buffer = new StringBuffer();
-			for (int i = 0; i < lineArray.length; i++) {
-				buffer.append(lineArray[i]);
+				StringBuffer buffer = new StringBuffer();
+				for (int i = 0; i < lineArray.length; i++) {
+					buffer.append(lineArray[i]);
 
-				if (buffer.length() == elementLength || i == lineArray.length - 1) {
-					ret.add(buffer.toString());
-					buffer = new StringBuffer();
+					if (buffer.length() == elementLength || i == lineArray.length - 1) {
+						ret.add(buffer.toString());
+						buffer = new StringBuffer();
+					}
+				}
+
+				if (elementCount != null && ret.size() != elementCount.intValue()) {
+					throw new InvalidRecordError(getLine(), toString());
 				}
 			}
 
-			if (elementCount != null && ret.size() != elementCount.intValue()) {
-				throw new InvalidRecordError(line, toString());
-			}
+			return ret;
+		} catch (ProcessorError e) {
+			throw e;
+		} catch (Exception e) {
+			throw new ProcessorError(e);
 		}
-
-		return ret;
 	}
 
 	public String toString() {

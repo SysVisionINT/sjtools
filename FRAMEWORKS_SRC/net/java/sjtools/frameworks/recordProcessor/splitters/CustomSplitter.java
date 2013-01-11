@@ -24,19 +24,21 @@ import java.io.Serializable;
 import java.lang.reflect.Method;
 import java.util.List;
 
+import net.java.sjtools.frameworks.recordProcessor.model.ReflectionExceptionHandler;
 import net.java.sjtools.frameworks.recordProcessor.model.error.ProcessorError;
 import net.java.sjtools.util.TextUtil;
 
-public class CustomSplitter implements Splitter, Serializable {
+public class CustomSplitter extends ReflectionExceptionHandler implements Splitter, Serializable {
 
 	private static final long serialVersionUID = 2799506306737427494L;
 
 	private Object customSplitterObject = null;
 	private Method customSplitterInit = null;
 	private Method customSplitterAddInitParameter = null;
+	private Method customSplitterHasNext = null;
 	private Method customSplitterNextRecord = null;
 
-	public CustomSplitter(String javaClass, String initMethod, String addInitParameterMethod, String nextRecordMethod) throws ProcessorError {
+	public CustomSplitter(String javaClass, String initMethod, String addInitParameterMethod, String hasNextMethod, String nextRecordMethod) throws ProcessorError {
 		try {
 			Class validatorClass = Thread.currentThread().getContextClassLoader().loadClass(javaClass);
 
@@ -46,6 +48,12 @@ public class CustomSplitter implements Splitter, Serializable {
 
 			if (!TextUtil.isEmptyString(addInitParameterMethod)) {
 				customSplitterAddInitParameter = validatorClass.getMethod(addInitParameterMethod, new Class[] { String.class, String.class });
+			}
+
+			customSplitterHasNext = validatorClass.getMethod(hasNextMethod, null);
+
+			if (customSplitterHasNext.getReturnType() != Boolean.class && customSplitterHasNext.getReturnType() != Boolean.TYPE) {
+				throw new ProcessorError("Method " + hasNextMethod + " of class " + javaClass + " has to return a [B|b]oolean");
 			}
 
 			customSplitterNextRecord = validatorClass.getMethod(nextRecordMethod, null);
@@ -65,7 +73,7 @@ public class CustomSplitter implements Splitter, Serializable {
 			try {
 				customSplitterAddInitParameter.invoke(customSplitterObject, new Object[] { name, value });
 			} catch (Exception e) {
-				throw new ProcessorError(e);
+				throw handleException(e);
 			}
 		}
 	}
@@ -78,16 +86,23 @@ public class CustomSplitter implements Splitter, Serializable {
 		}
 	}
 
+	public boolean hasNext() throws ProcessorError {
+		try {
+			return ((Boolean) customSplitterHasNext.invoke(customSplitterObject, null)).booleanValue();
+		} catch (Exception e) {
+			throw handleException(e);
+		}
+	}
+
 	public List nextRecord() throws ProcessorError {
 		try {
 			return (List) customSplitterNextRecord.invoke(customSplitterObject, null);
 		} catch (Exception e) {
-			throw new ProcessorError(e);
+			throw handleException(e);
 		}
 	}
 
 	public String toString() {
-		return "CustomSplitter(" + customSplitterObject.getClass().getName() + ", " + customSplitterInit.getName() + ", " + (customSplitterAddInitParameter == null ? "null" : customSplitterAddInitParameter.getName()) + ", " + customSplitterNextRecord.getName() + ")";
+		return "CustomSplitter(" + customSplitterObject.getClass().getName() + ", " + customSplitterInit.getName() + ", " + (customSplitterAddInitParameter == null ? "null" : customSplitterAddInitParameter.getName()) + ", " + customSplitterHasNext.getName() + ", " + customSplitterNextRecord.getName() + ")";
 	}
-
 }

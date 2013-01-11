@@ -23,6 +23,7 @@ import java.io.Serializable;
 import java.util.List;
 
 import net.java.sjtools.frameworks.recordProcessor.model.error.InvalidRecordError;
+import net.java.sjtools.frameworks.recordProcessor.model.error.ProcessorError;
 import net.java.sjtools.util.TextUtil;
 
 public class TokenLineSplitter extends LineSplitter implements Serializable {
@@ -39,27 +40,33 @@ public class TokenLineSplitter extends LineSplitter implements Serializable {
 		this.optionalLastToken = optionalLastToken;
 	}
 
-	public List split(String line) throws InvalidRecordError {
-		List ret = TextUtil.split(line, token);
+	public List nextRecord() throws ProcessorError {
+		try {
+			List ret = TextUtil.split(getLine(), token);
 
-		if (elementCount != null) {
-			switch (ret.size() - elementCount.intValue()) {
-				case 0:
-					if (!optionalLastToken) {
-						throw new InvalidRecordError(line, toString());
-					}
-					break;
-				case 1:
-					if (!line.endsWith(token)) {
-						throw new InvalidRecordError(line, toString());
-					}
-					break;
-				default:
-					throw new InvalidRecordError(line, toString());
+			if (elementCount != null) {
+				switch (ret.size() - elementCount.intValue()) {
+					case 0:
+						if (!optionalLastToken) {
+							throw new InvalidRecordError(getLine(), toString());
+						}
+						break;
+					case 1:
+						if (!getLine().endsWith(token)) {
+							throw new InvalidRecordError(getLine(), toString());
+						}
+						break;
+					default:
+						throw new InvalidRecordError(getLine(), toString());
+				}
 			}
-		}
 
-		return ret;
+			return ret;
+		} catch (ProcessorError e) {
+			throw e;
+		} catch (Exception e) {
+			throw new ProcessorError(e);
+		}
 	}
 
 	public String toString() {
