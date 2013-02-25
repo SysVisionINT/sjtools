@@ -30,32 +30,31 @@ import javax.sql.DataSource;
 public class DataSourceImpl implements DataSource, Serializable {
 	private static final long serialVersionUID = -1460664318268614437L;
 
-	private PrintWriter out = new PrintWriter(System.out);
-	
+	private transient PrintWriter out = new PrintWriter(System.out);
+
 	private boolean registed = false;
-	
+
 	private String driverClass = null;
 	private String dataBaseURL = null;
 	private String userName = null;
 	private String userPassword = null;
-	
-	public DataSourceImpl() {
-	}
-	
+
+	public DataSourceImpl() {}
+
 	public DataSourceImpl(String driver, String url, String user, String password) {
 		driverClass = driver;
 		dataBaseURL = url;
 		userName = user;
 		userPassword = password;
 	}
-	
+
 	public DataSourceImpl(String url, String user, String password) {
 		registed = true;
-		
+
 		dataBaseURL = url;
 		userName = user;
 		userPassword = password;
-	}	
+	}
 
 	public String getDataBaseURL() {
 		return dataBaseURL;
@@ -68,7 +67,7 @@ public class DataSourceImpl implements DataSource, Serializable {
 	public String getUserName() {
 		return userName;
 	}
-	
+
 	public int getLoginTimeout() throws SQLException {
 		throw new SQLException("Method not supported!");
 	}
@@ -113,7 +112,7 @@ public class DataSourceImpl implements DataSource, Serializable {
 		if (!this.driverClass.equals(driverClass)) {
 			registed = false;
 		}
-		
+
 		this.driverClass = driverClass;
 	}
 

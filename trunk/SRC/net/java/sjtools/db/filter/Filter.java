@@ -44,7 +44,7 @@ public class Filter implements Comparator, Serializable {
 	private Expression where = null;
 
 	private List orderBy = new ArrayList();
-	private MethodCache cache = new MethodCache();
+	private transient MethodCache cache = new MethodCache();
 
 	public void setWhere(Expression where) {
 		this.where = where;
@@ -58,9 +58,9 @@ public class Filter implements Comparator, Serializable {
 		if (where == null) {
 			return false;
 		}
-		
+
 		if (where instanceof Operation) {
-			return !((Operation)where).isEmpty();	
+			return !((Operation) where).isEmpty();
 		} else {
 			return true;
 		}
