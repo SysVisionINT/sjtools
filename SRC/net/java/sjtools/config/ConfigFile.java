@@ -33,26 +33,30 @@ import net.java.sjtools.util.URLUtil;
 public class ConfigFile extends AbstractConfiguration {
 	private File configFile = null;
 	private String resourceName = null;
-	
+
 	public ConfigFile(File configFile) throws ConfigurationError {
 		super();
-	
-		if (configFile == null || !configFile.exists()) {
+
+		if (configFile == null) {
+			throw new ConfigurationError("Configuration file is null");
+		}
+
+		if (!configFile.exists()) {
 			throw new ConfigurationError("Configuration file '" + configFile.getAbsolutePath() + "' not found");
 		}
-		
+
 		setFile(configFile);
 	}
-	
+
 	public ConfigFile(String resourceName) throws ConfigurationError {
 		super();
-		
+
 		URL url = ResourceUtil.getContextResourceURL(resourceName);
-		
+
 		if (url == null) {
 			throw new ConfigurationError("Configuration file '" + resourceName + "' not found in classpath");
 		}
-		
+
 		try {
 			if (URLUtil.isFile(url)) {
 				setFile(URLUtil.toFile(url));
@@ -60,19 +64,19 @@ public class ConfigFile extends AbstractConfiguration {
 				setResourceName(resourceName);
 			}
 		} catch (URISyntaxException e) {
-			throw new RuntimeException(e);
+			throw new ConfigurationError("ResourceName [" + resourceName + "] with URL [" + url.toString() + "] cannot be converted to URI", e);
 		}
 	}
-	
+
 	private void setResourceName(String name) {
 		resourceName = name;
-		
+
 		loadResourceFile();
 	}
 
 	private void setFile(File config) {
 		configFile = config;
-		
+
 		updateIfModified();
 	}
 
@@ -85,7 +89,7 @@ public class ConfigFile extends AbstractConfiguration {
 	private void loadResourceFile() {
 		try {
 			Properties properties = PropertyReader.getProperties(ResourceUtil.getContextResourceInputStream(resourceName));
-			
+
 			setConfiguration(properties, System.currentTimeMillis());
 		} catch (IOException e) {
 			throw new RuntimeException(e);
@@ -96,13 +100,13 @@ public class ConfigFile extends AbstractConfiguration {
 		if (!configFile.exists()) {
 			throw new RuntimeException("File '" + configFile.getAbsolutePath() + "' not longer exists");
 		}
-		
+
 		long lastModified = configFile.lastModified();
-		
+
 		if (lastModified > getConfigDate()) {
 			try {
 				Properties properties = PropertyReader.getProperties(configFile);
-				
+
 				setConfiguration(properties, lastModified);
 			} catch (IOException e) {
 				throw new RuntimeException(e);

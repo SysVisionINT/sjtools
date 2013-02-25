@@ -19,28 +19,32 @@
  */
 package net.java.sjtools.mail;
 
-public class MailPriority {
+import java.io.Serializable;
+
+public class MailPriority implements Serializable {
+	private static final long serialVersionUID = -6993788423297527180L;
+
 	public static final MailPriority LOW = new MailPriority(5);
 	public static final MailPriority NORMAL = new MailPriority(3);
 	public static final MailPriority HIGH = new MailPriority(1);
-	
+
 	private int priority = 0;
-	
-	private  MailPriority(int value) {
+
+	private MailPriority(int value) {
 		priority = value;
 	}
 
 	public boolean equals(Object obj) {
 		if (obj == null) {
-			return false; 
+			return false;
 		}
-		
+
 		if (!(obj instanceof MailPriority)) {
 			return false;
 		}
-		
+
 		MailPriority other = (MailPriority) obj;
-		
+
 		return priority == other.priority;
 	}
 
