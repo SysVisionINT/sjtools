@@ -24,6 +24,7 @@ import java.util.logging.Logger;
 import net.java.sjtools.logging.Log;
 import net.java.sjtools.logging.api.Factory;
 import net.java.sjtools.logging.api.Level;
+import net.java.sjtools.logging.error.LogRuntimeError;
 
 public class JDKFactory implements Factory {
 
@@ -32,6 +33,10 @@ public class JDKFactory implements Factory {
 	}
 
 	public void setLoggerLevel(String name, Level level) {
+		if (name == null) {
+			throw new LogRuntimeError("The logger name must be different from NULL");
+		}
+		
 		Logger logger = Logger.getLogger(name);
 		
 		if (logger != null) {

@@ -83,7 +83,13 @@ public class LogLevel implements Serializable {
 	}
 
 	public void setLoggerLevel(String name, Level level) {
-		LogConfigReader.getInstance().setParameter(name, level.toString());
+		String loggerName = DEFAULT_LOGGER_LEVEL_PROPERTY;
+		
+		if (name != null) {
+			loggerName = loggerName.concat(".").concat(name);
+		}
+		
+		LogConfigReader.getInstance().setParameter(loggerName, level.toString());
 
 		lock.getWriteLock();
 		levelMap.clear();
