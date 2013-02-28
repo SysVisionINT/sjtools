@@ -34,7 +34,7 @@ import net.java.sjtools.util.TextUtil;
 public class LogLevel implements Serializable {
 	private static final long serialVersionUID = -5230971362016826432L;
 
-	private static final String DEFAULT_LOGGER_LEVEL_PROPERTY = "sjtools.logging.level";
+	public static final String DEFAULT_LOGGER_LEVEL_PROPERTY = "sjtools.logging.level";
 
 	private Map levelMap = new HashMap();
 	private Lock lock = new Lock(levelMap);
