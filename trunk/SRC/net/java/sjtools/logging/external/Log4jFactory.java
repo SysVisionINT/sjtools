@@ -32,7 +32,11 @@ public class Log4jFactory implements Factory {
 	}
 
 	public void setLoggerLevel(String name, Level level) {
-		Logger logger = Logger.getLogger(name);
+		Logger logger = Logger.getRootLogger();
+		
+		if (name != null) {
+			logger = Logger.getLogger(name);
+		}
 
 		if (logger != null) {
 			logger.setLevel(org.apache.log4j.Level.toLevel(level.toString()));
