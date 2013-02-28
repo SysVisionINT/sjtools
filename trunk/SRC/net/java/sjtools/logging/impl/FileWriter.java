@@ -34,9 +34,9 @@ import net.java.sjtools.time.SuperDate;
 public class FileWriter implements Writer, Config, Serializable {
 	private static final long serialVersionUID = -6035365141449424419L;
 
-	private static final String FILE_NAME = "sjtools.logging.fileWriter.fileName";
-	private static final String DATE_PATTERN = "sjtools.logging.fileWriter.datePattern";
-	private static final String CHARSET = "sjtools.logging.fileWriter.charset";
+	public static final String FILE_NAME = "sjtools.logging.fileWriter.fileName";
+	public static final String DATE_PATTERN = "sjtools.logging.fileWriter.datePattern";
+	public static final String CHARSET = "sjtools.logging.fileWriter.charset";
 
 	private String fileName = null;
 	private String datePattern = null;

@@ -29,8 +29,8 @@ import net.java.sjtools.logging.util.LogClassLoader;
 import net.java.sjtools.logging.util.LogConfigReader;
 
 public class DefaultFactory implements Factory {
-	private static final String DEFAULT_LOGGER_FORMATER_PROPERTY = "sjtools.logging.formater";
-	private static final String DEFAULT_LOGGER_WRITER_PROPERTY = "sjtools.logging.writer";
+	public static final String DEFAULT_LOGGER_FORMATER_PROPERTY = "sjtools.logging.formater";
+	public static final String DEFAULT_LOGGER_WRITER_PROPERTY = "sjtools.logging.writer";
 
 	private LogLevel logLevel = null;
 	private Formater formater = null;
