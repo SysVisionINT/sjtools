@@ -17,25 +17,20 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA
  */
-package net.java.sjtools.thread.provider.impl;
+package net.java.sjtools.thread.executor.impl;
 
-import net.java.sjtools.pool.PoolConfig;
-import net.java.sjtools.thread.SuperThread;
-import net.java.sjtools.thread.pool.ThreadPool;
-import net.java.sjtools.thread.provider.ThreadProvider;
+import net.java.sjtools.thread.executor.Executor;
 
-public class PoolThreadProvider implements ThreadProvider {
-	private ThreadPool pool = null;
+public class SimpleThreadProvider implements Executor {
 
-	public PoolThreadProvider(PoolConfig config) {
-		pool = new ThreadPool(config);
-	}
+	public Thread execute(Runnable runnable) {
+		Thread thread = new Thread(runnable);
+		thread.setDaemon(true);
+		thread.start();
 
-	public SuperThread getThread() {
-		return pool.getThread();
+		return thread;
 	}
 
 	public void close() {
-		pool.closePool();
 	}
 }

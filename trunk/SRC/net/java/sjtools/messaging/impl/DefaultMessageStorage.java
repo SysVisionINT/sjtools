@@ -26,6 +26,7 @@ import net.java.sjtools.messaging.Message;
 import net.java.sjtools.messaging.model.MessageStorage;
 import net.java.sjtools.messaging.model.StorageRecord;
 import net.java.sjtools.thread.Lock;
+import net.java.sjtools.thread.util.Queue;
 
 public class DefaultMessageStorage  implements MessageStorage {
     private Map queueMap = null;
@@ -36,15 +37,15 @@ public class DefaultMessageStorage  implements MessageStorage {
         lock = new Lock(queueMap);
     }
 
-    private MessageQueue getMessageQueue(String listenerName) {
+    private Queue getMessageQueue(String listenerName) {
         lock.getReadLock();
-        MessageQueue queue = (MessageQueue) queueMap.get(listenerName);
+        Queue queue = (Queue) queueMap.get(listenerName);
         lock.releaseLock();
 
         return queue;
     }
 
-    private void addMessageQueue(String listenerName, MessageQueue messageQueue) {
+    private void addMessageQueue(String listenerName, Queue messageQueue) {
         lock.getWriteLock();
         queueMap.put(listenerName, messageQueue);
         lock.releaseLock();
@@ -60,10 +61,10 @@ public class DefaultMessageStorage  implements MessageStorage {
         Message message = null;
         StorageRecord messageRecord = null;
 
-        MessageQueue queue = getMessageQueue(listenerName);
+        Queue queue = getMessageQueue(listenerName);
 
         if (queue != null) {
-            message = queue.getFirst();
+            message = (Message) queue.peek();
 
             messageRecord = new StorageRecord("first", message);
         }
@@ -74,7 +75,7 @@ public class DefaultMessageStorage  implements MessageStorage {
     public boolean hasMessages(String listenerName) {
         boolean empty = false;
 
-        MessageQueue queue = getMessageQueue(listenerName);
+        Queue queue = getMessageQueue(listenerName);
 
         if (queue != null) {
             empty = !queue.isEmpty();
@@ -84,19 +85,19 @@ public class DefaultMessageStorage  implements MessageStorage {
     }
 
     public void store(String listenerName, Message message) {
-        MessageQueue queue = getMessageQueue(listenerName);
+        Queue queue = getMessageQueue(listenerName);
 
         if (queue == null) {
-            queue = new MessageQueue();
+            queue = new Queue();
 
             addMessageQueue(listenerName, queue);
         }
 
-        queue.add(message);
+        queue.push(message);
     }
 
     public void clean(String listenerName) {
-        MessageQueue queue = getMessageQueue(listenerName);
+        Queue queue = getMessageQueue(listenerName);
 
         if (queue != null) {
             queue.clean();
@@ -110,10 +111,10 @@ public class DefaultMessageStorage  implements MessageStorage {
     }
 
     public void deleteMessage(String listenerName, String recordKey) {
-        MessageQueue queue = getMessageQueue(listenerName);
+        Queue queue = getMessageQueue(listenerName);
 
         if (queue != null) {
-            queue.deleteFirst();
+            queue.poll();
         }
     }
 

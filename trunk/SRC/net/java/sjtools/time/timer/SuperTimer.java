@@ -23,12 +23,12 @@ import java.util.Date;
 import java.util.Timer;
 import java.util.TimerTask;
 
-import net.java.sjtools.thread.provider.ThreadProvider;
-import net.java.sjtools.thread.provider.impl.SimpleThreadProvider;
+import net.java.sjtools.thread.executor.Executor;
+import net.java.sjtools.thread.executor.impl.SimpleThreadProvider;
 
 public class SuperTimer {
 	private Timer timer = new Timer(true);
-	private ThreadProvider provider = new SimpleThreadProvider();
+	private Executor executor = new SimpleThreadProvider();
 
 	private static SuperTimer me = new SuperTimer();
 
@@ -67,11 +67,11 @@ public class SuperTimer {
 		return new SuperTimerTaskRunner(task);
 	}
 
-	public ThreadProvider getProvider() {
-		return provider;
+	public Executor getExecutor() {
+		return executor;
 	}
 
-	public void setProvider(ThreadProvider provider) {
-		this.provider = provider;
+	public void setExecutor(Executor executor) {
+		this.executor = executor;
 	}
 }

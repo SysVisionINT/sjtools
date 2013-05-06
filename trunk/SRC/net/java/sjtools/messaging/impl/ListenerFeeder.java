@@ -24,13 +24,12 @@ import net.java.sjtools.messaging.MessageBroker;
 import net.java.sjtools.messaging.model.Listener;
 import net.java.sjtools.messaging.model.MessageStorage;
 import net.java.sjtools.messaging.model.StorageRecord;
-import net.java.sjtools.thread.SuperThread;
 import net.java.sjtools.time.Sleep;
 
 public class ListenerFeeder implements Runnable {
 	private String storageKey = null;
 	private Listener listener = null;
-	private SuperThread thread = null;
+	private Thread thread = null;
 	private int topicCount = 1;
 	private boolean run = true;
 
@@ -50,7 +49,7 @@ public class ListenerFeeder implements Runnable {
 		this.listener = listener;
 		storageKey = listenerName;
 
-		thread = new SuperThread();
+		thread = new Thread(this);
 		thread.setDaemon(true);
 		thread.setName("ListenerFeeder(" + thread.getName() + ")");
 		thread.start();
@@ -58,10 +57,6 @@ public class ListenerFeeder implements Runnable {
 
 	public void delivery(Message message) {
 		MessageBroker.getInstance().getMessageStorage().store(storageKey, message);
-
-		if (thread.getStatus() == SuperThread.WAITING) {
-			thread.start(this);
-		}
 	}
 
 	public void run() {
@@ -87,8 +82,6 @@ public class ListenerFeeder implements Runnable {
 
 	public void stop() {
 		run = false;
-		thread.interrupt();
 		MessageBroker.getInstance().getMessageStorage().clean(storageKey);
-		thread.die();
 	}
 }

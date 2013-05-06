@@ -27,27 +27,13 @@ public class SuperThread extends Thread {
     public static final int STOPPING = 3;
     public static final int STOP = 4;
 
-    private static int threadNumber = 0;
-
     private int status = WAITING;
     private Runnable task = null;
     private ThreadListener listener = null;
 
-    private static synchronized String getThreadName() {
-        if (threadNumber == Integer.MAX_VALUE) {
-            threadNumber = Integer.MIN_VALUE;
-        }
-
-        return "SuperThread_".concat(String.valueOf(threadNumber++));
-    }
-
-    public SuperThread(ThreadListener boss) {
-        this();
+    public SuperThread(ThreadGroup group, String threadName, ThreadListener boss) {
+    	super(group, threadName);
         listener = boss;
-    }
-
-    public SuperThread() {
-        super(Thread.currentThread().getThreadGroup(), getThreadName());
     }
 
     public void run() {
@@ -65,17 +51,11 @@ public class SuperThread extends Thread {
 
                 if (status == RUNNING) {
                     status = WAITING;
-                }
-
-                if (listener != null) {
                     listener.done(this);
-                } else {
-                	status = STOPPING;
                 }
             }
         }
 
-        listener = null;
         status = STOP;
     }
 
