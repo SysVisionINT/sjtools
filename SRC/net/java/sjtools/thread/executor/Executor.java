@@ -17,19 +17,9 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA
  */
-package net.java.sjtools.time.timer;
+package net.java.sjtools.thread.executor;
 
-import java.util.TimerTask;
-
-public class SuperTimerTaskRunner extends TimerTask {
-	private SuperTimerTask task = null;
-
-	protected SuperTimerTaskRunner(SuperTimerTask task) {
-		this.task = task;
-		task.setRunner(this);
-	}
-
-	public void run() {
-		SuperTimer.getInstance().getExecutor().execute(task);
-	}
+public interface Executor {
+	public Thread execute(Runnable runnable);
+	public void close();
 }

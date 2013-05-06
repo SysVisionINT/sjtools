@@ -26,8 +26,8 @@ import net.java.sjtools.thread.SuperThread;
 public class ThreadPool {
 	private Pool pool = null;
 
-	public ThreadPool(PoolConfig config) {
-		pool = new Pool(config, new ThreadFactory());
+	public ThreadPool(PoolConfig config, ThreadFactory factory) {
+		pool = new Pool(config, factory);
 	}
 
 	public int getPoolSize() {
@@ -53,11 +53,10 @@ public class ThreadPool {
 		PoolConfig pc = new PoolConfig();
 		pc.setMinimalSize(0);
 		pc.setMaxSize(PoolConfig.NO_MAX_SIZE);
-		pc.setExpireTime(5000);
+		pc.setExpireTime(60000);
 		pc.setTimeOut(PoolConfig.NEVER_TIMEOUT);
-		pc.setValidateOnInterval(true);
-		pc.setValidationTime(1000);
-		pc.setWaitTime(5000);
+		pc.setValidateOnInterval(false);
+		pc.setWaitTime(PoolConfig.WAIT_FOREVER);
 
 		return pc;
 	}
