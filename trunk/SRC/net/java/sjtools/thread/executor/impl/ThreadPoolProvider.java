@@ -31,19 +31,16 @@ public class ThreadPoolProvider implements Executor {
 		pool = threadPool;
 	}
 
-	public Thread execute(Runnable runnable) {
-		Thread thread = null;
-		
+	public void execute(Runnable runnable) {
 		try {
 			SuperThread st = pool.getThread();
-			st.start(runnable);
 			
-			thread = st;
+			if (!st.start(runnable)) {
+				executor.execute(runnable);				
+			}
 		} catch (Exception e) {
-			thread = executor.execute(runnable);
+			executor.execute(runnable);
 		}
-		
-		return thread;
 	}
 
 	public void close() {
