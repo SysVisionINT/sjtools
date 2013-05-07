@@ -23,12 +23,10 @@ import net.java.sjtools.thread.executor.Executor;
 
 public class SimpleThreadProvider implements Executor {
 
-	public Thread execute(Runnable runnable) {
+	public void execute(Runnable runnable) {
 		Thread thread = new Thread(runnable);
 		thread.setDaemon(true);
 		thread.start();
-
-		return thread;
 	}
 
 	public void close() {

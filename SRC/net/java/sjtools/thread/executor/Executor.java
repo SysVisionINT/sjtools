@@ -20,6 +20,6 @@
 package net.java.sjtools.thread.executor;
 
 public interface Executor {
-	public Thread execute(Runnable runnable);
+	public void execute(Runnable runnable);
 	public void close();
 }
