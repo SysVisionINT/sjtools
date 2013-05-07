@@ -24,6 +24,7 @@ import net.java.sjtools.thread.executor.Executor;
 import net.java.sjtools.thread.pool.ThreadPool;
 
 public class ThreadPoolProvider implements Executor {
+	private Executor executor = new SimpleThreadProvider();
 	private ThreadPool pool = null;
 
 	public ThreadPoolProvider(ThreadPool threadPool) {
@@ -31,9 +32,16 @@ public class ThreadPoolProvider implements Executor {
 	}
 
 	public Thread execute(Runnable runnable) {
-		SuperThread thread = pool.getThread();
+		Thread thread = null;
 		
-		thread.start(runnable);
+		try {
+			SuperThread st = pool.getThread();
+			st.start(runnable);
+			
+			thread = st;
+		} catch (Exception e) {
+			thread = executor.execute(runnable);
+		}
 		
 		return thread;
 	}

@@ -35,6 +35,7 @@ import net.java.sjtools.thread.Lock;
 import net.java.sjtools.time.timer.SuperTimer;
 
 public class Pool {
+
 	private PoolConfig config = null;
 	private PoolFactory factory = null;
 	private Map idlList = new HashMap();
@@ -237,14 +238,14 @@ public class Pool {
 			obj = getFirstObject();
 
 			if (obj == null) {
-				if (inUseList.size() <= config.getMaxSize() || config.getMaxSize() == PoolConfig.NO_MAX_SIZE) {
+				if (config.getMaxSize() == PoolConfig.NO_MAX_SIZE || inUseList.size() <= config.getMaxSize()) {
 					obj = factory.createObject();
 				}
-			}
-
-			if (config.isValidateOnBorrow() && !factory.validateObject(obj)) {
-				factory.destroyObject(obj);
-				obj = null;
+			} else {
+				if (config.isValidateOnBorrow() && !factory.validateObject(obj)) {
+					factory.destroyObject(obj);
+					obj = null;
+				}
 			}
 		}
 

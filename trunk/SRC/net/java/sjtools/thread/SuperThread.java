@@ -25,7 +25,7 @@ public class SuperThread extends Thread {
     public static final int WAITING = 1;
     public static final int RUNNING = 2;
     public static final int STOPPING = 3;
-    public static final int STOP = 4;
+    public static final int STOPED = 4;
 
     private int status = WAITING;
     private Runnable task = null;
@@ -34,6 +34,10 @@ public class SuperThread extends Thread {
     public SuperThread(ThreadGroup group, String threadName, ThreadListener boss) {
     	super(group, threadName);
         listener = boss;
+    }
+    
+    public SuperThread(ThreadGroup group, String threadName) {
+    	this(group, threadName, null);
     }
 
     public void run() {
@@ -51,12 +55,15 @@ public class SuperThread extends Thread {
 
                 if (status == RUNNING) {
                     status = WAITING;
-                    listener.done(this);
+                    
+                    if (listener != null) {
+                    	listener.done(this);
+                    }
                 }
             }
         }
 
-        status = STOP;
+        status = STOPED;
     }
 
     public synchronized int getStatus() {

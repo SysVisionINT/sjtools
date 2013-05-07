@@ -21,6 +21,9 @@ package net.java.sjtools.thread.pool;
 
 import net.java.sjtools.pool.Pool;
 import net.java.sjtools.pool.PoolConfig;
+import net.java.sjtools.pool.error.ObjectCreationException;
+import net.java.sjtools.pool.error.PoolUnavailableException;
+import net.java.sjtools.pool.error.WaitTimeExpiredException;
 import net.java.sjtools.thread.SuperThread;
 
 public class ThreadPool {
@@ -38,15 +41,8 @@ public class ThreadPool {
 		return pool.getPoolConfig();
 	}
 
-	public SuperThread getThread() {
-		SuperThread st = null;
-
-		try {
-			st = (SuperThread) pool.borrowObject();
-		} catch (Exception e) {
-		}
-
-		return st;
+	public SuperThread getThread() throws PoolUnavailableException, WaitTimeExpiredException, ObjectCreationException {
+		return (SuperThread) pool.borrowObject();
 	}
 
 	public static PoolConfig getDefaultConfig() {

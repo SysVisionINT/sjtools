@@ -26,7 +26,7 @@ import net.java.sjtools.messaging.Message;
 import net.java.sjtools.messaging.model.MessageStorage;
 import net.java.sjtools.messaging.model.StorageRecord;
 import net.java.sjtools.thread.Lock;
-import net.java.sjtools.thread.util.Queue;
+import net.java.sjtools.util.Queue;
 
 public class DefaultMessageStorage  implements MessageStorage {
     private Map queueMap = null;
