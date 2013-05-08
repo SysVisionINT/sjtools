@@ -24,19 +24,27 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 import net.java.sjtools.thread.executor.Executor;
-import net.java.sjtools.thread.executor.impl.SimpleThreadProvider;
+import net.java.sjtools.thread.executor.impl.BasicThreadExecutor;
 
 public class SuperTimer {
-	private Timer timer = new Timer(true);
+	private Timer timer = null;
+	private boolean defaultTimer = false;
 	private Executor executor = null;
 
-	private static SuperTimer me = new SuperTimer();
+	private static SuperTimer me = new SuperTimer(true, new BasicThreadExecutor(false));
 
-	private SuperTimer() {
+	private SuperTimer(boolean defaultTimer, Executor executor) {
+		this.timer = new Timer(defaultTimer ? true : false);
+		this.defaultTimer = defaultTimer;
+		this.executor = executor;
 	}
 
 	public static SuperTimer getInstance() {
 		return me;
+	}
+	
+	public static SuperTimer getInstance(Executor executor) {
+		return new SuperTimer(false, executor);
 	}
 
 	public void schedule(SuperTimerTask task, long delay) {
@@ -62,24 +70,23 @@ public class SuperTimer {
 	public void scheduleAtFixedRate(SuperTimerTask task, Date firstTime, long period) {
 		timer.scheduleAtFixedRate(getTaskRunner(task), firstTime, period);
 	}
+	
+	public boolean close() {
+		if (!defaultTimer) {
+			timer.cancel();
+			executor.close();
+			
+			return true;
+		}
+		
+		return false;
+	}
 
 	private TimerTask getTaskRunner(SuperTimerTask task) {
-		return new SuperTimerTaskRunner(task);
+		return new SuperTimerTaskRunner(this, task);
 	}
 
 	protected Executor getExecutor() {
-		if (executor == null) {
-			createExecutor();
-		}
-		
 		return executor;
-	}
-
-	private synchronized void createExecutor() {
-		if (executor != null) {
-			return;
-		}
-
-		executor = new SimpleThreadProvider(false);
 	}
 }

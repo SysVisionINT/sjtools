@@ -205,11 +205,6 @@ public class Pool {
 		running = false;
 
 		clear();
-
-		config = null;
-		factory = null;
-		idlList = null;
-		inUseList = null;
 	}
 
 	public void clear() {

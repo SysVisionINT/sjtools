@@ -22,14 +22,16 @@ package net.java.sjtools.time.timer;
 import java.util.TimerTask;
 
 public class SuperTimerTaskRunner extends TimerTask {
+	private SuperTimer superTimer = null;
 	private SuperTimerTask task = null;
 
-	protected SuperTimerTaskRunner(SuperTimerTask task) {
+	protected SuperTimerTaskRunner(SuperTimer superTimer, SuperTimerTask task) {
+		this.superTimer = superTimer;
 		this.task = task;
 		task.setRunner(this);
 	}
 
 	public void run() {
-		SuperTimer.getInstance().getExecutor().execute(task);
+		superTimer.getExecutor().execute(task);
 	}
 }
