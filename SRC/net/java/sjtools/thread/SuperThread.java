@@ -22,85 +22,88 @@ package net.java.sjtools.thread;
 import net.java.sjtools.thread.pool.ThreadListener;
 
 public class SuperThread extends Thread {
-    public static final int WAITING = 1;
-    public static final int RUNNING = 2;
-    public static final int STOPPING = 3;
-    public static final int STOPED = 4;
 
-    private int status = WAITING;
-    private Runnable task = null;
-    private ThreadListener listener = null;
+	public static final int WAITING = 1;
+	public static final int RUNNING = 2;
+	public static final int STOPPING = 3;
+	public static final int STOPED = 4;
 
-    public SuperThread(ThreadGroup group, String threadName, ThreadListener boss) {
-    	super(group, threadName);
-        listener = boss;
-    }
-    
-    public SuperThread(ThreadGroup group, String threadName) {
-    	this(group, threadName, null);
-    }
+	private int status = WAITING;
+	private Runnable task = null;
+	private ThreadListener listener = null;
 
-    public void run() {
-        while (status < STOPPING) {
-            try {
-                Thread.sleep(Long.MAX_VALUE);
-            } catch (InterruptedException e) {}
+	protected SuperThread(ThreadGroup group, String threadName, ThreadListener boss) {
+		super(group, threadName);
+		listener = boss;
+	}
 
-            if (status < STOPPING && task != null) {
-                status = RUNNING;
+	protected SuperThread(ThreadGroup group, String threadName) {
+		this(group, threadName, null);
+	}
 
-                task.run();
+	public void run() {
+		while (status < STOPPING) {
+			try {
+				Thread.sleep(Long.MAX_VALUE);
+			} catch (InterruptedException e) {}
 
-                task = null;
+			if (status < STOPPING && task != null) {
+				status = RUNNING;
 
-                if (status == RUNNING) {
-                    status = WAITING;
-                    
-                    if (listener != null) {
-                    	listener.done(this);
-                    }
-                }
-            }
-        }
+				task.run();
 
-        status = STOPED;
-    }
+				task = null;
 
-    public synchronized int getStatus() {
-        return status;
-    }
+				if (status == RUNNING) {
+					status = WAITING;
 
-    public synchronized void die() {
-        int oldStatus = status;
+					if (listener != null) {
+						listener.done(this);
+					}
+				}
+			}
+		}
 
-        status = STOPPING;
+		status = STOPED;
+	}
 
-        if (oldStatus == WAITING) {
-            this.interrupt();
-        }
-    }
+	public synchronized int getStatus() {
+		return status;
+	}
 
-    public synchronized boolean start(Runnable task) {
-        if (status == WAITING) {
-            this.task = task;
+	public synchronized void die() {
+		if (status < STOPED) {
+			int oldStatus = status;
 
-            this.interrupt();
+			status = STOPPING;
 
-            return true;
-        } else {
-            return false;
-        }
-    }
+			if (oldStatus == WAITING) {
+				this.interrupt();
+			}
+		}
+	}
 
-    public boolean equals(Object obj) {
-        if (obj == null) {
-            return false;
-        }
+	public synchronized boolean start(Runnable task) {
+		if (status == WAITING) {
+			this.task = task;
 
-        if (!(obj instanceof SuperThread)) {
-            return false;
-        }
+			this.interrupt();
 
-        return ((Thread) obj).getName().equals(this.getName());
-    }
+			return true;
+		} else {
+			return false;
+		}
+	}
+
+	public boolean equals(Object obj) {
+		if (obj == null) {
+			return false;
+		}
+
+		if (!(obj instanceof SuperThread)) {
+			return false;
+		}
+
+		return ((Thread) obj).getName().equals(this.getName());
+	}
 }
