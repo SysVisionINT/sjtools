@@ -19,6 +19,7 @@
  */
 package net.java.sjtools.thread;
 
+import net.java.sjtools.io.IO;
 import net.java.sjtools.thread.pool.ThreadListener;
 
 public class SuperThread extends Thread {
@@ -50,7 +51,11 @@ public class SuperThread extends Thread {
 			if (status < STOPPING && task != null) {
 				status = RUNNING;
 
-				task.run();
+				try {
+					task.run();
+				} catch (Exception e) {
+					e.printStackTrace(IO.err);
+				}
 
 				task = null;
 
