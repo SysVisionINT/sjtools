@@ -28,7 +28,7 @@ import net.java.sjtools.thread.executor.impl.SimpleThreadProvider;
 
 public class SuperTimer {
 	private Timer timer = new Timer(true);
-	private Executor executor = new SimpleThreadProvider();
+	private Executor executor = null;
 
 	private static SuperTimer me = new SuperTimer();
 
@@ -67,11 +67,19 @@ public class SuperTimer {
 		return new SuperTimerTaskRunner(task);
 	}
 
-	public Executor getExecutor() {
+	protected Executor getExecutor() {
+		if (executor == null) {
+			createExecutor();
+		}
+		
 		return executor;
 	}
 
-	public void setExecutor(Executor executor) {
-		this.executor = executor;
+	private synchronized void createExecutor() {
+		if (executor != null) {
+			return;
+		}
+
+		executor = new SimpleThreadProvider(false);
 	}
 }
