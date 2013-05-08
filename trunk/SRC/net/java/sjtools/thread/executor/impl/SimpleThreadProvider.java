@@ -22,10 +22,15 @@ package net.java.sjtools.thread.executor.impl;
 import net.java.sjtools.thread.executor.Executor;
 
 public class SimpleThreadProvider implements Executor {
+	private boolean daemon = false; 
+	
+	public SimpleThreadProvider(boolean daemon) {
+		this.daemon = daemon;
+	}
 
 	public void execute(Runnable runnable) {
 		Thread thread = new Thread(runnable);
-		thread.setDaemon(true);
+		thread.setDaemon(daemon);
 		thread.start();
 	}
 

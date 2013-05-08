@@ -24,9 +24,13 @@ import net.java.sjtools.thread.executor.Executor;
 import net.java.sjtools.thread.pool.ThreadPool;
 
 public class ThreadPoolProvider implements Executor {
-	private Executor executor = new SimpleThreadProvider();
+	private Executor defaultExecutor = new SimpleThreadProvider(false);
 	private ThreadPool pool = null;
 
+	public ThreadPoolProvider() {
+		pool = new ThreadPool();
+	}
+	
 	public ThreadPoolProvider(ThreadPool threadPool) {
 		pool = threadPool;
 	}
@@ -36,10 +40,10 @@ public class ThreadPoolProvider implements Executor {
 			SuperThread st = pool.getThread();
 			
 			if (!st.start(runnable)) {
-				executor.execute(runnable);				
+				defaultExecutor.execute(runnable);				
 			}
 		} catch (Exception e) {
-			executor.execute(runnable);
+			defaultExecutor.execute(runnable);
 		}
 	}
 

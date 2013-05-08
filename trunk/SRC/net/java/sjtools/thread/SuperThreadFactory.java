@@ -17,29 +17,33 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA
  */
-package net.java.sjtools.thread.pool;
+package net.java.sjtools.thread;
 
-import net.java.sjtools.pool.Pool;
-import net.java.sjtools.pool.PoolFactory;
-import net.java.sjtools.thread.SuperThread;
+import net.java.sjtools.thread.pool.ThreadListener;
 
-public class ThreadFactory implements PoolFactory, ThreadListener {
+public class SuperThreadFactory {
 	private String threadIdentifier = null;
 	private int priority = Thread.NORM_PRIORITY;
 	private boolean daemon = true;
 	private int threadNumber = 1;
 	private ThreadGroup group = null;
-	private Pool pool = null;
 	
-	public ThreadFactory(String threadIdentifier, boolean daemon, int priority) {
+	public SuperThreadFactory(String threadIdentifier, boolean daemon, int priority) {
 		this.threadIdentifier = threadIdentifier;
 		this.daemon = daemon;
 		this.priority = priority;
-		this.group = Thread.currentThread().getThreadGroup();
+		
+		SecurityManager currentManager = System.getSecurityManager();
+		
+		if (currentManager != null) {
+			this.group = currentManager.getThreadGroup();
+		} else {
+			this.group = Thread.currentThread().getThreadGroup();
+		}
 	}
 
-	public Object createObject() {
-		SuperThread st = new SuperThread(group, getThreadName(), this);
+	public SuperThread createSuperThread(ThreadListener listener) {
+		SuperThread st = createThread(listener);
 
 		st.setDaemon(daemon);
 		st.setPriority(priority);
@@ -48,40 +52,17 @@ public class ThreadFactory implements PoolFactory, ThreadListener {
 
 		return st;
 	}
-
-	private String getThreadName() {
+	
+	public SuperThread createSuperThread() {
+		return createSuperThread(null);
+	}
+	
+	private SuperThread createThread(ThreadListener listener) {
 		StringBuffer buffer = new StringBuffer();
 		buffer.append(threadIdentifier);
 		buffer.append("-");
 		buffer.append(threadNumber++);
-		
-		return buffer.toString();
-	}
 
-	public boolean validateObject(Object obj) {
-		if (obj instanceof SuperThread) {
-			return ((SuperThread)obj).getStatus() < SuperThread.STOPPING;	
-		}
-		
-		return false;
+		return new SuperThread(group, buffer.toString(), listener);	
 	}
-
-	public void destroyObject(Object obj) {
-		if (obj instanceof SuperThread) {
-			((SuperThread)obj).die();
-		}
-	}
-
-	public void done(SuperThread thread) {
-		if (pool != null && pool.isRunning()) {
-			pool.returnObject(thread);
-		} else {
-			destroyObject(thread);
-		}
-	}
-
-	public void setPool(Pool pool) {
-		this.pool = pool;
-	}
-
 }

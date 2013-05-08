@@ -25,12 +25,22 @@ import net.java.sjtools.pool.error.ObjectCreationException;
 import net.java.sjtools.pool.error.PoolUnavailableException;
 import net.java.sjtools.pool.error.WaitTimeExpiredException;
 import net.java.sjtools.thread.SuperThread;
+import net.java.sjtools.thread.SuperThreadFactory;
 
 public class ThreadPool {
+	private static int poolCounter = 1;
 	private Pool pool = null;
 
-	public ThreadPool(PoolConfig config, ThreadFactory factory) {
-		pool = new Pool(config, factory);
+	public ThreadPool() {
+		this(new SuperThreadFactory(getDefaultPoolName(), false, Thread.NORM_PRIORITY));
+	}
+
+	public ThreadPool(SuperThreadFactory factory) {
+		this(getDefaultConfig(), factory);
+	}
+	
+	public ThreadPool(PoolConfig config, SuperThreadFactory factory) {
+		pool = new Pool(config, new ThreadPoolFactory(factory));
 	}
 
 	public int getPoolSize() {
@@ -44,15 +54,18 @@ public class ThreadPool {
 	public SuperThread getThread() throws PoolUnavailableException, WaitTimeExpiredException, ObjectCreationException {
 		return (SuperThread) pool.borrowObject();
 	}
+	
+	private static String getDefaultPoolName() {
+		StringBuffer buffer = new StringBuffer("ThreadPool(");
+		buffer.append(poolCounter++);
+		buffer.append(")");
+		
+		return buffer.toString();
+	}
 
 	public static PoolConfig getDefaultConfig() {
 		PoolConfig pc = new PoolConfig();
-		pc.setMinimalSize(0);
-		pc.setMaxSize(PoolConfig.NO_MAX_SIZE);
 		pc.setExpireTime(60000);
-		pc.setTimeOut(PoolConfig.NEVER_TIMEOUT);
-		pc.setValidateOnInterval(false);
-		pc.setWaitTime(PoolConfig.WAIT_FOREVER);
 
 		return pc;
 	}
