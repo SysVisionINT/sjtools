@@ -19,35 +19,21 @@
  */
 package net.java.sjtools.thread.executor.impl;
 
-import net.java.sjtools.thread.SuperThread;
 import net.java.sjtools.thread.executor.Executor;
-import net.java.sjtools.thread.pool.ThreadPool;
 
-public class ThreadPoolProvider implements Executor {
-	private Executor defaultExecutor = new SimpleThreadProvider(false);
-	private ThreadPool pool = null;
-
-	public ThreadPoolProvider() {
-		pool = new ThreadPool();
-	}
+public class BasicThreadExecutor implements Executor {
+	private boolean daemon = false; 
 	
-	public ThreadPoolProvider(ThreadPool threadPool) {
-		pool = threadPool;
+	public BasicThreadExecutor(boolean daemon) {
+		this.daemon = daemon;
 	}
 
 	public void execute(Runnable runnable) {
-		try {
-			SuperThread st = pool.getThread();
-			
-			if (!st.start(runnable)) {
-				defaultExecutor.execute(runnable);				
-			}
-		} catch (Exception e) {
-			defaultExecutor.execute(runnable);
-		}
+		Thread thread = new Thread(runnable);
+		thread.setDaemon(daemon);
+		thread.start();
 	}
 
 	public void close() {
-		pool.closePool();
 	}
 }
