@@ -35,6 +35,7 @@ import net.java.sjtools.thread.Lock;
 import net.java.sjtools.time.timer.SuperTimer;
 
 public class Pool {
+
 	private PoolConfig config = null;
 	private PoolFactory factory = null;
 	private Map idlList = new HashMap();
@@ -227,35 +228,34 @@ public class Pool {
 		}
 
 		Object obj = null;
-		
-		try {
-			lock.getWriteLock();
-			
-			long wait = Long.MAX_VALUE;
 
-			if (config.getWaitTime() != PoolConfig.WAIT_FOREVER) {
-				wait = System.currentTimeMillis() + config.getWaitTime();
-			}
+		long wait = Long.MAX_VALUE;
 
-			while (obj == null && System.currentTimeMillis() < wait) {
-				obj = getFirstObject();
+		if (config.getWaitTime() != PoolConfig.WAIT_FOREVER) {
+			wait = System.currentTimeMillis() + config.getWaitTime();
+		}
 
-				if (obj == null) {
-					if (config.getMaxSize() == PoolConfig.NO_MAX_SIZE || inUseList.size() < config.getMaxSize()) {
-						obj = factory.createObject();
-					}
-				} else {
-					if (config.isValidateOnBorrow() && !factory.validateObject(obj)) {
-						factory.destroyObject(obj);
-						obj = null;
-					}
-				}
-			}
+		while (obj == null && System.currentTimeMillis() < wait) {
+			obj = getFirstObject();
 
 			if (obj == null) {
-				throw new WaitTimeExpiredException();
+				if (config.getMaxSize() == PoolConfig.NO_MAX_SIZE || inUseList.size() < config.getMaxSize()) {
+					obj = factory.createObject();
+				}
+			} else {
+				if (config.isValidateOnBorrow() && !factory.validateObject(obj)) {
+					factory.destroyObject(obj);
+					obj = null;
+				}
 			}
-			
+		}
+
+		if (obj == null) {
+			throw new WaitTimeExpiredException();
+		}
+
+		try {
+			lock.getWriteLock();
 			inUseList.put(obj, new Long(System.currentTimeMillis()));
 		} finally {
 			lock.releaseLock();
@@ -267,12 +267,18 @@ public class Pool {
 	private Object getFirstObject() {
 		Object obj = null;
 
-		if (!idlList.isEmpty()) {
-			obj = idlList.keySet().iterator().next();
+		try {
+			lock.getWriteLock();
 
-			if (idlList.remove(obj) == null) {
-				obj = null;
+			if (!idlList.isEmpty()) {
+				obj = idlList.keySet().iterator().next();
+
+				if (idlList.remove(obj) == null) {
+					obj = null;
+				}
 			}
+		} finally {
+			lock.releaseLock();
 		}
 
 		return obj;
