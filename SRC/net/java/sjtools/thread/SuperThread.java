@@ -43,13 +43,13 @@ public class SuperThread extends Thread {
 	}
 
 	public void run() {
-		while (status < STOPPING) {
+		while (getStatus() < STOPPING) {
 			try {
 				Thread.sleep(Long.MAX_VALUE);
 			} catch (InterruptedException e) {}
 
-			if (status < STOPPING && task != null) {
-				status = RUNNING;
+			if (getStatus() < STOPPING && task != null) {
+				setStatus(RUNNING);
 
 				try {
 					task.run();
@@ -59,8 +59,8 @@ public class SuperThread extends Thread {
 
 				task = null;
 
-				if (status == RUNNING) {
-					status = WAITING;
+				if (getStatus() == RUNNING) {
+					setStatus(WAITING);
 
 					if (listener != null) {
 						listener.done(this);
@@ -69,7 +69,11 @@ public class SuperThread extends Thread {
 			}
 		}
 
-		status = STOPED;
+		setStatus(STOPED);
+	}
+	
+	private synchronized void setStatus(int status) {
+		this.status = status;
 	}
 
 	public synchronized int getStatus() {

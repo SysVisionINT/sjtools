@@ -234,7 +234,7 @@ public class Pool {
 			obj = getFirstObject();
 
 			if (obj == null) {
-				if (config.getMaxSize() == PoolConfig.NO_MAX_SIZE || inUseList.size() < config.getMaxSize()) {
+				if (config.getMaxSize() == PoolConfig.NO_MAX_SIZE || getObjectsInUse() < config.getMaxSize()) {
 					obj = factory.createObject();
 				}
 			} else {
@@ -330,7 +330,7 @@ public class Pool {
 		schedule();
 	}
 
-	public void setPoolFactory(PoolFactory factory) {
+	private void setPoolFactory(PoolFactory factory) {
 		this.factory = factory;
 		factory.setPool(this);
 	}
