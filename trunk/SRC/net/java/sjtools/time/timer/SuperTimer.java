@@ -23,15 +23,17 @@ import java.util.Date;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import net.java.sjtools.thread.SuperThreadFactory;
 import net.java.sjtools.thread.executor.Executor;
-import net.java.sjtools.thread.executor.impl.BasicThreadExecutor;
+import net.java.sjtools.thread.executor.impl.ThreadPoolExecutor;
+import net.java.sjtools.thread.pool.ThreadPool;
 
 public class SuperTimer {
 	private Timer timer = null;
 	private boolean defaultTimer = false;
 	private Executor executor = null;
 
-	private static SuperTimer me = new SuperTimer(true, new BasicThreadExecutor(false));
+	private static SuperTimer me = new SuperTimer(true, null);
 
 	private SuperTimer(boolean defaultTimer, Executor executor) {
 		this.timer = new Timer(defaultTimer ? true : false);
@@ -42,7 +44,7 @@ public class SuperTimer {
 	public static SuperTimer getInstance() {
 		return me;
 	}
-	
+
 	public static SuperTimer getInstance(Executor executor) {
 		return new SuperTimer(false, executor);
 	}
@@ -87,6 +89,20 @@ public class SuperTimer {
 	}
 
 	protected Executor getExecutor() {
+		if (executor == null) {
+			init();
+		}
+		
 		return executor;
+	}
+	
+	private synchronized void init() {
+		if (executor != null) {
+			return;
+		}
+		
+		SuperThreadFactory factory = new SuperThreadFactory("SuperTimer", true, Thread.MIN_PRIORITY);
+		ThreadPool threadPool = new ThreadPool(factory);
+		executor = new ThreadPoolExecutor(threadPool);
 	}
 }
