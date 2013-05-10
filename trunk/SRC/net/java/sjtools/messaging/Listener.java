@@ -17,24 +17,9 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA
  */
-package net.java.sjtools.messaging.model;
+package net.java.sjtools.messaging;
 
-import net.java.sjtools.messaging.Message;
 
-public class StorageRecord {
-    private Message message = null;
-    private String recordKey = null;
-
-    public StorageRecord(String recordKey, Message message) {
-        this.recordKey = recordKey;
-        this.message = message;
-    }
-
-    public Message getMessage() {
-        return message;
-    }
-
-    public String getRecordKey() {
-        return recordKey;
-    }
+public interface Listener {
+    public void onMessage(Message message);
 }
