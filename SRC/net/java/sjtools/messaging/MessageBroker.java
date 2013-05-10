@@ -24,20 +24,18 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
-import net.java.sjtools.messaging.impl.DefaultMessageStorage;
-import net.java.sjtools.messaging.impl.ListenerFeeder;
-import net.java.sjtools.messaging.model.Listener;
-import net.java.sjtools.messaging.model.MessageStorage;
+import net.java.sjtools.messaging.impl.MessageQueue;
+import net.java.sjtools.messaging.model.ListenerRecord;
 import net.java.sjtools.thread.Lock;
 
 public class MessageBroker {
+
 	private static MessageBroker messageBroker = new MessageBroker();
 
 	private Map topicMap = null;
 	private Lock topicLock = null;
 	private Map listenerMap = null;
 	private Lock listenerLock = null;
-	private MessageStorage messageStorage = null;
 
 	public static MessageBroker getInstance() {
 		return messageBroker;
@@ -47,19 +45,8 @@ public class MessageBroker {
 		topicMap = new HashMap();
 		topicLock = new Lock(topicMap);
 
-		setMessageStorage(new DefaultMessageStorage());
-
 		listenerMap = new HashMap();
 		listenerLock = new Lock(listenerMap);
-	}
-
-	public void setMessageStorage(MessageStorage storage) {
-		if (messageStorage != null) {
-			messageStorage.close();
-		}
-
-		messageStorage = storage;
-		messageStorage.open();
 	}
 
 	public Topic createTopic(String topicName) {
@@ -74,86 +61,100 @@ public class MessageBroker {
 	}
 
 	private void register(String topicName, Topic topic) {
-		topicLock.getWriteLock();
-		topicMap.put(topicName, topic);
-		topicLock.releaseLock();
+		try {
+			topicLock.getWriteLock();
+			topicMap.put(topicName, topic);
+		} finally {
+			topicLock.releaseLock();
+		}
 	}
 
 	public String[] getTopicNames() {
-		topicLock.getReadLock();
-		Set topicNames = topicMap.keySet();
-		topicLock.releaseLock();
+		try {
+			topicLock.getReadLock();
+			Set topicNames = topicMap.keySet();
 
-		return (String[]) topicNames.toArray(new String[topicNames.size()]);
+			return (String[]) topicNames.toArray(new String[topicNames.size()]);
+		} finally {
+			topicLock.releaseLock();
+		}
 	}
 
 	public Topic getTopic(String topicName) {
-		topicLock.getReadLock();
-		Topic topic = (Topic) topicMap.get(topicName);
-		topicLock.releaseLock();
-
-		return topic;
+		try {
+			topicLock.getReadLock();
+			return (Topic) topicMap.get(topicName);
+		} finally {
+			topicLock.releaseLock();
+		}
 	}
 
 	protected void register(String name, Listener listener) {
-		listenerLock.getWriteLock();
+		try {
+			listenerLock.getWriteLock();
 
-		ListenerFeeder registed = (ListenerFeeder) listenerMap.get(name);
+			ListenerRecord registed = (ListenerRecord) listenerMap.get(name);
 
-		if (registed == null) {
-			registed = new ListenerFeeder(name, listener);
-			listenerMap.put(name, registed);
-		} else {
-			registed.incTopicCount();
+			if (registed == null) {
+				registed = new ListenerRecord(listener);
+				listenerMap.put(name, registed);
+			} else {
+				registed.incrementTopicCount();
+			}
+		} finally {
+			listenerLock.releaseLock();
 		}
-
-		listenerLock.releaseLock();
 	}
 
 	protected void unregister(String name) {
-		listenerLock.getWriteLock();
+		try {
+			listenerLock.getWriteLock();
 
-		ListenerFeeder registed = (ListenerFeeder) listenerMap.get(name);
+			ListenerRecord registed = (ListenerRecord) listenerMap.get(name);
 
-		if (registed != null) {
-			registed.decTopicCount();
+			if (registed != null) {
+				registed.decrementTopicCount();
 
-			if (registed.getTopicCount() == 0) {
-				listenerMap.remove(name);
-				registed.stop();
+				if (registed.getTopicCount() == 0) {
+					listenerMap.remove(name);
+					registed.getMessageQueue().close();
+				}
 			}
+		} finally {
+			listenerLock.releaseLock();
 		}
-
-		listenerLock.releaseLock();
 	}
 
-	public MessageStorage getMessageStorage() {
-		return messageStorage;
+	public MessageQueue getListenerMessageQueue(String listenerName) {
+		try {
+			listenerLock.getReadLock();
+			ListenerRecord registed = (ListenerRecord) listenerMap.get(listenerName);
+
+			if (registed != null) {
+				return registed.getMessageQueue();
+			} else {
+				return null;
+			}
+		} finally {
+			listenerLock.releaseLock();
+		}
 	}
 
-	public ListenerFeeder getListenerFeeder(String listenerName) {
-		listenerLock.getReadLock();
-		ListenerFeeder feeder = (ListenerFeeder) listenerMap.get(listenerName);
-		listenerLock.releaseLock();
-
-		return feeder;
-	}
-	
 	public void stop() {
-		listenerLock.getWriteLock();
-		
-		ListenerFeeder feeder = null;
-		
-		for (Iterator i =  listenerMap.values().iterator(); i.hasNext();) {
-			feeder = (ListenerFeeder) i.next();
-			feeder.stop();
+		try {
+			listenerLock.getWriteLock();
+			topicLock.getWriteLock();
+
+			for (Iterator i = listenerMap.values().iterator(); i.hasNext();) {
+				ListenerRecord registed = (ListenerRecord) i.next();
+				registed.getMessageQueue().close();
+			}
+
+			listenerMap.clear();
+			topicMap.clear();
+		} finally {
+			listenerLock.releaseLock();
+			topicLock.releaseLock();
 		}
-		
-		listenerMap.clear();
-		listenerLock.releaseLock();
-		
-		topicLock.getWriteLock();
-		topicMap.clear();
-		topicLock.releaseLock();
 	}
 }

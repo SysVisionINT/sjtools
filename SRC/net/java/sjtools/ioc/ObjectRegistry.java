@@ -19,18 +19,15 @@
  */
 package net.java.sjtools.ioc;
 
-import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 
-import net.java.sjtools.ioc.error.ObjectCreationError;
 import net.java.sjtools.ioc.error.ObjectNotFound;
 import net.java.sjtools.ioc.error.ObjectRegestryError;
 import net.java.sjtools.ioc.model.RegistryRecord;
 import net.java.sjtools.logging.Log;
 import net.java.sjtools.logging.LogFactory;
 import net.java.sjtools.thread.Lock;
-import net.java.sjtools.util.BeanUtil;
 
 public class ObjectRegistry {
 	public static final int OBJECT_NAME = 0;
@@ -120,68 +117,6 @@ public class ObjectRegistry {
 		} else {
 			throw new ObjectNotFound(objectName);
 		}
-	}
-
-	public void fillDependencies(String objectName, int type) throws ObjectRegestryError {
-		Class[] parameters = null;
-		Object[] value = null;
-		String propertyName = null;
-		Object parameterValue = null;
-
-		Object object = getObject(objectName);
-		Method[] methods = object.getClass().getMethods();
-
-		for (int i = 0; i < methods.length; i++) {
-			if (methods[i].getName().startsWith("set")) {
-				parameters = methods[i].getParameterTypes();
-
-				if (parameters.length == 1) {
-					propertyName = BeanUtil.getPropertyName(methods[i].getName());
-
-					if (!isPropertyFillable(objectName, propertyName)) {
-						continue;
-					}
-
-					if (type == OBJECT_NAME) {
-						if (isObjectDefined(propertyName)) {
-							parameterValue = getObject(propertyName);
-
-							if (parameterValue != null) {
-								try {
-									value = new Object[1];
-									value[0] = parameterValue;
-
-									methods[i].invoke(object, value);
-								} catch (Exception e) {
-									throw new ObjectCreationError("Error invoking method " + methods[i].getName(), e);
-								}
-							}
-						}
-					}
-
-					if (type == CLASS_NAME) {
-						if (isObjectDefined(parameters[0])) {
-							parameterValue = getObject(parameters[0]);
-
-							if (parameterValue != null) {
-								try {
-									value = new Object[1];
-									value[0] = parameterValue;
-
-									methods[i].invoke(object, value);
-								} catch (Exception e) {
-									throw new ObjectCreationError("Error invoking method " + methods[i].getName(), e);
-								}
-							}
-						}
-					}
-				}
-			}
-		}
-	}
-
-	protected boolean isPropertyFillable(String objectName, String propertyName) {
-		return true;
 	}
 
 	public boolean isObjectDefined(Class clazz) throws ObjectRegestryError {

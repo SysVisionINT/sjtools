@@ -23,11 +23,11 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import net.java.sjtools.messaging.impl.ListenerFeeder;
-import net.java.sjtools.messaging.model.Listener;
+import net.java.sjtools.messaging.impl.MessageQueue;
 import net.java.sjtools.thread.Lock;
 
 public class Topic {
+
 	private List listenerList = null;
 	private Lock listenerLock = null;
 	private String name = null;
@@ -46,49 +46,78 @@ public class Topic {
 	public void sendMessage(Message msg) {
 		MessageBroker broker = MessageBroker.getInstance();
 
-		ListenerFeeder feeder = null;
+		MessageQueue queue = null;
 
-		listenerLock.getReadLock();
+		try {
+			listenerLock.getReadLock();
 
-		for (Iterator i = listenerList.iterator(); i.hasNext();) {
-			feeder = broker.getListenerFeeder((String) i.next());
+			for (Iterator i = listenerList.iterator(); i.hasNext();) {
+				queue = broker.getListenerMessageQueue((String) i.next());
 
-			feeder.delivery(msg);
+				if (queue != null) {
+					queue.push(msg);
+				}
+			}
+		} finally {
+			listenerLock.releaseLock();
 		}
-
-		listenerLock.releaseLock();
 	}
 
 	public void subscribe(Listener listener) {
-		subscribe(listener.getClass().getName(), listener);
+		String listenerName = listener.getClass().getName();
+
+		subscribe(listenerName, listener);
 	}
 
 	public void subscribe(String listenerName, Listener listener) {
-		listenerLock.getWriteLock();
-		listenerList.add(listenerName);
-		listenerLock.releaseLock();
+		if (!isSubscriber(listenerName)) {
+			try {
+				listenerLock.getWriteLock();
+				listenerList.add(listenerName);
 
-		MessageBroker.getInstance().register(listenerName, listener);
+				MessageBroker.getInstance().register(listenerName, listener);
+			} finally {
+				listenerLock.releaseLock();
+			}
+		}
 	}
 
 	public void unsubscribe(Listener listener) {
-		unsubscribe(listener.getClass().getName(), listener);
+		String listenerName = listener.getClass().getName();
+
+		unsubscribe(listenerName);
 	}
 
-	public void unsubscribe(String listenerName, Listener listener) {
-		listenerLock.getWriteLock();
-		listenerList.remove(listenerName);
-		listenerLock.releaseLock();
+	public void unsubscribe(String listenerName) {
+		if (isSubscriber(listenerName)) {
+			try {
+				listenerLock.getWriteLock();
+				listenerList.remove(listenerName);
 
-		MessageBroker.getInstance().unregister(listenerName);
+				MessageBroker.getInstance().unregister(listenerName);
+			} finally {
+				listenerLock.releaseLock();
+			}
+		}
+	}
+
+	private boolean isSubscriber(String listenerName) {
+		try {
+			listenerLock.getReadLock();
+
+			return listenerList.contains(listenerName);
+		} finally {
+			listenerLock.releaseLock();
+		}
 	}
 
 	public int getNumberOfListeners() {
-		listenerLock.getReadLock();
-		int size = listenerList.size();
-		listenerLock.releaseLock();
-
-		return size;
+		try {
+			listenerLock.getReadLock();
+			return listenerList.size();
+		} finally {
+			listenerLock.releaseLock();
+		}
 	}
 
 	public boolean equals(Object obj) {

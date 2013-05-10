@@ -19,20 +19,30 @@
  */
 package net.java.sjtools.messaging.model;
 
-import net.java.sjtools.messaging.Message;
+import net.java.sjtools.messaging.Listener;
+import net.java.sjtools.messaging.impl.MessageQueue;
 
-public interface MessageStorage {
-	public void open();
-
-	public StorageRecord getNextMessage(String listenerName);
-
-	public void deleteMessage(String listenerName, String recordKey);
-
-	public boolean hasMessages(String listenerName);
-
-	public void store(String listenerName, Message message);
-
-	public void clean(String listenerName);
-
-	public void close();
+public class ListenerRecord {
+	private int topicCount = 1;
+	private MessageQueue messageQueue = null;
+	
+	public ListenerRecord(Listener listener) {
+		messageQueue = new MessageQueue(listener);
+	}
+	
+	public int getTopicCount() {
+		return topicCount;
+	}
+	
+	public MessageQueue getMessageQueue() {
+		return messageQueue;
+	}
+	
+	public void incrementTopicCount() {
+		topicCount++;
+	}
+	
+	public void decrementTopicCount() {
+		topicCount--;
+	}
 }

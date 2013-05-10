@@ -23,75 +23,21 @@ import java.io.Serializable;
 
 public class Message implements Serializable {
 	private static final long serialVersionUID = 2816641117920581583L;
-	
-	private String sender = null;
-    private long timestamp = 0;
-    private Object messageObject = null;
-    private String replyTo = null;
-    private String messageID = null;
 
-    public Message(Object messageObject) {       
-        this.messageObject = messageObject;
-        
-        timestamp = System.currentTimeMillis();
-    }
+	private long timestamp = 0;
+	private Object messageObject = null;
 
-    public Object getMessageObject() {
-        return messageObject;
-    }
+	public Message(Object messageObject) {
+		this.messageObject = messageObject;
 
-    public String getSender() {
-        return sender;
-    }
+		timestamp = System.currentTimeMillis();
+	}
 
-    public void setSender(String sender) {
-        this.sender = sender;
-    }
-    
-    public long getTimestamp() {
-        return timestamp;
-    }
-    
-    public String getMessageID() {
-        if (messageID != null) {
-            return messageID;
-        }
-        
-        StringBuffer buffer = new StringBuffer();
-        
-        if (sender != null) {
-            buffer.append(sender);
-            buffer.append(":");
-        }
-        
-        buffer.append(String.valueOf(timestamp));
-        
-        return buffer.toString();
-    }
-    
-    public void setMessageID(String messageID) {
-        this.messageID = messageID;
-    }
-    
-    public String getReplyTo() {
-        return replyTo;
-    }
-    
-    public void setReplyTo(String replyTo) {
-        this.replyTo = replyTo;
-    }
-    
-    public boolean equals(Object obj) {
-        if (obj == null) {
-            return false;
-        }
-        
-        if (!(obj instanceof Message)) {
-            return false;
-        }
-        
-        Message other = (Message)obj;
-                
-        return other.getMessageID().equals(getMessageID());
-    }
+	public Object getMessageObject() {
+		return messageObject;
+	}
+
+	public long getTimestamp() {
+		return timestamp;
+	}
 }
