@@ -23,7 +23,6 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import net.java.sjtools.messaging.impl.MessageQueue;
 import net.java.sjtools.thread.Lock;
 
 public class Topic {
@@ -46,17 +45,11 @@ public class Topic {
 	public void sendMessage(Message msg) {
 		MessageBroker broker = MessageBroker.getInstance();
 
-		MessageQueue queue = null;
-
 		try {
 			listenerLock.getReadLock();
 
 			for (Iterator i = listenerList.iterator(); i.hasNext();) {
-				queue = broker.getListenerMessageQueue((String) i.next());
-
-				if (queue != null) {
-					queue.push(msg);
-				}
+				broker.sendMessage((String) i.next(), msg);
 			}
 		} finally {
 			listenerLock.releaseLock();
@@ -75,7 +68,7 @@ public class Topic {
 				listenerLock.getWriteLock();
 				listenerList.add(listenerName);
 
-				MessageBroker.getInstance().register(listenerName, listener);
+				MessageBroker.getInstance().registerListener(listenerName, listener);
 			} finally {
 				listenerLock.releaseLock();
 			}
@@ -94,7 +87,7 @@ public class Topic {
 				listenerLock.getWriteLock();
 				listenerList.remove(listenerName);
 
-				MessageBroker.getInstance().unregister(listenerName);
+				MessageBroker.getInstance().unregisterListener(listenerName);
 			} finally {
 				listenerLock.releaseLock();
 			}

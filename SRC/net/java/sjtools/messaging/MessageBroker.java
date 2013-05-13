@@ -54,19 +54,16 @@ public class MessageBroker {
 
 		if (topic == null) {
 			topic = new Topic(topicName);
-			register(topicName, topic);
+			
+			try {
+				topicLock.getWriteLock();
+				topicMap.put(topicName, topic);
+			} finally {
+				topicLock.releaseLock();
+			}
 		}
 
 		return topic;
-	}
-
-	private void register(String topicName, Topic topic) {
-		try {
-			topicLock.getWriteLock();
-			topicMap.put(topicName, topic);
-		} finally {
-			topicLock.releaseLock();
-		}
 	}
 
 	public String[] getTopicNames() {
@@ -88,8 +85,14 @@ public class MessageBroker {
 			topicLock.releaseLock();
 		}
 	}
+	
+	public void registerListener(Listener listener) {
+		if (listener != null) {
+			registerListener(listener.getClass().getName(), listener);
+		}
+	}
 
-	protected void register(String name, Listener listener) {
+	public void registerListener(String name, Listener listener) {
 		try {
 			listenerLock.getWriteLock();
 
@@ -99,21 +102,27 @@ public class MessageBroker {
 				registed = new ListenerRecord(listener);
 				listenerMap.put(name, registed);
 			} else {
-				registed.incrementTopicCount();
+				registed.incrementSubscriptionCount();
 			}
 		} finally {
 			listenerLock.releaseLock();
 		}
 	}
+	
+	public void unregisterListener(Listener listener) {
+		if (listener != null) {
+			registerListener(listener.getClass().getName(), listener);
+		}
+	}
 
-	protected void unregister(String name) {
+	public void unregisterListener(String name) {
 		try {
 			listenerLock.getWriteLock();
 
 			ListenerRecord registed = (ListenerRecord) listenerMap.get(name);
 
 			if (registed != null) {
-				registed.decrementTopicCount();
+				registed.decrementSubscriptionCount();
 
 				if (registed.getTopicCount() == 0) {
 					listenerMap.remove(name);
@@ -125,7 +134,7 @@ public class MessageBroker {
 		}
 	}
 
-	public MessageQueue getListenerMessageQueue(String listenerName) {
+	private MessageQueue getListenerMessageQueue(String listenerName) {
 		try {
 			listenerLock.getReadLock();
 			ListenerRecord registed = (ListenerRecord) listenerMap.get(listenerName);
@@ -138,6 +147,17 @@ public class MessageBroker {
 		} finally {
 			listenerLock.releaseLock();
 		}
+	}
+	
+	public boolean sendMessage(String listenerName, Message message) {
+		MessageQueue queue = getListenerMessageQueue(listenerName);
+		
+		if (queue != null) {
+			queue.push(message);
+			return true;
+		}
+		
+		return false;
 	}
 
 	public void stop() {

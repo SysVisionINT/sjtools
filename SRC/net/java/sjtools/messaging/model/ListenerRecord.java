@@ -38,11 +38,11 @@ public class ListenerRecord {
 		return messageQueue;
 	}
 	
-	public void incrementTopicCount() {
+	public void incrementSubscriptionCount() {
 		topicCount++;
 	}
 	
-	public void decrementTopicCount() {
+	public void decrementSubscriptionCount() {
 		topicCount--;
 	}
 }
