@@ -57,9 +57,9 @@ public class Topic {
 	}
 
 	public void subscribe(Listener listener) {
-		String listenerName = listener.getClass().getName();
-
-		subscribe(listenerName, listener);
+		if (listener != null) {
+			subscribe(MessageBroker.getInstance().getListenerName(listener), listener);
+		}
 	}
 
 	public void subscribe(String listenerName, Listener listener) {

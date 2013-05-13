@@ -88,7 +88,7 @@ public class MessageBroker {
 	
 	public void registerListener(Listener listener) {
 		if (listener != null) {
-			registerListener(listener.getClass().getName(), listener);
+			registerListener(getListenerName(listener), listener);
 		}
 	}
 
@@ -111,8 +111,12 @@ public class MessageBroker {
 	
 	public void unregisterListener(Listener listener) {
 		if (listener != null) {
-			registerListener(listener.getClass().getName(), listener);
+			registerListener(getListenerName(listener), listener);
 		}
+	}
+
+	public String getListenerName(Listener listener) {
+		return listener.getClass().getName();
 	}
 
 	public void unregisterListener(String name) {
@@ -144,6 +148,23 @@ public class MessageBroker {
 			listenerLock.releaseLock();
 		}
 	}	
+	
+	public boolean isListenerRegistered(Listener listener) {
+		if (listener != null) {
+			return isListenerRegistered(getListenerName(listener));
+		}
+		
+		return false;
+	}
+	
+	public boolean isListenerRegistered(String name) {
+		try {
+			listenerLock.getReadLock();
+			return listenerMap.containsKey(name);
+		} finally {
+			listenerLock.releaseLock();
+		}
+	}
 
 	private MessageQueue getListenerMessageQueue(String listenerName) {
 		try {
