@@ -133,6 +133,17 @@ public class MessageBroker {
 			listenerLock.releaseLock();
 		}
 	}
+	
+	public String[] getListenerNames() {
+		try {
+			listenerLock.getReadLock();
+			Set listenerNames = listenerMap.keySet();
+
+			return (String[]) listenerNames.toArray(new String[listenerNames.size()]);
+		} finally {
+			listenerLock.releaseLock();
+		}
+	}	
 
 	private MessageQueue getListenerMessageQueue(String listenerName) {
 		try {
