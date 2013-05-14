@@ -19,82 +19,9 @@
  */
 package net.java.sjtools.messaging.impl;
 
-import net.java.sjtools.io.IO;
-import net.java.sjtools.messaging.Listener;
 import net.java.sjtools.messaging.Message;
-import net.java.sjtools.util.Queue;
 
-public class MessageQueue implements Runnable {
-
-	private Queue queue = null;
-	private boolean running = false;
-	private boolean sleeping = false;
-	private Listener listener = null;
-	private Thread thread = null;
-
-	public MessageQueue(Listener listener) {
-		this.queue = new Queue();
-		this.listener = listener;
-		this.running = true;
-
-		thread = new Thread(this);
-		thread.setDaemon(true);
-
-		thread.start();
-	}
-
-	public void run() {
-		while (isRunning()) {
-			Message message = (Message) queue.poll();
-
-			if (message != null) {
-				try {
-					listener.onMessage(message);
-				} catch (Exception e) {
-					e.printStackTrace(IO.err);
-				}
-			} else {
-				try {
-					setSleeping(true);
-					Thread.sleep(Long.MAX_VALUE);
-				} catch (InterruptedException e) {
-					setSleeping(false);
-				}
-				
-			}
-		}
-	}
-
-	public void push(Message message) {
-		if (isRunning()) {
-			queue.push(message);
-
-			if (isSleeping()) {
-				thread.interrupt();
-			}
-		}
-	}
-
-	public synchronized void close() {
-		if (isRunning()) {
-			running = false;
-			queue.clean();
-
-			if (isSleeping()) {
-				thread.interrupt();
-			}
-		}
-	}
-
-	private synchronized boolean isRunning() {
-		return running;
-	}
-
-	private synchronized boolean isSleeping() {
-		return sleeping;
-	}
-
-	private synchronized void setSleeping(boolean mode) {
-		this.sleeping = mode;
-	}
+public interface MessageQueue {
+	public void push(Message message);
+	public void close();
 }

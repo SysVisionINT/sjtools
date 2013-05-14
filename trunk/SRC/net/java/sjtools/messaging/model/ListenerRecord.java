@@ -20,6 +20,7 @@
 package net.java.sjtools.messaging.model;
 
 import net.java.sjtools.messaging.Listener;
+import net.java.sjtools.messaging.impl.DaemonQueue;
 import net.java.sjtools.messaging.impl.MessageQueue;
 
 public class ListenerRecord {
@@ -27,7 +28,11 @@ public class ListenerRecord {
 	private MessageQueue messageQueue = null;
 	
 	public ListenerRecord(Listener listener) {
-		messageQueue = new MessageQueue(listener);
+		this(new DaemonQueue(listener));
+	}
+	
+	public ListenerRecord(MessageQueue messageQueue) {
+		this.messageQueue = messageQueue;
 	}
 	
 	public int getTopicCount() {
