@@ -17,22 +17,35 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA
  */
-package net.java.sjtools.messaging.util;
+package net.java.sjtools.messaging.impl;
 
-import java.util.Random;
+import net.java.sjtools.messaging.Message;
+import net.java.sjtools.thread.Lock;
 
-public class MessageReferenceUtil {
-	private static Random random = new Random(System.currentTimeMillis());
+public class CallQueue implements MessageQueue {
+	private Message message = null;
+	private Lock semafore = null;
 	
-	public static String getReference() {
-		StringBuffer buffer = new StringBuffer();
-		
-		buffer.append(Thread.currentThread().getName());
-		buffer.append("-");
-		buffer.append(String.valueOf(System.currentTimeMillis()));
-		buffer.append("-");
-		buffer.append(random.nextInt(1000000));
-		
-		return String.valueOf(buffer.toString().hashCode());
+	public CallQueue() {
+		semafore = new Lock(this);
+		semafore.getWriteLock();
+	}
+
+	public void push(Message message) {
+		this.message = message;
+		semafore.releaseLock();
+	}
+
+	public void close() {
+		semafore.releaseLock();
+	}
+	
+	public Message getMessage() {
+		try {
+			semafore.getWriteLock();
+			return message;
+		} finally {
+			semafore.releaseLock();
+		}
 	}
 }

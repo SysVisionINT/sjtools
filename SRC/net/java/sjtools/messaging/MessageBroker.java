@@ -24,8 +24,12 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
+import net.java.sjtools.messaging.error.NoListenerError;
+import net.java.sjtools.messaging.impl.CallQueue;
 import net.java.sjtools.messaging.impl.MessageQueue;
+import net.java.sjtools.messaging.message.Request;
 import net.java.sjtools.messaging.model.ListenerRecord;
+import net.java.sjtools.messaging.util.ReferenceUtil;
 import net.java.sjtools.thread.Lock;
 
 public class MessageBroker {
@@ -36,6 +40,8 @@ public class MessageBroker {
 	private Lock topicLock = null;
 	private Map listenerMap = null;
 	private Lock listenerLock = null;
+	private Map callMap = null;
+	private Lock callLock = null;
 
 	public static MessageBroker getInstance() {
 		return messageBroker;
@@ -47,6 +53,9 @@ public class MessageBroker {
 
 		listenerMap = new HashMap();
 		listenerLock = new Lock(listenerMap);
+		
+		callMap = new HashMap();
+		callLock = new Lock(callMap);
 	}
 
 	public Topic createTopic(String topicName) {
@@ -77,7 +86,7 @@ public class MessageBroker {
 		}
 	}
 
-	public Topic getTopic(String topicName) {
+	private Topic getTopic(String topicName) {
 		try {
 			topicLock.getReadLock();
 			return (Topic) topicMap.get(topicName);
@@ -181,8 +190,21 @@ public class MessageBroker {
 		}
 	}
 	
+	private MessageQueue getCallMessageQueue(String callRef) {
+		try {
+			callLock.getReadLock();
+			return (MessageQueue) callMap.get(callRef);
+		} finally {
+			callLock.releaseLock();
+		}
+	}
+	
 	public boolean sendMessage(String listenerName, Message message) {
 		MessageQueue queue = getListenerMessageQueue(listenerName);
+		
+		if (queue == null) {
+			queue = getCallMessageQueue(listenerName);
+		}
 		
 		if (queue != null) {
 			queue.push(message);
@@ -191,20 +213,69 @@ public class MessageBroker {
 		
 		return false;
 	}
+	
+	public Object call(String listenerName, Object data) throws NoListenerError {
+		MessageQueue queue = getListenerMessageQueue(listenerName);
+		
+		if (queue != null) {
+			String msgRef = ReferenceUtil.getMessageReference();
+			String callRef = ReferenceUtil.getCallReference(msgRef);
+			CallQueue callQueue = registerCall(callRef);
+			
+			Request request = new Request(callRef, msgRef, data);
+			queue.push(request);
+			
+			Message response = callQueue.getMessage();
+			unregisterCall(callRef);
+			
+			return response.getMessageObject();
+		} else {
+			throw new NoListenerError(listenerName);
+		}
+	}
+	
+	private CallQueue registerCall(String callRef) {
+		try {
+			callLock.getWriteLock();
+			CallQueue queue = new CallQueue();
+			
+			callMap.put(callRef, queue);
+			
+			return queue;
+		} finally {
+			callLock.releaseLock();
+		}
+	}
+	
+	private void unregisterCall(String callRef) {
+		try {
+			callLock.getWriteLock();
+			callMap.remove(callRef);
+		} finally {
+			callLock.releaseLock();
+		}
+	}	
 
 	public void stop() {
 		try {
 			listenerLock.getWriteLock();
 			topicLock.getWriteLock();
+			callLock.getWriteLock();
 
 			for (Iterator i = listenerMap.values().iterator(); i.hasNext();) {
 				ListenerRecord registed = (ListenerRecord) i.next();
 				registed.getMessageQueue().close();
 			}
+			
+			for (Iterator i = callMap.values().iterator(); i.hasNext();) {
+				MessageQueue queue = (MessageQueue) i.next();
+				queue.close();
+			}
 
 			listenerMap.clear();
 			topicMap.clear();
 		} finally {
+			callLock.releaseLock();
 			listenerLock.releaseLock();
 			topicLock.releaseLock();
 		}
