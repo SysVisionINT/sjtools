@@ -24,7 +24,7 @@ import net.java.sjtools.messaging.Listener;
 import net.java.sjtools.messaging.Message;
 import net.java.sjtools.util.Queue;
 
-public class DaemonQueue implements MessageQueue, Runnable {
+public class ListenerQueue implements MessageQueue, Runnable {
 
 	private Queue queue = null;
 	private boolean running = false;
@@ -32,7 +32,7 @@ public class DaemonQueue implements MessageQueue, Runnable {
 	private Listener listener = null;
 	private Thread thread = null;
 
-	public DaemonQueue(Listener listener) {
+	public ListenerQueue(Listener listener) {
 		this.queue = new Queue();
 		this.listener = listener;
 		this.running = true;

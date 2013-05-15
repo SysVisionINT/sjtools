@@ -56,29 +56,15 @@ public class Topic {
 		}
 	}
 
-	public void subscribe(Listener listener) {
-		if (listener != null) {
-			subscribe(MessageBroker.getInstance().getListenerName(listener), listener);
-		}
-	}
-
-	public void subscribe(String listenerName, Listener listener) {
-		if (!isSubscriber(listenerName)) {
+	public void subscribe(String listenerName) {
+		if (!isSubscriber(listenerName) && MessageBroker.getInstance().isListenerRegistered(listenerName)) {
 			try {
 				listenerLock.getWriteLock();
 				listenerList.add(listenerName);
-
-				MessageBroker.getInstance().registerListener(listenerName, listener);
 			} finally {
 				listenerLock.releaseLock();
 			}
 		}
-	}
-
-	public void unsubscribe(Listener listener) {
-		String listenerName = listener.getClass().getName();
-
-		unsubscribe(listenerName);
 	}
 
 	public void unsubscribe(String listenerName) {
@@ -86,8 +72,6 @@ public class Topic {
 			try {
 				listenerLock.getWriteLock();
 				listenerList.remove(listenerName);
-
-				MessageBroker.getInstance().unregisterListener(listenerName);
 			} finally {
 				listenerLock.releaseLock();
 			}

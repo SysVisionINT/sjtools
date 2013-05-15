@@ -26,9 +26,9 @@ import java.util.Set;
 
 import net.java.sjtools.messaging.error.NoListenerError;
 import net.java.sjtools.messaging.impl.CallQueue;
+import net.java.sjtools.messaging.impl.ListenerQueue;
 import net.java.sjtools.messaging.impl.MessageQueue;
 import net.java.sjtools.messaging.message.Request;
-import net.java.sjtools.messaging.model.ListenerRecord;
 import net.java.sjtools.messaging.util.ReferenceUtil;
 import net.java.sjtools.thread.Lock;
 
@@ -58,8 +58,15 @@ public class MessageBroker {
 		callLock = new Lock(callMap);
 	}
 
-	public Topic createTopic(String topicName) {
-		Topic topic = getTopic(topicName);
+	public Topic getTopic(String topicName) {
+		Topic topic = null;
+		
+		try {
+			topicLock.getReadLock();
+			topic = (Topic) topicMap.get(topicName);
+		} finally {
+			topicLock.releaseLock();
+		}
 
 		if (topic == null) {
 			topic = new Topic(topicName);
@@ -86,61 +93,14 @@ public class MessageBroker {
 		}
 	}
 
-	private Topic getTopic(String topicName) {
-		try {
-			topicLock.getReadLock();
-			return (Topic) topicMap.get(topicName);
-		} finally {
-			topicLock.releaseLock();
-		}
-	}
-
-	public void registerListener(Listener listener) {
-		if (listener != null) {
-			registerListener(getListenerName(listener), listener);
-		}
-	}
-
 	public void registerListener(String name, Listener listener) {
 		try {
 			listenerLock.getWriteLock();
 
-			ListenerRecord registed = (ListenerRecord) listenerMap.get(name);
+			ListenerQueue queue = (ListenerQueue) listenerMap.get(name);
 
-			if (registed == null) {
-				registed = new ListenerRecord(listener);
-				listenerMap.put(name, registed);
-			} else {
-				registed.incrementSubscriptionCount();
-			}
-		} finally {
-			listenerLock.releaseLock();
-		}
-	}
-
-	public void unregisterListener(Listener listener) {
-		if (listener != null) {
-			registerListener(getListenerName(listener), listener);
-		}
-	}
-
-	public String getListenerName(Listener listener) {
-		return listener.getClass().getName();
-	}
-
-	public void unregisterListener(String name) {
-		try {
-			listenerLock.getWriteLock();
-
-			ListenerRecord registed = (ListenerRecord) listenerMap.get(name);
-
-			if (registed != null) {
-				registed.decrementSubscriptionCount();
-
-				if (registed.getTopicCount() == 0) {
-					listenerMap.remove(name);
-					registed.getMessageQueue().close();
-				}
+			if (queue == null) {
+				listenerMap.put(name, new ListenerQueue(listener));
 			}
 		} finally {
 			listenerLock.releaseLock();
@@ -158,14 +118,6 @@ public class MessageBroker {
 		}
 	}
 
-	public boolean isListenerRegistered(Listener listener) {
-		if (listener != null) {
-			return isListenerRegistered(getListenerName(listener));
-		}
-
-		return false;
-	}
-
 	public boolean isListenerRegistered(String name) {
 		try {
 			listenerLock.getReadLock();
@@ -178,13 +130,7 @@ public class MessageBroker {
 	private MessageQueue getListenerMessageQueue(String listenerName) {
 		try {
 			listenerLock.getReadLock();
-			ListenerRecord registed = (ListenerRecord) listenerMap.get(listenerName);
-
-			if (registed != null) {
-				return registed.getMessageQueue();
-			} else {
-				return null;
-			}
+			return (MessageQueue) listenerMap.get(listenerName);
 		} finally {
 			listenerLock.releaseLock();
 		}
@@ -273,8 +219,8 @@ public class MessageBroker {
 			callLock.getWriteLock();
 
 			for (Iterator i = listenerMap.values().iterator(); i.hasNext();) {
-				ListenerRecord registed = (ListenerRecord) i.next();
-				registed.getMessageQueue().close();
+				MessageQueue queue = (MessageQueue) i.next();
+				queue.close();
 			}
 
 			for (Iterator i = callMap.values().iterator(); i.hasNext();) {
