@@ -89,19 +89,19 @@ public abstract class AbstractActor implements Listener {
 	}	
 	
 	public void subscribeEvent(String eventName) {
-		Topic topic = broker.createTopic(eventName);
+		Topic topic = broker.getTopic(eventName);
 		
-		topic.subscribe(actorName, this);
+		topic.subscribe(actorName);
 	}
 	
 	public void unsubscribeEvent(String eventName) {
-		Topic topic = broker.createTopic(eventName);
+		Topic topic = broker.getTopic(eventName);
 		
 		topic.unsubscribe(actorName);
 	}
 	
 	protected void event(String eventName, Object messageObject) {
-		Topic topic = broker.createTopic(eventName);
+		Topic topic = broker.getTopic(eventName);
 		
 		topic.sendMessage(new Event(eventName, messageObject));
 	}
