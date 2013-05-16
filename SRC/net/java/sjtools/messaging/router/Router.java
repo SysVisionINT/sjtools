@@ -17,11 +17,13 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA
  */
-package net.java.sjtools.messaging;
+package net.java.sjtools.messaging.router;
 
-import net.java.sjtools.messaging.message.Message;
+import net.java.sjtools.messaging.Topic;
 
-
-public interface Listener {
-    public void onMessage(Message message);
+public interface Router {
+	public MessageRouter getMessageRouter();
+	public Topic getTopic(String topicName);
+	public String[] getTopicNames();
+	public void stop();
 }

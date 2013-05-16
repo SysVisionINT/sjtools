@@ -19,26 +19,26 @@
  */
 package net.java.sjtools.messaging.message;
 
-import net.java.sjtools.messaging.Message;
+import net.java.sjtools.messaging.Endpoint;
 import net.java.sjtools.messaging.util.ReferenceUtil;
 
 public class Request extends Message {
 	private static final long serialVersionUID = 4353178246757520713L;
 	
-	private String replyTo = null;
+	private Endpoint replyTo = null;
 	private String referente = null;
 	
-	public Request(String replyTo, Object data) {
+	public Request(Endpoint replyTo, Object data) {
 		this(replyTo, ReferenceUtil.getMessageReference(), data);
 	}
 	
-	public Request(String replyTo, String referente, Object data) {
+	public Request(Endpoint replyTo, String referente, Object data) {
 		super(data);
 		this.replyTo = replyTo;
 		this.referente = referente;
 	}
 	
-	public String getReplyTo() {
+	public Endpoint getReplyTo() {
 		return replyTo;
 	}
 	

@@ -19,7 +19,6 @@
  */
 package net.java.sjtools.messaging.message;
 
-import net.java.sjtools.messaging.Message;
 
 public class Event extends Message {
 	private static final long serialVersionUID = 7017058156067441210L;
