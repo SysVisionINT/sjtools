@@ -19,7 +19,6 @@
  */
 package net.java.sjtools.messaging.message;
 
-import net.java.sjtools.messaging.Message;
 
 public class Response extends Message {
 	private static final long serialVersionUID = 3757518415493088289L;

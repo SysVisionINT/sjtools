@@ -17,35 +17,29 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA
  */
-package net.java.sjtools.messaging.impl;
+package net.java.sjtools.messaging.router;
 
-import net.java.sjtools.messaging.Message;
-import net.java.sjtools.thread.Lock;
+import java.io.Serializable;
 
-public class CallQueue implements MessageQueue {
-	private Message message = null;
-	private Lock semafore = null;
+import net.java.sjtools.messaging.Endpoint;
+import net.java.sjtools.messaging.message.Message;
+
+public class RoutingMessage implements Serializable {
+	private static final long serialVersionUID = -4173224364858370839L;
 	
-	public CallQueue() {
-		semafore = new Lock(this);
-		semafore.getWriteLock();
-	}
-
-	public void push(Message message) {
+	private Endpoint endpoint = null;
+	private Message message = null;
+	
+	public RoutingMessage(Endpoint endpoint, Message message) {
+		this.endpoint = endpoint;
 		this.message = message;
-		semafore.releaseLock();
 	}
 
-	public void close() {
-		semafore.releaseLock();
+	public Endpoint getEndpoint() {
+		return endpoint;
 	}
 	
 	public Message getMessage() {
-		try {
-			semafore.getWriteLock();
-			return message;
-		} finally {
-			semafore.releaseLock();
-		}
+		return message;
 	}
 }

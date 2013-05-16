@@ -20,35 +20,35 @@
 package net.java.sjtools.messaging.actor;
 
 import net.java.sjtools.io.IO;
+import net.java.sjtools.messaging.Endpoint;
 import net.java.sjtools.messaging.Listener;
-import net.java.sjtools.messaging.Message;
 import net.java.sjtools.messaging.MessageBroker;
 import net.java.sjtools.messaging.Topic;
-import net.java.sjtools.messaging.error.NoListenerError;
+import net.java.sjtools.messaging.error.NoRouterError;
 import net.java.sjtools.messaging.message.Event;
+import net.java.sjtools.messaging.message.Message;
 import net.java.sjtools.messaging.message.Request;
 import net.java.sjtools.messaging.message.Response;
+import net.java.sjtools.messaging.router.LocalRouter;
+import net.java.sjtools.messaging.router.Router;
 import net.java.sjtools.messaging.util.ReferenceUtil;
 
 public abstract class AbstractActor implements Listener {
 
-	private String actorName = null;
-	private MessageBroker broker = null;
+	private Endpoint actorAddress = null;
 
-	public AbstractActor(String actorName) {
-		this.actorName = actorName;
-		
-		broker = MessageBroker.getInstance();
+	public AbstractActor(String actorName) {		
+		LocalRouter router = MessageBroker.getLocalRouter();
 
-		broker.registerListener(actorName, this);
+		actorAddress = router.registerListener(actorName, this);
 	}
 	
 	public AbstractActor() {
 		this(ReferenceUtil.getActorReference());
 	}
 	
-	public String getActorName() {
-		return actorName;
+	public Endpoint getActorAddress() {
+		return actorAddress;
 	}
 
 	public void onMessage(Message message) {
@@ -60,7 +60,7 @@ public abstract class AbstractActor implements Listener {
 			} else if (message instanceof Request) {
 				Request request = (Request) message;
 				Object response = receiveCall(request.getMessageObject());
-				broker.sendMessage(request.getReplyTo(), request.createResponse(response));
+				MessageBroker.sendMessage(request.getReplyTo(), request.createResponse(response));
 			} else if (message instanceof Response) {
 				Response response = (Response) message;
 				receiveAsynchronousCallResponse(response.getReferente(), response.getMessageObject());
@@ -72,42 +72,45 @@ public abstract class AbstractActor implements Listener {
 		}
 	}
 	
-	public void cast(String listenerName, Object messageObject) throws NoListenerError {
-		if (!broker.sendMessage(listenerName, new Message(messageObject))) {
-			throw new NoListenerError(listenerName);
+	public void cast(Endpoint address, Object messageObject) throws NoRouterError {
+		if (!MessageBroker.sendMessage(address, new Message(messageObject))) {
+			throw new NoRouterError(address.toString());
 		}
 	}
 	
-	public String asynchronousCall(String listenerName, Object messageObject) throws NoListenerError {
+	public String asynchronousCall(Endpoint address, Object messageObject) throws NoRouterError {
 		String msgRef = ReferenceUtil.getMessageReference();
 		
-		if (!broker.sendMessage(listenerName, new Request(actorName, msgRef, messageObject))) {
-			throw new NoListenerError(listenerName);
+		if (!MessageBroker.sendMessage(address, new Request(actorAddress, msgRef, messageObject))) {
+			throw new NoRouterError(address.toString());
 		}
 		
 		return msgRef;
-	}	
-	
-	public void subscribeEvent(String eventName) {
-		Topic topic = broker.getTopic(eventName);
-		
-		topic.subscribe(actorName);
 	}
 	
-	public void unsubscribeEvent(String eventName) {
-		Topic topic = broker.getTopic(eventName);
+	public void subscribeEvent(String routerName, String eventName) throws NoRouterError {
+		Router router = MessageBroker.getRouter(routerName);
+		Topic topic = router.getTopic(eventName);
 		
-		topic.unsubscribe(actorName);
+		topic.subscribe(actorAddress);
 	}
 	
-	protected void event(String eventName, Object messageObject) {
-		Topic topic = broker.getTopic(eventName);
+	public void unsubscribeEvent(String routerName, String eventName) throws NoRouterError {
+		Router router = MessageBroker.getRouter(routerName);
+		Topic topic = router.getTopic(eventName);
 		
-		topic.sendMessage(new Event(eventName, messageObject));
+		topic.unsubscribe(actorAddress);
 	}
 	
-	protected Object call(String listenerName, Object messageObject) throws NoListenerError {
-		return broker.call(listenerName, messageObject);
+	protected void event(String eventName, Object messageObject) throws NoRouterError {
+		Router router = MessageBroker.getLocalRouter();
+		Topic topic = router.getTopic(eventName);
+		
+		MessageBroker.sendMessage(topic.getEndpoint(), new Event(eventName, messageObject));
+	}
+	
+	protected Object call(Endpoint address, Object messageObject) throws NoRouterError {
+		return MessageBroker.call(address, messageObject);
 	}
 
 	protected abstract void receiveAsynchronousCallResponse(String referente, Object messageObject);

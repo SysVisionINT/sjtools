@@ -17,11 +17,12 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA
  */
-package net.java.sjtools.messaging;
+package net.java.sjtools.messaging.queue;
 
+import net.java.sjtools.messaging.Endpoint;
 import net.java.sjtools.messaging.message.Message;
 
-
-public interface Listener {
-    public void onMessage(Message message);
+public interface MessageQueue {
+	public void push(Endpoint endpoint, Message message);
+	public void close();
 }

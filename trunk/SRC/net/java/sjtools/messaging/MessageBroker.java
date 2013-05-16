@@ -20,123 +20,83 @@
 package net.java.sjtools.messaging;
 
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
-import net.java.sjtools.messaging.error.NoListenerError;
-import net.java.sjtools.messaging.impl.CallQueue;
-import net.java.sjtools.messaging.impl.ListenerQueue;
-import net.java.sjtools.messaging.impl.MessageQueue;
+import net.java.sjtools.messaging.error.NoRouterError;
+import net.java.sjtools.messaging.message.Message;
 import net.java.sjtools.messaging.message.Request;
+import net.java.sjtools.messaging.queue.CallQueue;
+import net.java.sjtools.messaging.queue.MessageQueue;
+import net.java.sjtools.messaging.queue.RouterQueue;
+import net.java.sjtools.messaging.router.LocalRouter;
+import net.java.sjtools.messaging.router.Router;
 import net.java.sjtools.messaging.util.ReferenceUtil;
 import net.java.sjtools.thread.Lock;
 
 public class MessageBroker {
+	private static Map routerMap = null;
+	private static Lock routerLock = null;
+	private static Map routerQueueMap = null;
+	private static Lock routerQueueLock = null;
+	private static Map callMap = null;
+	private static Lock callLock = null;
 
-	private static MessageBroker messageBroker = new MessageBroker();
-
-	private Map topicMap = null;
-	private Lock topicLock = null;
-	private Map listenerMap = null;
-	private Lock listenerLock = null;
-	private Map callMap = null;
-	private Lock callLock = null;
-
-	public static MessageBroker getInstance() {
-		return messageBroker;
-	}
-
-	private MessageBroker() {
-		topicMap = new HashMap();
-		topicLock = new Lock(topicMap);
-
-		listenerMap = new HashMap();
-		listenerLock = new Lock(listenerMap);
-
-		callMap = new HashMap();
-		callLock = new Lock(callMap);
-	}
-
-	public Topic getTopic(String topicName) {
-		Topic topic = null;
-		
+	public static void registerRouter(String name, Router router) {
 		try {
-			topicLock.getReadLock();
-			topic = (Topic) topicMap.get(topicName);
-		} finally {
-			topicLock.releaseLock();
-		}
+			routerLock.getWriteLock();
 
-		if (topic == null) {
-			topic = new Topic(topicName);
-
-			try {
-				topicLock.getWriteLock();
-				topicMap.put(topicName, topic);
-			} finally {
-				topicLock.releaseLock();
-			}
-		}
-
-		return topic;
-	}
-
-	public String[] getTopicNames() {
-		try {
-			topicLock.getReadLock();
-			Set topicNames = topicMap.keySet();
-
-			return (String[]) topicNames.toArray(new String[topicNames.size()]);
-		} finally {
-			topicLock.releaseLock();
-		}
-	}
-
-	public void registerListener(String name, Listener listener) {
-		try {
-			listenerLock.getWriteLock();
-
-			ListenerQueue queue = (ListenerQueue) listenerMap.get(name);
+			Router queue = (Router) routerMap.get(name);
 
 			if (queue == null) {
-				listenerMap.put(name, new ListenerQueue(listener));
+				routerMap.put(name, router);
+
+				try {
+					routerQueueLock.getWriteLock();
+					routerQueueMap.put(name, new RouterQueue(router.getMessageRouter()));
+				} finally {
+					routerQueueLock.releaseLock();
+				}
 			}
 		} finally {
-			listenerLock.releaseLock();
+			routerLock.releaseLock();
 		}
 	}
 
-	public String[] getListenerNames() {
+	public static String[] getRouterNames() {
 		try {
-			listenerLock.getReadLock();
-			Set listenerNames = listenerMap.keySet();
+			routerLock.getReadLock();
+			Set routerNames = routerMap.keySet();
 
-			return (String[]) listenerNames.toArray(new String[listenerNames.size()]);
+			return (String[]) routerNames.toArray(new String[routerNames.size()]);
 		} finally {
-			listenerLock.releaseLock();
+			routerLock.releaseLock();
 		}
 	}
 
-	public boolean isListenerRegistered(String name) {
+	public static Router getRouter(String routerName) {
 		try {
-			listenerLock.getReadLock();
-			return listenerMap.containsKey(name);
+			routerLock.getReadLock();
+			return (Router) routerMap.get(routerName);
 		} finally {
-			listenerLock.releaseLock();
+			routerLock.releaseLock();
 		}
 	}
+	
+	public static LocalRouter getLocalRouter() {
+		return (LocalRouter) getRouter(Endpoint.LOCAL_ROUTER);
+	}	
 
-	private MessageQueue getListenerMessageQueue(String listenerName) {
+	private static MessageQueue getRouterQueue(String routerName) {
 		try {
-			listenerLock.getReadLock();
-			return (MessageQueue) listenerMap.get(listenerName);
+			routerQueueLock.getReadLock();
+			return (MessageQueue) routerQueueMap.get(routerName);
 		} finally {
-			listenerLock.releaseLock();
+			routerQueueLock.releaseLock();
 		}
 	}
 
-	private MessageQueue getCallMessageQueue(String callRef) {
+	private static MessageQueue getCallMessageQueue(String callRef) {
 		try {
 			callLock.getReadLock();
 			return (MessageQueue) callMap.get(callRef);
@@ -145,52 +105,49 @@ public class MessageBroker {
 		}
 	}
 
-	public boolean sendMessage(String listenerName, Message message) {
-		MessageQueue queue = getQueue(listenerName);
+	public static boolean sendMessage(Endpoint endpoint, Message message) {
+		MessageQueue queue = null;
+
+		if (endpoint.isLocal()) {
+			queue = getCallMessageQueue(endpoint.getDestination());
+		}
+
+		if (queue == null) {
+			queue = getRouterQueue(endpoint.getRouterName());
+		}
 
 		if (queue != null) {
-			queue.push(message);
+			queue.push(endpoint, message);
 			return true;
 		}
 
 		return false;
 	}
 
-	private MessageQueue getQueue(String listenerName) {
-		MessageQueue queue = getListenerMessageQueue(listenerName);
+	public static Object call(Endpoint endpoint, Object data) throws NoRouterError {
+		String msgRef = ReferenceUtil.getMessageReference();
+		String callRef = ReferenceUtil.getCallReference(msgRef);
 
-		if (queue == null) {
-			queue = getCallMessageQueue(listenerName);
-		}
+		try {
+			CallQueue callQueue = registerCall(callRef);
 
-		return queue;
-	}
+			Endpoint callEndpoint = Endpoint.getLocalEndpointForDestination(callRef);
 
-	public Object call(String listenerName, Object data) throws NoListenerError {
-		MessageQueue queue = getQueue(listenerName);
+			Request request = new Request(callEndpoint, msgRef, data);
 
-		if (queue != null) {
-			String msgRef = ReferenceUtil.getMessageReference();
-			String callRef = ReferenceUtil.getCallReference(msgRef);
-
-			try {
-				CallQueue callQueue = registerCall(callRef);
-
-				Request request = new Request(callRef, msgRef, data);
-				queue.push(request);
-
+			if (sendMessage(endpoint, request)) {
 				Message response = callQueue.getMessage();
 
 				return response.getMessageObject();
-			} finally {
-				unregisterCall(callRef);
+			} else {
+				throw new NoRouterError(endpoint.toString());
 			}
-		} else {
-			throw new NoListenerError(listenerName);
+		} finally {
+			unregisterCall(callRef);
 		}
 	}
 
-	private CallQueue registerCall(String callRef) {
+	private static CallQueue registerCall(String callRef) {
 		try {
 			callLock.getWriteLock();
 			CallQueue queue = new CallQueue();
@@ -203,7 +160,7 @@ public class MessageBroker {
 		}
 	}
 
-	private void unregisterCall(String callRef) {
+	private static void unregisterCall(String callRef) {
 		try {
 			callLock.getWriteLock();
 			callMap.remove(callRef);
@@ -212,28 +169,16 @@ public class MessageBroker {
 		}
 	}
 
-	public void stop() {
-		try {
-			listenerLock.getWriteLock();
-			topicLock.getWriteLock();
-			callLock.getWriteLock();
+	static {
+		routerMap = new HashMap();
+		routerLock = new Lock(routerMap);
 
-			for (Iterator i = listenerMap.values().iterator(); i.hasNext();) {
-				MessageQueue queue = (MessageQueue) i.next();
-				queue.close();
-			}
+		callMap = new HashMap();
+		callLock = new Lock(callMap);
 
-			for (Iterator i = callMap.values().iterator(); i.hasNext();) {
-				MessageQueue queue = (MessageQueue) i.next();
-				queue.close();
-			}
-
-			listenerMap.clear();
-			topicMap.clear();
-		} finally {
-			callLock.releaseLock();
-			listenerLock.releaseLock();
-			topicLock.releaseLock();
-		}
+		routerQueueMap = new HashMap();
+		routerQueueLock = new Lock(routerQueueMap);
+		
+		registerRouter(Endpoint.LOCAL_ROUTER, new LocalRouter());
 	}
 }

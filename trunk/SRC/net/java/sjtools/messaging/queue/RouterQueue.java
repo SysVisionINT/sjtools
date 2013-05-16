@@ -17,24 +17,26 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA
  */
-package net.java.sjtools.messaging.impl;
+package net.java.sjtools.messaging.queue;
 
 import net.java.sjtools.io.IO;
-import net.java.sjtools.messaging.Listener;
-import net.java.sjtools.messaging.Message;
+import net.java.sjtools.messaging.Endpoint;
+import net.java.sjtools.messaging.message.Message;
+import net.java.sjtools.messaging.router.MessageRouter;
+import net.java.sjtools.messaging.router.RoutingMessage;
 import net.java.sjtools.util.Queue;
 
-public class ListenerQueue implements MessageQueue, Runnable {
+public class RouterQueue implements MessageQueue, Runnable {
 
 	private Queue queue = null;
 	private boolean running = false;
 	private boolean sleeping = false;
-	private Listener listener = null;
+	private MessageRouter messageRouter = null;
 	private Thread thread = null;
 
-	public ListenerQueue(Listener listener) {
+	public RouterQueue(MessageRouter messageRouter) {
 		this.queue = new Queue();
-		this.listener = listener;
+		this.messageRouter = messageRouter;
 		this.running = true;
 
 		thread = new Thread(this);
@@ -45,11 +47,11 @@ public class ListenerQueue implements MessageQueue, Runnable {
 
 	public void run() {
 		while (isRunning()) {
-			Message message = (Message) queue.poll();
+			RoutingMessage routingMessage = (RoutingMessage) queue.poll();
 
-			if (message != null) {
+			if (routingMessage != null) {
 				try {
-					listener.onMessage(message);
+					messageRouter.route(routingMessage.getEndpoint(), routingMessage.getMessage());
 				} catch (Exception e) {
 					e.printStackTrace(IO.err);
 				}
@@ -65,9 +67,9 @@ public class ListenerQueue implements MessageQueue, Runnable {
 		}
 	}
 
-	public void push(Message message) {
+	public void push(Endpoint endpoint, Message message) {
 		if (isRunning()) {
-			queue.push(message);
+			queue.push(new RoutingMessage(endpoint, message));
 
 			if (isSleeping()) {
 				thread.interrupt();

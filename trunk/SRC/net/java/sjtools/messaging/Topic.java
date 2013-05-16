@@ -20,80 +20,64 @@
 package net.java.sjtools.messaging;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 import net.java.sjtools.thread.Lock;
 
 public class Topic {
+	private List subscriberList = null;
+	private Lock subscriberLock = null;
+	private Endpoint endpoint = null;
 
-	private List listenerList = null;
-	private Lock listenerLock = null;
-	private String name = null;
+	public Topic(Endpoint endpoint) {
+		subscriberList = new ArrayList();
+		subscriberLock = new Lock(subscriberList);
 
-	protected Topic(String name) {
-		listenerList = new ArrayList();
-		listenerLock = new Lock(listenerList);
-
-		this.name = name;
+		this.endpoint = endpoint;
 	}
 
-	public String getName() {
-		return name;
+	public Endpoint getEndpoint() {
+		return endpoint;
 	}
 
-	public void sendMessage(Message msg) {
-		MessageBroker broker = MessageBroker.getInstance();
-
-		try {
-			listenerLock.getReadLock();
-
-			for (Iterator i = listenerList.iterator(); i.hasNext();) {
-				broker.sendMessage((String) i.next(), msg);
-			}
-		} finally {
-			listenerLock.releaseLock();
-		}
-	}
-
-	public void subscribe(String listenerName) {
-		if (!isSubscriber(listenerName) && MessageBroker.getInstance().isListenerRegistered(listenerName)) {
+	public void subscribe(Endpoint endpoint) {
+		if (!isSubscriber(endpoint)) {			
 			try {
-				listenerLock.getWriteLock();
-				listenerList.add(listenerName);
+				subscriberLock.getWriteLock();
+				subscriberList.add(endpoint);
 			} finally {
-				listenerLock.releaseLock();
+				subscriberLock.releaseLock();
 			}
 		}
 	}
 
-	public void unsubscribe(String listenerName) {
-		if (isSubscriber(listenerName)) {
+	public void unsubscribe(Endpoint endpoint) {
+		if (isSubscriber(endpoint)) {
 			try {
-				listenerLock.getWriteLock();
-				listenerList.remove(listenerName);
+				subscriberLock.getWriteLock();
+				subscriberList.remove(endpoint);
 			} finally {
-				listenerLock.releaseLock();
+				subscriberLock.releaseLock();
 			}
 		}
 	}
 
-	private boolean isSubscriber(String listenerName) {
+	private boolean isSubscriber(Endpoint endpoint) {
 		try {
-			listenerLock.getReadLock();
+			subscriberLock.getReadLock();
 
-			return listenerList.contains(listenerName);
+			return subscriberList.contains(endpoint);
 		} finally {
-			listenerLock.releaseLock();
+			subscriberLock.releaseLock();
 		}
 	}
 
-	public int getNumberOfListeners() {
+	public Endpoint[] getSubscribers() {
 		try {
-			listenerLock.getReadLock();
-			return listenerList.size();
+			subscriberLock.getReadLock();
+			return (Endpoint[]) subscriberList.toArray(new Endpoint[subscriberList.size()]);
 		} finally {
-			listenerLock.releaseLock();
+			subscriberLock.releaseLock();
 		}
 	}
 
@@ -108,6 +92,6 @@ public class Topic {
 
 		Topic other = (Topic) obj;
 
-		return other.getName().equals(name);
+		return other.endpoint.equals(endpoint);
 	}
 }
