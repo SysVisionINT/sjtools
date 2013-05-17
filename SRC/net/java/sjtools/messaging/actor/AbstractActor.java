@@ -37,16 +37,16 @@ public abstract class AbstractActor implements Listener {
 
 	private Endpoint actorAddress = null;
 
-	public AbstractActor(String actorName) {		
+	public AbstractActor(String actorName) {
 		LocalRouter router = MessageBroker.getLocalRouter();
 
 		actorAddress = router.registerListener(actorName, this);
 	}
-	
+
 	public AbstractActor() {
 		this(ReferenceUtil.getActorReference());
 	}
-	
+
 	public Endpoint getActorAddress() {
 		return actorAddress;
 	}
@@ -71,44 +71,54 @@ public abstract class AbstractActor implements Listener {
 			e.printStackTrace(IO.err);
 		}
 	}
-	
+
 	public void cast(Endpoint address, Object messageObject) throws NoRouterError {
 		if (!MessageBroker.sendMessage(address, new Message(messageObject))) {
 			throw new NoRouterError(address.toString());
 		}
 	}
-	
+
 	public String asynchronousCall(Endpoint address, Object messageObject) throws NoRouterError {
 		String msgRef = ReferenceUtil.getMessageReference();
-		
+
 		if (!MessageBroker.sendMessage(address, new Request(actorAddress, msgRef, messageObject))) {
 			throw new NoRouterError(address.toString());
 		}
-		
+
 		return msgRef;
 	}
-	
-	public void subscribeEvent(String routerName, String eventName) throws NoRouterError {
-		Router router = MessageBroker.getRouter(routerName);
-		Topic topic = router.getTopic(eventName);
-		
-		topic.subscribe(actorAddress);
+
+	public void subscribeEvent(Endpoint endpoint) throws NoRouterError {
+		Router router = MessageBroker.getRouter(endpoint.getRouterName());
+
+		if (router != null) {
+			Topic topic = router.getTopic(endpoint.getDestination());
+
+			topic.subscribe(actorAddress);
+		} else {
+			throw new NoRouterError(endpoint.toString());
+		}
 	}
-	
-	public void unsubscribeEvent(String routerName, String eventName) throws NoRouterError {
-		Router router = MessageBroker.getRouter(routerName);
-		Topic topic = router.getTopic(eventName);
-		
-		topic.unsubscribe(actorAddress);
+
+	public void unsubscribeEvent(Endpoint endpoint) throws NoRouterError {
+		Router router = MessageBroker.getRouter(endpoint.getRouterName());
+
+		if (router != null) {
+			Topic topic = router.getTopic(endpoint.getDestination());
+
+			topic.unsubscribe(actorAddress);
+		} else {
+			throw new NoRouterError(endpoint.toString());
+		}
 	}
-	
+
 	protected void event(String eventName, Object messageObject) throws NoRouterError {
 		Router router = MessageBroker.getLocalRouter();
 		Topic topic = router.getTopic(eventName);
-		
+
 		MessageBroker.sendMessage(topic.getEndpoint(), new Event(eventName, messageObject));
 	}
-	
+
 	protected Object call(Endpoint address, Object messageObject) throws NoRouterError {
 		return MessageBroker.call(address, messageObject);
 	}
