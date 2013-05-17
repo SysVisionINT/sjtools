@@ -94,7 +94,11 @@ public abstract class AbstractActor implements Listener {
 		if (router != null) {
 			Topic topic = router.getTopic(endpoint.getDestination());
 
-			topic.subscribe(actorAddress);
+			if (topic != null) {
+				topic.subscribe(actorAddress);
+			} else {
+				throw new NoRouterError(endpoint.toString());
+			}
 		} else {
 			throw new NoRouterError(endpoint.toString());
 		}
@@ -106,7 +110,11 @@ public abstract class AbstractActor implements Listener {
 		if (router != null) {
 			Topic topic = router.getTopic(endpoint.getDestination());
 
-			topic.unsubscribe(actorAddress);
+			if (topic != null) {
+				topic.unsubscribe(actorAddress);
+			} else {
+				throw new NoRouterError(endpoint.toString());
+			}
 		} else {
 			throw new NoRouterError(endpoint.toString());
 		}
