@@ -21,6 +21,8 @@ package net.java.sjtools.messaging;
 
 import java.io.Serializable;
 
+import net.java.sjtools.messaging.error.InvalidEndpointException;
+
 public class Endpoint implements Serializable {
 	private static final long serialVersionUID = -4321920104279012067L;
 	
@@ -55,6 +57,43 @@ public class Endpoint implements Serializable {
 	public static Endpoint getLocalEndpointForTopic(String topicName) {
 		return getEndpointForTopic(LOCAL_ROUTER, topicName);
 	}	
+	
+	public static Endpoint getEndpointFromString(String address) throws InvalidEndpointException {
+		String routerName = null;
+		String destination = null;
+		String type = null;
+		
+		int routeSeparatorPos = address.indexOf(ROUTER_SEPARATOR);
+		
+		if (routeSeparatorPos <= 0) {
+			throw new InvalidEndpointException(address);
+		}
+		
+		routerName = address.substring(0, routeSeparatorPos);
+		int startTypePos = routeSeparatorPos + ROUTER_SEPARATOR.length();
+		
+		int typeSeparatorPos = address.indexOf(TYPE_SEPARATOR, startTypePos);
+		
+		if (typeSeparatorPos == -1) {
+			throw new InvalidEndpointException(address);
+		}
+		
+		type = address.substring(startTypePos, typeSeparatorPos);
+		
+		if (!type.equals(TYPE_TOPIC) && !type.equals(TYPE_LISTENER)) {
+			throw new InvalidEndpointException(address);
+		}
+		
+		int startDestinationPos = typeSeparatorPos + TYPE_SEPARATOR.length();
+		
+		if (startDestinationPos >= address.length()) {
+			throw new InvalidEndpointException(address);
+		}
+		
+		destination = address.substring(startDestinationPos);
+		
+		return new Endpoint(routerName, type, destination);
+	}
 	
 	public String getRouterName() {
 		return routerName;
