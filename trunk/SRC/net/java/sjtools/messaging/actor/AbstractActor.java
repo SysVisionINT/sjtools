@@ -43,10 +43,6 @@ public abstract class AbstractActor implements Listener {
 		actorAddress = router.registerListener(actorName, this);
 	}
 
-	public AbstractActor() {
-		this(ReferenceUtil.getActorReference());
-	}
-
 	public Endpoint getActorAddress() {
 		return actorAddress;
 	}
@@ -56,20 +52,36 @@ public abstract class AbstractActor implements Listener {
 			if (message instanceof Event) {
 				Event event = (Event) message;
 
-				receiveEvent(event.getEventName(), event.getMessageObject());
+				processEvent(event);
 			} else if (message instanceof Request) {
 				Request request = (Request) message;
-				Object response = receiveCall(request.getMessageObject());
-				MessageBroker.sendMessage(request.getReplyTo(), request.createResponse(response));
+				processRequest(request);
 			} else if (message instanceof Response) {
 				Response response = (Response) message;
-				receiveAsynchronousCallResponse(response.getReferente(), response.getMessageObject());
+				processResponse(response);
 			} else {
-				receiveCast(message.getMessageObject());
+				processMessage(message);
 			}
 		} catch (Exception e) {
 			e.printStackTrace(IO.err);
 		}
+	}
+
+	protected void processMessage(Message message) {
+		receiveCast(message.getMessageObject());
+	}
+
+	protected void processResponse(Response response) {
+		receiveAsynchronousCallResponse(response.getReferente(), response.getMessageObject());
+	}
+
+	protected void processRequest(Request request) {
+		Object response = receiveCall(request.getMessageObject());
+		MessageBroker.sendMessage(request.getReplyTo(), request.createResponse(response));
+	}
+
+	protected void processEvent(Event event) {
+		receiveEvent(event.getEventName(), event.getMessageObject());
 	}
 
 	public void cast(Endpoint address, Object messageObject) throws NoRouterError {
@@ -131,12 +143,11 @@ public abstract class AbstractActor implements Listener {
 		return MessageBroker.call(address, messageObject);
 	}
 
-	protected abstract void receiveAsynchronousCallResponse(String referente, Object messageObject);
+	public abstract void receiveAsynchronousCallResponse(String referente, Object messageObject);
 
-	protected abstract void receiveCast(Object messageObject);
+	public abstract void receiveCast(Object messageObject);
 
-	protected abstract Object receiveCall(Object messageObject);
+	public abstract Object receiveCall(Object messageObject);
 
-	protected abstract void receiveEvent(String eventName, Object messageObject);
-
+	public abstract void receiveEvent(String eventName, Object messageObject);
 }
