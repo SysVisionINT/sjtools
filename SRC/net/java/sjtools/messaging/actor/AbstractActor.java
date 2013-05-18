@@ -35,16 +35,16 @@ import net.java.sjtools.messaging.util.ReferenceUtil;
 
 public abstract class AbstractActor implements Listener {
 
-	private Endpoint actorAddress = null;
+	private Endpoint endpoint = null;
 
 	public AbstractActor(String actorName) {
 		LocalRouter router = MessageBroker.getLocalRouter();
 
-		actorAddress = router.registerListener(actorName, this);
+		endpoint = router.registerListener(actorName, this);
 	}
 
-	public Endpoint getActorAddress() {
-		return actorAddress;
+	public Endpoint getEndpoint() {
+		return endpoint;
 	}
 
 	public void onMessage(Message message) {
@@ -93,7 +93,7 @@ public abstract class AbstractActor implements Listener {
 	public String asynchronousCall(Endpoint address, Object messageObject) throws NoRouterError {
 		String msgRef = ReferenceUtil.getMessageReference();
 
-		if (!MessageBroker.sendMessage(address, new Request(actorAddress, msgRef, messageObject))) {
+		if (!MessageBroker.sendMessage(address, new Request(endpoint, msgRef, messageObject))) {
 			throw new NoRouterError(address.toString());
 		}
 
@@ -107,7 +107,7 @@ public abstract class AbstractActor implements Listener {
 			Topic topic = router.getTopic(endpoint.getDestination());
 
 			if (topic != null) {
-				topic.subscribe(actorAddress);
+				topic.subscribe(endpoint);
 			} else {
 				throw new NoRouterError(endpoint.toString());
 			}
@@ -123,7 +123,7 @@ public abstract class AbstractActor implements Listener {
 			Topic topic = router.getTopic(endpoint.getDestination());
 
 			if (topic != null) {
-				topic.unsubscribe(actorAddress);
+				topic.unsubscribe(endpoint);
 			} else {
 				throw new NoRouterError(endpoint.toString());
 			}
