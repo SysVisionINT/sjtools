@@ -24,7 +24,6 @@ import java.util.Random;
 public class ReferenceUtil {
 	private static final int MAX_RANDOM = 1000000;
 	private static final String CALL_PREFIX = "CALL-";
-	private static final String ACTOR_PREFIX = "ACTOR-";
 	
 	private static Random random = new Random(System.currentTimeMillis());
 	private static long seq = 0;
@@ -59,9 +58,5 @@ public class ReferenceUtil {
 
 	public static String getCallReference(String messageReference) {
 		return CALL_PREFIX.concat(messageReference);
-	}
-	
-	public static String getActorReference() {
-		return ACTOR_PREFIX.concat(getReference());
 	}
 }
