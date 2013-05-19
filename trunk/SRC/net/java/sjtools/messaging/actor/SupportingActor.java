@@ -19,10 +19,10 @@
  */
 package net.java.sjtools.messaging.actor;
 
-import net.java.sjtools.messaging.actor.hyper.ProcessEvent;
-import net.java.sjtools.messaging.actor.hyper.ProcessMessage;
-import net.java.sjtools.messaging.actor.hyper.ProcessRequest;
-import net.java.sjtools.messaging.actor.hyper.ProcessResponse;
+import net.java.sjtools.messaging.actor.process.ProcessEvent;
+import net.java.sjtools.messaging.actor.process.ProcessMessage;
+import net.java.sjtools.messaging.actor.process.ProcessRequest;
+import net.java.sjtools.messaging.actor.process.ProcessResponse;
 import net.java.sjtools.messaging.message.Event;
 import net.java.sjtools.messaging.message.Message;
 import net.java.sjtools.messaging.message.Request;
@@ -33,16 +33,16 @@ import net.java.sjtools.thread.executor.Executor;
 import net.java.sjtools.thread.executor.impl.ThreadPoolExecutor;
 import net.java.sjtools.thread.pool.ThreadPool;
 
-public abstract class AbstractHyperActor extends AbstractActor {
+public abstract class SupportingActor extends AbstractActor {
 	private Executor actorExecutor = null;
 	
-	public AbstractHyperActor(String actorName, ThreadPool threadPool) {
+	public SupportingActor(String actorName, ThreadPool threadPool) {
 		super(actorName);
 
 		actorExecutor = new ThreadPoolExecutor(threadPool);
 	}
 	
-	public AbstractHyperActor(String actorName, int maxThreadPoolSize) {
+	public SupportingActor(String actorName, int maxThreadPoolSize) {
 		this(actorName, createThreadPool(actorName, maxThreadPoolSize));
 	}
 	
