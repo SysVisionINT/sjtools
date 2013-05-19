@@ -84,22 +84,6 @@ public abstract class AbstractActor implements Listener {
 		receiveEvent(event.getEventName(), event.getMessageObject());
 	}
 
-	public void cast(Endpoint address, Object messageObject) throws NoRouterError {
-		if (!MessageBroker.sendMessage(address, new Message(messageObject))) {
-			throw new NoRouterError(address.toString());
-		}
-	}
-
-	public String asynchronousCall(Endpoint address, Object messageObject) throws NoRouterError {
-		String msgRef = ReferenceUtil.getMessageReference();
-
-		if (!MessageBroker.sendMessage(address, new Request(endpoint, msgRef, messageObject))) {
-			throw new NoRouterError(address.toString());
-		}
-
-		return msgRef;
-	}
-
 	public void subscribeEvent(Endpoint endpoint) throws NoRouterError {
 		Router router = MessageBroker.getRouter(endpoint.getRouterName());
 
@@ -143,6 +127,22 @@ public abstract class AbstractActor implements Listener {
 		return MessageBroker.call(address, messageObject);
 	}
 
+	protected void cast(Endpoint address, Object messageObject) throws NoRouterError {
+		if (!MessageBroker.sendMessage(address, new Message(messageObject))) {
+			throw new NoRouterError(address.toString());
+		}
+	}
+
+	protected String asynchronousCall(Endpoint address, Object messageObject) throws NoRouterError {
+		String msgRef = ReferenceUtil.getMessageReference();
+
+		if (!MessageBroker.sendMessage(address, new Request(endpoint, msgRef, messageObject))) {
+			throw new NoRouterError(address.toString());
+		}
+
+		return msgRef;
+	}	
+	
 	public abstract void receiveAsynchronousCallResponse(String referente, Object messageObject);
 
 	public abstract void receiveCast(Object messageObject);
