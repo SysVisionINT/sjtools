@@ -81,6 +81,18 @@ public class IO {
 			return line;
 		}
 	}
+	
+	public static void print(String text) {
+		IO.out.print(text);
+	}
+	
+	public static void println(String text) {
+		IO.out.println(text);
+	}
+	
+	public static void println() {
+		IO.out.println();
+	}
 
 	public static String getDefaultSystemCharset() {
 		String charSet = System.getProperty("file.encoding");

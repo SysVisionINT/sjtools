@@ -20,8 +20,9 @@
 package net.java.sjtools.thread;
 
 public class Lock {
-	private int givenLocks;
-	private int waitingWriters;
+
+	private int givenLocks = 0;
+	private int waitingWriters = 0;
 	private Object mutex = null;
 
 	public Lock(Object obj) {
@@ -70,5 +71,4 @@ public class Lock {
 			mutex.notifyAll();
 		}
 	}
-
 }
