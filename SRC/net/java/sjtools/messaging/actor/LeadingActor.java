@@ -19,8 +19,8 @@
  */
 package net.java.sjtools.messaging.actor;
 
-public abstract class AbstractThreadActor extends AbstractActor implements Runnable {
-	public AbstractThreadActor(String actorName) {
+public abstract class LeadingActor extends AbstractActor implements Runnable {
+	public LeadingActor(String actorName) {
 		super(actorName);
 		
 		Thread thread = new Thread(this, actorName);

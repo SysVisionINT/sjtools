@@ -17,24 +17,24 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA
  */
-package net.java.sjtools.messaging.actor.hyper;
+package net.java.sjtools.messaging.actor.process;
 
 import net.java.sjtools.io.IO;
-import net.java.sjtools.messaging.actor.AbstractActor;
-import net.java.sjtools.messaging.message.Message;
+import net.java.sjtools.messaging.actor.SupportingActor;
+import net.java.sjtools.messaging.message.Response;
 
-public class ProcessMessage implements Runnable {
-	private AbstractActor actor = null;
-	private Message message = null;
+public class ProcessResponse implements Runnable {
+	private SupportingActor actor = null;
+	private Response response = null;
 	
-	public ProcessMessage(AbstractActor actor, Message message) {
+	public ProcessResponse(SupportingActor actor, Response response) {
 		this.actor = actor;
-		this.message = message;
+		this.response = response;
 	}
 
 	public void run() {
 		try {
-			actor.receiveCast(message.getMessageObject());
+			actor.receiveAsynchronousCallResponse(response.getReferente(), response.getMessageObject());
 		} catch (Exception e) {
 			e.printStackTrace(IO.err);
 		}

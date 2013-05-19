@@ -17,29 +17,26 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA
  */
-package net.java.sjtools.messaging.actor.hyper;
+package net.java.sjtools.messaging.actor.process;
 
 import net.java.sjtools.io.IO;
-import net.java.sjtools.messaging.MessageBroker;
-import net.java.sjtools.messaging.actor.AbstractHyperActor;
-import net.java.sjtools.messaging.message.Request;
+import net.java.sjtools.messaging.actor.SupportingActor;
+import net.java.sjtools.messaging.message.Event;
 
-public class ProcessRequest implements Runnable {
-	private AbstractHyperActor actor = null;
-	private Request request = null;
+public class ProcessEvent implements Runnable {
+	private SupportingActor actor = null;
+	private Event event = null;
 	
-	public ProcessRequest(AbstractHyperActor actor, Request request) {
+	public ProcessEvent(SupportingActor actor, Event event) {
 		this.actor = actor;
-		this.request = request;
+		this.event = event;
 	}
 
 	public void run() {
 		try {
-			Object response = actor.receiveCall(request.getMessageObject());
-			MessageBroker.sendMessage(request.getReplyTo(), request.createResponse(response));
+			actor.receiveEvent(event.getEventName(), event.getMessageObject());
 		} catch (Exception e) {
 			e.printStackTrace(IO.err);
 		}
 	}
-
 }
