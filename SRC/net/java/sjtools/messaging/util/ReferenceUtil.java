@@ -23,7 +23,7 @@ import java.util.Random;
 
 public class ReferenceUtil {
 	private static final int MAX_RANDOM = 1000000;
-	private static final String CALL_PREFIX = "CALL-";
+	private static final String CALL_PREFIX = "call/";
 	
 	private static Random random = new Random(System.currentTimeMillis());
 	private static long seq = 0;
