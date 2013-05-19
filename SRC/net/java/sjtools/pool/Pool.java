@@ -32,15 +32,18 @@ import net.java.sjtools.pool.task.Expire;
 import net.java.sjtools.pool.task.Timeout;
 import net.java.sjtools.pool.task.Validate;
 import net.java.sjtools.thread.Lock;
+import net.java.sjtools.thread.Semafore;
 import net.java.sjtools.time.timer.SuperTimer;
 
 public class Pool {
-
+	private static final int WAIT_TIMEOUT = 1000;
+	
 	private PoolConfig config = null;
 	private PoolFactory factory = null;
 	private Map idlList = new HashMap();
 	private Map inUseList = new HashMap();
 	private boolean running = true;
+	private Semafore semafore = new Semafore();
 	private Lock lock = null;
 
 	public Pool(PoolConfig config, PoolFactory factory) {
@@ -151,7 +154,7 @@ public class Pool {
 
 		for (; currentSize < minSize; currentSize++) {
 			try {
-				idlList.put(factory.createObject(), new Long(System.currentTimeMillis()));
+				addObjectToIdlList(factory.createObject());
 			} catch (ObjectCreationException e) {}
 		}
 	}
@@ -236,6 +239,9 @@ public class Pool {
 			if (obj == null) {
 				if (config.getMaxSize() == PoolConfig.NO_MAX_SIZE || getObjectsInUse() < config.getMaxSize()) {
 					obj = factory.createObject();
+				} else {
+					long timeout = wait - System.currentTimeMillis();
+					semafore.waitForGreen(timeout < WAIT_TIMEOUT ? timeout : WAIT_TIMEOUT);
 				}
 			} else {
 				if (config.isValidateOnBorrow() && !factory.validateObject(obj)) {
@@ -295,10 +301,15 @@ public class Pool {
 				}
 			}
 
-			idlList.put(obj, new Long(System.currentTimeMillis()));
+			addObjectToIdlList(obj);
 		} finally {
 			lock.releaseLock();
 		}
+	}
+
+	private void addObjectToIdlList(Object obj) {
+		idlList.put(obj, new Long(System.currentTimeMillis()));
+		semafore.goGreen();
 	}
 
 	public void invalidade(Object obj) {
