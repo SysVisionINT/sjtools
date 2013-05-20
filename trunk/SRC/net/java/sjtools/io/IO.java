@@ -27,6 +27,8 @@ import java.io.OutputStream;
 import java.io.PrintStream;
 import java.io.UnsupportedEncodingException;
 
+import net.java.sjtools.util.TextUtil;
+
 public class IO {
 	public static String currentCharSet = null;
 	public static PrintStream out = null;
@@ -82,12 +84,12 @@ public class IO {
 		}
 	}
 	
-	public static void print(String text) {
-		IO.out.print(text);
+	public static void print(Object value) {
+		IO.out.print(TextUtil.toString(value));
 	}
 	
-	public static void println(String text) {
-		IO.out.println(text);
+	public static void println(Object value) {
+		IO.out.println(TextUtil.toString(value));
 	}
 	
 	public static void println() {

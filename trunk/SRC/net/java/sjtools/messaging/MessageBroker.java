@@ -154,6 +154,10 @@ public class MessageBroker {
 				} else {
 					response = callQueue.getMessage(timeout);
 				}
+				
+				if (response == null) {
+					return null;
+				}
 
 				return response.getMessageObject();
 			} else {

@@ -86,12 +86,12 @@ public abstract class AbstractActor implements Listener {
 
 	public void subscribeTopic(Endpoint endpoint) throws NoRouterError {
 		Router router = MessageBroker.getRouter(endpoint.getRouterName());
-
+		
 		if (router != null) {
 			Topic topic = router.getTopic(endpoint.getDestination());
 
 			if (topic != null) {
-				topic.subscribe(endpoint);
+				topic.subscribe(getEndpoint());
 			} else {
 				throw new NoRouterError(endpoint.toString());
 			}
@@ -107,7 +107,7 @@ public abstract class AbstractActor implements Listener {
 			Topic topic = router.getTopic(endpoint.getDestination());
 
 			if (topic != null) {
-				topic.unsubscribe(endpoint);
+				topic.unsubscribe(getEndpoint());
 			} else {
 				throw new NoRouterError(endpoint.toString());
 			}
@@ -119,14 +119,15 @@ public abstract class AbstractActor implements Listener {
 	protected void event(String eventName, Object messageObject) throws NoRouterError {
 		Router router = MessageBroker.getLocalRouter();
 		Topic topic = router.getTopic(getTopicNameForEvent(eventName));
-
+		
 		MessageBroker.sendMessage(topic.getEndpoint(), new Event(eventName, messageObject));
 	}
 
-	private String getTopicNameForEvent(String eventName) {
+	public String getTopicNameForEvent(String eventName) {
 		StringBuffer buffer = new StringBuffer();
 		buffer.append("event/");
 		buffer.append(eventName);
+		
 		return buffer.toString();
 	}
 

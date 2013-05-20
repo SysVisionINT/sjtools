@@ -20,15 +20,13 @@
 package net.java.sjtools.thread;
 
 public class Semaphore {
-	private String mutex = "muuuutex";
-
 	public boolean waitForGreen(long milliSeconds) {
 		long start = 0;
 		
-		synchronized (mutex) {
+		synchronized (this) {
 			try {
 				start = System.currentTimeMillis();
-				mutex.wait(milliSeconds);
+				this.wait(milliSeconds);
 				return (System.currentTimeMillis() - start) < milliSeconds;
 			} catch (InterruptedException e) {
 				return false;
@@ -37,16 +35,17 @@ public class Semaphore {
 	}
 	
 	public void waitForGreen() {
-		synchronized (mutex) {
+		synchronized (this) {
 			try {
-				mutex.wait();
-			} catch (InterruptedException e) {}
+				this.wait();
+			} catch (InterruptedException e) {
+			}
 		}
 	}	
 
 	public void goGreen() {
-		synchronized (mutex) {
-			mutex.notifyAll();
+		synchronized (this) {
+			this.notifyAll();
 		}
 	}
 }
