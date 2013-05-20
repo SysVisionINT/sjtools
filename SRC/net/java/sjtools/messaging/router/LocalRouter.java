@@ -160,7 +160,15 @@ public class LocalRouter implements Router, MessageRouter {
 				Endpoint [] subscribers = topic.getSubscribers();
 				
 				for (int i = 0; i < subscribers.length; i++) {
-					MessageBroker.sendMessage(subscribers[i], message);
+					if (subscribers[i].isLocal()) {
+						ListenerQueue queue = getListenerQueue(subscribers[i].getDestination());
+
+						if (queue != null) {
+							queue.push(message);
+						}
+					} else {
+						MessageBroker.sendMessage(subscribers[i], message);
+					}
 				}
 			}
 		}
