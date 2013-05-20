@@ -17,40 +17,14 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA
  */
-package net.java.sjtools.messaging.queue;
+package net.java.sjtools.messaging.error;
 
-import net.java.sjtools.messaging.Endpoint;
-import net.java.sjtools.messaging.error.TimeoutException;
-import net.java.sjtools.messaging.message.Message;
-import net.java.sjtools.thread.Semaphore;
+import net.java.sjtools.error.ApplicationError;
 
-public class CallQueue implements MessageQueue {
-	private Message message = null;
-	private Semaphore semafore = null;
+public class TimeoutException extends ApplicationError {
+	private static final long serialVersionUID = -7658135471823178109L;
 	
-	public CallQueue() {
-		semafore = new Semaphore();
-	}
-
-	public void push(Endpoint endpoint, Message message) {
-		this.message = message;
-		semafore.goGreen();
-	}
-
-	public void close() {
-		semafore.goGreen();
-	}
-	
-	public Message getMessage() {
-		semafore.waitForGreen();
-		return message;
-	}
-	
-	public Message getMessage(long timeout) throws TimeoutException {
-		if (semafore.waitForGreen(timeout)) {
-			return message;
-		} else {
-			throw new TimeoutException(timeout);
-		}
+	public TimeoutException(long timeout) {
+		super("Timeout after ".concat(String.valueOf(timeout)));
 	}
 }

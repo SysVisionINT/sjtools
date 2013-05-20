@@ -24,6 +24,7 @@ import java.util.Map;
 import java.util.Set;
 
 import net.java.sjtools.messaging.error.NoRouterError;
+import net.java.sjtools.messaging.error.TimeoutException;
 import net.java.sjtools.messaging.message.Message;
 import net.java.sjtools.messaging.message.Request;
 import net.java.sjtools.messaging.queue.CallQueue;
@@ -125,6 +126,16 @@ public class MessageBroker {
 	}
 
 	public static Object call(Endpoint endpoint, Object data) throws NoRouterError {
+		try {
+			return call(endpoint, data, 0);
+		} catch (TimeoutException e) {
+			// No TimeoutException with timeout=0
+		}
+		
+		return null;
+	}
+	
+	public static Object call(Endpoint endpoint, Object data, long timeout) throws NoRouterError, TimeoutException {
 		String msgRef = ReferenceUtil.getMessageReference();
 		String callRef = ReferenceUtil.getCallReference(msgRef);
 
@@ -136,7 +147,13 @@ public class MessageBroker {
 			Request request = new Request(callEndpoint, msgRef, data);
 
 			if (sendMessage(endpoint, request)) {
-				Message response = callQueue.getMessage();
+				Message response = null;
+				
+				if (timeout == 0) {
+					response = callQueue.getMessage();
+				} else {
+					response = callQueue.getMessage(timeout);
+				}
 
 				return response.getMessageObject();
 			} else {
@@ -145,7 +162,7 @@ public class MessageBroker {
 		} finally {
 			unregisterCall(callRef);
 		}
-	}
+	}	
 
 	private static CallQueue registerCall(String callRef) {
 		try {

@@ -32,7 +32,7 @@ import net.java.sjtools.pool.task.Expire;
 import net.java.sjtools.pool.task.Timeout;
 import net.java.sjtools.pool.task.Validate;
 import net.java.sjtools.thread.Lock;
-import net.java.sjtools.thread.Semafore;
+import net.java.sjtools.thread.Semaphore;
 import net.java.sjtools.time.timer.SuperTimer;
 
 public class Pool {
@@ -43,7 +43,7 @@ public class Pool {
 	private Map idlList = new HashMap();
 	private Map inUseList = new HashMap();
 	private boolean running = true;
-	private Semafore semafore = new Semafore();
+	private Semaphore semafore = new Semaphore();
 	private Lock lock = null;
 
 	public Pool(PoolConfig config, PoolFactory factory) {
