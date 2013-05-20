@@ -19,14 +19,20 @@
  */
 package net.java.sjtools.thread;
 
-public class Semafore {
-	private String mutex = "";
+public class Semaphore {
+	private String mutex = "muuuutex";
 
-	public void waitForGreen(long milliSeconds) {
+	public boolean waitForGreen(long milliSeconds) {
+		long start = 0;
+		
 		synchronized (mutex) {
 			try {
+				start = System.currentTimeMillis();
 				mutex.wait(milliSeconds);
-			} catch (Exception e) {}
+				return (System.currentTimeMillis() - start) < milliSeconds;
+			} catch (InterruptedException e) {
+				return false;
+			}
 		}
 	}
 	
@@ -34,7 +40,7 @@ public class Semafore {
 		synchronized (mutex) {
 			try {
 				mutex.wait();
-			} catch (Exception e) {}
+			} catch (InterruptedException e) {}
 		}
 	}	
 

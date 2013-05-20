@@ -25,6 +25,7 @@ import net.java.sjtools.messaging.Listener;
 import net.java.sjtools.messaging.MessageBroker;
 import net.java.sjtools.messaging.Topic;
 import net.java.sjtools.messaging.error.NoRouterError;
+import net.java.sjtools.messaging.error.TimeoutException;
 import net.java.sjtools.messaging.message.Event;
 import net.java.sjtools.messaging.message.Message;
 import net.java.sjtools.messaging.message.Request;
@@ -51,7 +52,6 @@ public abstract class AbstractActor implements Listener {
 		try {
 			if (message instanceof Event) {
 				Event event = (Event) message;
-
 				processEvent(event);
 			} else if (message instanceof Request) {
 				Request request = (Request) message;
@@ -132,6 +132,10 @@ public abstract class AbstractActor implements Listener {
 
 	protected Object call(Endpoint address, Object messageObject) throws NoRouterError {
 		return MessageBroker.call(address, messageObject);
+	}
+	
+	protected Object call(Endpoint address, Object messageObject, long timeout) throws NoRouterError, TimeoutException {
+		return MessageBroker.call(address, messageObject, timeout);
 	}
 
 	protected void cast(Endpoint address, Object messageObject) throws NoRouterError {
