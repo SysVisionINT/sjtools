@@ -177,4 +177,8 @@ public class LocalRouter implements Router, MessageRouter {
 	public MessageRouter getMessageRouter() {
 		return this;
 	}
+
+	public String getRouterName() {
+		return Endpoint.LOCAL_ROUTER;
+	}
 }
