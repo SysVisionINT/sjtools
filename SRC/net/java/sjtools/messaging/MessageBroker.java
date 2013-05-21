@@ -43,18 +43,18 @@ public class MessageBroker {
 	private static Map callMap = null;
 	private static Lock callLock = null;
 
-	public static void registerRouter(String name, Router router) {
+	public static void registerRouter(Router router) {
 		try {
 			routerLock.getWriteLock();
 
-			Router queue = (Router) routerMap.get(name);
+			Router queue = (Router) routerMap.get(router.getRouterName());
 
 			if (queue == null) {
-				routerMap.put(name, router);
+				routerMap.put(router.getRouterName(), router);
 
 				try {
 					routerQueueLock.getWriteLock();
-					routerQueueMap.put(name, new RouterQueue(router.getMessageRouter()));
+					routerQueueMap.put(router.getRouterName(), new RouterQueue(router.getMessageRouter()));
 				} finally {
 					routerQueueLock.releaseLock();
 				}
@@ -200,6 +200,6 @@ public class MessageBroker {
 		routerQueueMap = new HashMap();
 		routerQueueLock = new Lock(routerQueueMap);
 		
-		registerRouter(Endpoint.LOCAL_ROUTER, new LocalRouter());
+		registerRouter(new LocalRouter());
 	}
 }
