@@ -46,16 +46,12 @@ public class Endpoint implements Serializable {
 		return new Endpoint(routerName, TYPE_LISTENER, destination);
 	}
 	
-	public static Endpoint getEndpointForTopic(String routerName, String topicName) {
-		return new Endpoint(routerName, TYPE_TOPIC, topicName);
-	}
-	
 	public static Endpoint getLocalEndpointForDestination(String destination) {
 		return getEndpointForDestination(LOCAL_ROUTER, destination);
 	}
 	
 	public static Endpoint getLocalEndpointForTopic(String topicName) {
-		return getEndpointForTopic(LOCAL_ROUTER, topicName);
+		return new Endpoint(LOCAL_ROUTER, TYPE_TOPIC, topicName);
 	}	
 	
 	public static Endpoint getEndpointFromString(String address) throws InvalidEndpointException {
