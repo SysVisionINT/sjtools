@@ -31,6 +31,7 @@ import net.java.sjtools.messaging.message.Message;
 import net.java.sjtools.messaging.message.Request;
 import net.java.sjtools.messaging.message.Response;
 import net.java.sjtools.messaging.router.LocalRouter;
+import net.java.sjtools.messaging.router.Router;
 import net.java.sjtools.messaging.util.ReferenceUtil;
 
 public abstract class AbstractActor implements Listener {
@@ -84,9 +85,9 @@ public abstract class AbstractActor implements Listener {
 	}
 
 	public void subscribeTopic(Endpoint endpoint) throws NoRouterError {
-		if (endpoint.isLocal()) {
-			LocalRouter router = MessageBroker.getLocalRouter();
-			
+		Router router = MessageBroker.getRouter(endpoint.getRouterName());
+		
+		if (router != null) {
 			Topic topic = router.getTopic(endpoint.getDestination());
 
 			if (topic != null) {
@@ -100,9 +101,9 @@ public abstract class AbstractActor implements Listener {
 	}
 
 	public void unsubscribeTopic(Endpoint endpoint) throws NoRouterError {
-		if (endpoint.isLocal()) {
-			LocalRouter router = MessageBroker.getLocalRouter();
-			
+		Router router = MessageBroker.getRouter(endpoint.getRouterName());
+
+		if (router != null) {
 			Topic topic = router.getTopic(endpoint.getDestination());
 
 			if (topic != null) {
@@ -116,7 +117,7 @@ public abstract class AbstractActor implements Listener {
 	}
 
 	protected void event(String eventName, Object messageObject) throws NoRouterError {
-		LocalRouter router = MessageBroker.getLocalRouter();
+		Router router = MessageBroker.getLocalRouter();
 		Topic topic = router.getTopic(getTopicNameForEvent(eventName));
 		
 		MessageBroker.sendMessage(topic.getEndpoint(), new Event(eventName, messageObject));
