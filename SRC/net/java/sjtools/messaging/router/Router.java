@@ -19,8 +19,12 @@
  */
 package net.java.sjtools.messaging.router;
 
+import net.java.sjtools.messaging.Topic;
+
 public interface Router {
 	public String getRouterName();
 	public MessageRouter getMessageRouter();
+	public Topic getTopic(String topicName);
+	public String[] getTopicNames();
 	public void stop();
 }
