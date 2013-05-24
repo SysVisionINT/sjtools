@@ -34,7 +34,7 @@ public class ProcessResponse implements Runnable {
 
 	public void run() {
 		try {
-			actor.receiveAsynchronousCallResponse(response.getReferente(), response.getMessageObject());
+			actor.receiveAsynchronousCallResponse(response.getReference(), response.getMessageObject());
 		} catch (Exception e) {
 			e.printStackTrace(IO.err);
 		}

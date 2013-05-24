@@ -72,7 +72,7 @@ public abstract class AbstractActor implements Listener {
 	}
 
 	protected void processResponse(Response response) {
-		receiveAsynchronousCallResponse(response.getReferente(), response.getMessageObject());
+		receiveAsynchronousCallResponse(response.getReference(), response.getMessageObject());
 	}
 
 	protected void processRequest(Request request) {

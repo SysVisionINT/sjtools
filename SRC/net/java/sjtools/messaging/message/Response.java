@@ -23,14 +23,14 @@ package net.java.sjtools.messaging.message;
 public class Response extends Message {
 	private static final long serialVersionUID = 3757518415493088289L;
 	
-	private String referente = null;
+	private String reference = null;
 	
-	public Response(String referente, Object data) {
+	public Response(String reference, Object data) {
 		super(data);
-		this.referente = referente;
+		this.reference = reference;
 	}
 
-	public String getReferente() {
-		return referente;
+	public String getReference() {
+		return reference;
 	}
 }
