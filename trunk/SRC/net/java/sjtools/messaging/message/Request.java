@@ -26,27 +26,27 @@ public class Request extends Message {
 	private static final long serialVersionUID = 4353178246757520713L;
 	
 	private Endpoint replyTo = null;
-	private String referente = null;
+	private String reference = null;
 	
 	public Request(Endpoint replyTo, Object data) {
 		this(replyTo, ReferenceUtil.getMessageReference(), data);
 	}
 	
-	public Request(Endpoint replyTo, String referente, Object data) {
+	public Request(Endpoint replyTo, String reference, Object data) {
 		super(data);
 		this.replyTo = replyTo;
-		this.referente = referente;
+		this.reference = reference;
 	}
 	
 	public Endpoint getReplyTo() {
 		return replyTo;
 	}
 	
-	public String getReferente() {
-		return referente;
+	public String getReference() {
+		return reference;
 	}
 
 	public Response createResponse(Object data) {
-		return new Response(referente, data);
+		return new Response(reference, data);
 	}
 }
