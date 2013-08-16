@@ -27,30 +27,43 @@ import net.java.sjtools.db.DBMSUtil;
 
 public class NativePrimaryKeyUtil {
 	public static final long KEY_NOT_FOUND = -1;
+	
+	private static NativePrimaryKeyReader postgresql = new PostgreSQLPrimaryKeyReader();
+	private static NativePrimaryKeyReader informix = new InformixPrimaryKeyReader();
+	private static NativePrimaryKeyReader mysql = new MySQLPrimaryKeyReader();
+	private static NativePrimaryKeyReader derby = new DerbyPrimaryKeyReader();
+	private static NativePrimaryKeyReader hsql = new HSQLPrimaryKeyReader();
+	private static NativePrimaryKeyReader h2 = new H2PrimaryKeyReader();
 
 	public static long getPrimaryKey(Connection con) throws SQLException {
-		return getPrimaryKey(con, DBMSUtil.getDBMS(con));
+		return getPrimaryKey(con, DBMSUtil.getDBMS(con), null);
+	}
+	
+	public static long getPrimaryKey(Connection con, String tableName) throws SQLException {
+		return getPrimaryKey(con, DBMSUtil.getDBMS(con), tableName);
 	}
 
-	public static long getPrimaryKey(Connection con, DBMS dbms) throws SQLException {
+	public static long getPrimaryKey(Connection con, DBMS dbms, String tableName) throws SQLException {
 		long ret = KEY_NOT_FOUND;
 
 		NativePrimaryKeyReader reader = null;
 
-		if (dbms.equals(DBMS.DBMS_INFORMIX)) {
-			reader = new InformixPrimaryKeyReader();
+		if (dbms.equals(DBMS.DBMS_POSTGRESQL)) {
+			reader = postgresql;
+		} else if (dbms.equals(DBMS.DBMS_INFORMIX)) {
+			reader = informix;
 		} else if (dbms.equals(DBMS.DBMS_MYSQL)) { 
-			reader = new MySQLPrimaryKeyReader();
+			reader = mysql;
 		} else if (dbms.equals(DBMS.DBMS_DERBY)) { 
-			reader = new DerbyPrimaryKeyReader();
+			reader = derby;
 		} else if (dbms.equals(DBMS.DBMS_HSQL)) { 
-			reader = new HSQLPrimaryKeyReader();
+			reader = hsql;
 		} else if (dbms.equals(DBMS.DBMS_H2)) { 
-			reader = new H2PrimaryKeyReader();			
+			reader = h2;			
 		}
 
 		if (reader != null) {
-			ret = reader.getKey(con);
+			ret = reader.getKey(con, tableName);
 		}
 
 		return ret;

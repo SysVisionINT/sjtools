@@ -30,7 +30,7 @@ public class InformixPrimaryKeyReader implements NativePrimaryKeyReader {
 	
 	private static final String SQL_GENERATED_ID = "SELECT DBINFO('sqlca.sqlerrd1') FROM systables WHERE tabid = 1";
 
-	public long getKey(Connection con) throws SQLException {
+	public long getKey(Connection con, String tableName) throws SQLException {
 		long ret = 0;
 		
         PreparedStatement ps = null;
