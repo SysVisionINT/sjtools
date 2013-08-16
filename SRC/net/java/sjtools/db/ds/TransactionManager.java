@@ -22,6 +22,8 @@ package net.java.sjtools.db.ds;
 import java.io.PrintWriter;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.sql.SQLFeatureNotSupportedException;
+import java.util.logging.Logger;
 
 import javax.sql.DataSource;
 
@@ -29,8 +31,8 @@ import net.java.sjtools.db.connection.FastConnection;
 import net.java.sjtools.db.error.SQLError;
 
 public class TransactionManager implements DataSource {
-	private static ThreadLocal connection = new ThreadLocal();
-	private static ThreadLocal transaction = new ThreadLocal();
+	private static ThreadLocal<FastConnection> connection = new ThreadLocal<FastConnection>();
+	private static ThreadLocal<Boolean> transaction = new ThreadLocal<Boolean>();
 
 	private DataSource dataSource = null;
 	
@@ -61,10 +63,10 @@ public class TransactionManager implements DataSource {
 	}
 
 	public void commit() throws SQLError {
-		Boolean tran = (Boolean) transaction.get();
+		Boolean tran = transaction.get();
 
 		if (tran != null && tran.booleanValue()) {
-			FastConnection con = (FastConnection) connection.get();
+			FastConnection con = connection.get();
 
 			if (con != null) {
 				try {
@@ -87,10 +89,10 @@ public class TransactionManager implements DataSource {
 	}
 
 	public void rollback() throws SQLError {
-		Boolean tran = (Boolean) transaction.get();
+		Boolean tran = transaction.get();
 
 		if (tran != null && tran.booleanValue()) {
-			FastConnection con = (FastConnection) connection.get();
+			FastConnection con = connection.get();
 
 			if (con != null) {
 				try {
@@ -109,7 +111,7 @@ public class TransactionManager implements DataSource {
 	}
 
 	public boolean isInTransaction() {
-		Boolean tran = (Boolean) transaction.get();
+		Boolean tran = transaction.get();
 
 		if (tran != null && tran.booleanValue()) {
 			return true;
@@ -120,7 +122,7 @@ public class TransactionManager implements DataSource {
 
 	public Connection getConnection() throws SQLException {
 		if (isInTransaction()) {
-			return (Connection) connection.get();
+			return connection.get();
 		} else {
 			return dataSource.getConnection();
 		}
@@ -144,5 +146,17 @@ public class TransactionManager implements DataSource {
 
 	public void setLoginTimeout(int seconds) throws SQLException {
 		dataSource.setLoginTimeout(seconds);
+	}
+
+	public Logger getParentLogger() throws SQLFeatureNotSupportedException {
+		throw new SQLFeatureNotSupportedException("Method not supported!");
+	}
+
+	public <T> T unwrap(Class<T> iface) throws SQLException {
+		throw new SQLException("Method not supported!");
+	}
+
+	public boolean isWrapperFor(Class<?> iface) throws SQLException {
+		throw new SQLException("Method not supported!");
 	}
 }

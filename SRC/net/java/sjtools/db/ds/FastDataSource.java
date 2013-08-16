@@ -27,14 +27,14 @@ import net.java.sjtools.db.connection.FastConnection;
 public class FastDataSource extends DataSourceImpl {
 	private static final long serialVersionUID = -961465900213544680L;
 
-	private static ThreadLocal localCon = new ThreadLocal();
+	private static ThreadLocal<FastConnection> localCon = new ThreadLocal<FastConnection>();
 
 	public FastDataSource(String driver, String url, String user, String password) {
 		super(driver, url, user, password);
 	}
 
 	public Connection getConnection() throws SQLException {
-		Connection con = (Connection) localCon.get();
+		Connection con = localCon.get();
 
 		if (con == null) {
 			con = super.getConnection();
@@ -46,7 +46,7 @@ public class FastDataSource extends DataSourceImpl {
 	}
 
 	public void release() {
-		FastConnection con = (FastConnection) localCon.get();
+		FastConnection con = localCon.get();
 
 		if (con != null) {
 			con.closeConnection();

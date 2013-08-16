@@ -30,7 +30,7 @@ public class DerbyPrimaryKeyReader implements NativePrimaryKeyReader {
 	
 	private static final String SQL_GENERATED_ID = "SELECT IDENTITY_VAL_LOCAL() FROM sys.sysschemas WHERE schemaname = 'SYS'";
 
-	public long getKey(Connection con) throws SQLException {
+	public long getKey(Connection con, String tableName) throws SQLException {
 		long ret = 0;
 		
         PreparedStatement ps = null;

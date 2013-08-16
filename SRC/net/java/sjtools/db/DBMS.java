@@ -34,6 +34,7 @@ public class DBMS implements Serializable {
 	public static final String DRIVER_DERBY = "DERBY";
 	public static final String DRIVER_HSQL = "HSQL";
 	public static final String DRIVER_H2 = "H2";
+	public static final String DRIVER_POSTGRESQL = "POSTGRESQL";
 	
 	private static final int DBMS_UNKNOWN_VALUE = 0;
 	private static final int DBMS_SAPDB_VALUE = 1;
@@ -44,6 +45,7 @@ public class DBMS implements Serializable {
 	private static final int DBMS_DERBY_VALUE = 6;
 	private static final int DBMS_HSQL_VALUE = 7;
 	private static final int DBMS_H2_VALUE = 8;
+	private static final int DBMS_POSTGRESQL_VALUE = 9;
 	
 	public static final DBMS DBMS_UNKNOWN = new DBMS(DBMS_UNKNOWN_VALUE);
 	public static final DBMS DBMS_SAPDB = new DBMS(DBMS_SAPDB_VALUE);
@@ -54,6 +56,7 @@ public class DBMS implements Serializable {
 	public static final DBMS DBMS_DERBY = new DBMS(DBMS_DERBY_VALUE);
 	public static final DBMS DBMS_HSQL = new DBMS(DBMS_HSQL_VALUE);
 	public static final DBMS DBMS_H2 = new DBMS(DBMS_H2_VALUE);
+	public static final DBMS DBMS_POSTGRESQL = new DBMS(DBMS_POSTGRESQL_VALUE);
 	
 	private int dbms = DBMS_UNKNOWN_VALUE;
 	
@@ -64,7 +67,9 @@ public class DBMS implements Serializable {
 	public static DBMS getDBMS(String driverName) {
 		String driver = driverName.toUpperCase();
 		
-		if (driver.indexOf(DRIVER_INFORMIX) >= 0) {
+		if (driver.indexOf(DRIVER_POSTGRESQL) >= 0) {
+			return DBMS_POSTGRESQL;
+		} else if (driver.indexOf(DRIVER_INFORMIX) >= 0) {
 			return DBMS_INFORMIX;
 		} else if (driver.indexOf(DRIVER_ORACLE) >= 0) {
 			return DBMS_ORACLE;
@@ -118,7 +123,9 @@ public class DBMS implements Serializable {
 		case DBMS_HSQL_VALUE:
 			return DRIVER_HSQL;
 		case DBMS_H2_VALUE:
-			return DRIVER_H2;					
+			return DRIVER_H2;			
+		case DBMS_POSTGRESQL_VALUE:
+			return DRIVER_POSTGRESQL;				
 		}
 
 		return null;

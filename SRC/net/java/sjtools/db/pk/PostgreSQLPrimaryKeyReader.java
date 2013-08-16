@@ -20,8 +20,38 @@
 package net.java.sjtools.db.pk;
 
 import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 
-public interface NativePrimaryKeyReader {
-	public long getKey(Connection con, String tableName) throws SQLException;
+import net.java.sjtools.db.DBUtil;
+import net.java.sjtools.util.TextUtil;
+
+public class PostgreSQLPrimaryKeyReader implements NativePrimaryKeyReader {
+	
+	private static final String SQL_GENERATED_ID = "select currval('{tableName}_id_seq')";
+
+	public long getKey(Connection con, String tableName) throws SQLException {
+		long ret = 0;
+		
+        PreparedStatement ps = null;
+        ResultSet rs = null;
+
+       try {
+    	   String sql = TextUtil.replace(SQL_GENERATED_ID, "{tableName}", tableName);
+    	   
+            ps = con.prepareStatement(sql, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
+
+            rs = ps.executeQuery();
+        
+            if (rs.next()) {
+                ret = rs.getLong(1);
+            }
+        } finally {
+            DBUtil.close(rs);
+            DBUtil.close(ps);
+        }
+		
+		return ret;
+	}
 }
