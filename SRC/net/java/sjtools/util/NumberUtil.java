@@ -22,7 +22,6 @@ package net.java.sjtools.util;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 
-
 public class NumberUtil {
 
 	public static Double format(String number) {
@@ -151,23 +150,56 @@ public class NumberUtil {
 		}
 
 		if (number.charAt(0) == '-') {
-			if (number.length() > MIN_INTEGER.length()) {
+			// Limite inferior
+			if (MIN_INTEGER.charAt(0) == '-') {
+				if (number.length() > MIN_INTEGER.length()) {
+					return false;
+				}
+
+				if (number.length() == MIN_INTEGER.length() && number.compareTo(MIN_INTEGER) > 0) {
+					return false;
+				}
+			} else {
 				return false;
 			}
 
-			if (number.length() == MIN_INTEGER.length() && number.compareTo(MIN_INTEGER) > 0) {
-				return false;
+			// Limite superior
+			if (MAX_INTEGER.charAt(0) == '-') {
+				if (number.length() < MAX_INTEGER.length()) {
+					return false;
+				}
+
+				if (number.length() == MAX_INTEGER.length() && number.compareTo(MAX_INTEGER) < 0) {
+					return false;
+				}
 			}
 		} else {
-			if (number.length() > MAX_INTEGER.length()) {
-				return false;
+			// Limite inferior
+			if (MIN_INTEGER.charAt(0) != '-') {
+				if (number.length() < MIN_INTEGER.length()) {
+					return false;
+				}
+
+				if (number.length() == MIN_INTEGER.length() && number.compareTo(MIN_INTEGER) < 0) {
+					return false;
+				}
 			}
 
-			if (number.length() == MAX_INTEGER.length() && number.compareTo(MAX_INTEGER) > 0) {
+			// Limite superior
+			if (MAX_INTEGER.charAt(0) != '-') {
+				if (number.length() > MAX_INTEGER.length()) {
+					return false;
+				}
+
+				if (number.length() == MAX_INTEGER.length() && number.compareTo(MAX_INTEGER) > 0) {
+					return false;
+				}
+			} else {
 				return false;
 			}
 		}
 
 		return true;
 	}
+
 }
