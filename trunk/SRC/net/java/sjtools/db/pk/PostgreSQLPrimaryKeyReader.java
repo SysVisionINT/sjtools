@@ -25,33 +25,30 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 import net.java.sjtools.db.DBUtil;
-import net.java.sjtools.util.TextUtil;
 
 public class PostgreSQLPrimaryKeyReader implements NativePrimaryKeyReader {
-	
-	private static final String SQL_GENERATED_ID = "select currval('{tableName}_id_seq')";
+
+	private static final String SQL_GENERATED_ID = "select lastval()";
 
 	public long getKey(Connection con, String tableName) throws SQLException {
 		long ret = 0;
-		
-        PreparedStatement ps = null;
-        ResultSet rs = null;
 
-       try {
-    	   String sql = TextUtil.replace(SQL_GENERATED_ID, "{tableName}", tableName);
-    	   
-            ps = con.prepareStatement(sql, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
+		PreparedStatement ps = null;
+		ResultSet rs = null;
 
-            rs = ps.executeQuery();
-        
-            if (rs.next()) {
-                ret = rs.getLong(1);
-            }
-        } finally {
-            DBUtil.close(rs);
-            DBUtil.close(ps);
-        }
-		
+		try {
+			ps = con.prepareStatement(SQL_GENERATED_ID, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
+
+			rs = ps.executeQuery();
+
+			if (rs.next()) {
+				ret = rs.getLong(1);
+			}
+		} finally {
+			DBUtil.close(rs);
+			DBUtil.close(ps);
+		}
+
 		return ret;
 	}
 }
