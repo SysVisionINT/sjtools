@@ -87,6 +87,7 @@ public class CSVSplitter implements Splitter, Serializable {
 			char lastCh = 0;
 
 			boolean quotedField = false;
+			boolean skipedCR = false;
 
 			while (true) {
 				b = inputStream.read();
@@ -108,11 +109,17 @@ public class CSVSplitter implements Splitter, Serializable {
 
 				record.append(ch);
 
-				if (!quotedField && lastCh == '\r' && ch != '\n') {
-					field.append(lastCh);
+				if (!quotedField && (lastCh == '\r' || skipedCR) && ch != '\n') {
+					skipedCR = false;
+					field.append('\r');
 				}
 
 				if (!quotedField || lastCh == quote) {
+					if (ch == '\r') {
+						skipedCR = true;
+						continue;
+					}
+
 					if (ch == separator || ch == '\n') {
 						ret.add(field.toString());
 						field = new StringBuffer();
