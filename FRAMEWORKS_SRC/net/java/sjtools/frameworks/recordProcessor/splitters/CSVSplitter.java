@@ -38,6 +38,10 @@ public class CSVSplitter implements Splitter, Serializable {
 
 	private InputStream inputStream = null;
 
+	private ProcessorError processorError = null;
+	private List record = null;
+	private boolean eof = false;
+
 	public CSVSplitter(Integer elementCount, String separator, String quote, boolean skipHeader) throws ProcessorError {
 		try {
 			if (separator.length() != 1) {
@@ -68,115 +72,153 @@ public class CSVSplitter implements Splitter, Serializable {
 	}
 
 	public boolean hasNext() throws ProcessorError {
+		if (eof) {
+			return false;
+		}
+
 		try {
-			return inputStream.available() != 0;
+			processorError = null;
+
+			// Lista para retorno do método nextRecord
+			record = new ArrayList();
+
+			StringBuffer buffer = new StringBuffer();
+			StringBuffer field = new StringBuffer();
+
+			int b = 0;
+			char ch = 0;
+
+			boolean quotedField = false;
+			boolean skipedCR = false;
+
+			short quoteCount = 0;
+
+			while (true) {
+				b = inputStream.read();
+
+				if (b == -1) { //EOF
+					eof = true;
+
+					if (quotedField && quoteCount != 1) { // O último caracter não é uma aspa.
+						processorError = new InvalidRecordError(buffer.toString(), toString());
+						return true;
+					}
+
+					//Se for linha vazia, não adicionar e retornar false (não existem mais registos).
+					if (field.length() == 0 && record.isEmpty()) {
+						return false;
+					}
+
+					record.add(field.toString());
+					break;
+				} else {
+					ch = (char) b;
+
+					// Para saber a totalidade do registo que foi lido
+					buffer.append(ch);
+
+					if (quotedField) {
+						if (ch == quote) {
+							quoteCount++;
+
+							if (quoteCount == 2) {
+								field.append(quote);
+								quoteCount = 0;
+
+							}
+
+							continue;
+						}
+
+						if (quoteCount == 1) {
+							if (ch == '\r') {
+								skipedCR = true;
+								continue;
+							}
+
+							if (ch == separator) {
+								// Fim do field
+								record.add(field.toString());
+								field.setLength(0);
+								quoteCount = 0;
+								quotedField = false;
+								continue;
+							} else if (ch == '\n') {
+								// Fim do field e do record
+								record.add(field.toString());
+								break;
+							} else {
+								processorError = new InvalidRecordError(buffer.toString(), toString());
+								return true;
+							}
+						}
+
+						if (skipedCR) {
+							skipedCR = false;
+							field.append('\r');
+						}
+
+						field.append(ch);
+					} else { // if (quotedField)
+						if (ch == quote) {
+							if (field.length() == 0) {
+								quotedField = true;
+								continue;
+							} else {
+								processorError = new InvalidRecordError(buffer.toString(), toString());
+								return true;
+							}
+						}
+
+						if (ch == '\r') {
+							skipedCR = true;
+							continue;
+						}
+
+						if (ch == separator) {
+							// Fim do field
+							record.add(field.toString());
+							quoteCount = 0;
+							field.setLength(0);
+							continue;
+						} else if (ch == '\n') {
+							// Fim do field e do record
+							record.add(field.toString());
+							break;
+						}
+
+						if (skipedCR) {
+							skipedCR = false;
+							field.append('\r');
+						}
+
+						field.append(ch);
+					}
+				}
+			}
+
+			// Validação do número de elementos
+			if (elementCount != null && elementCount.intValue() != record.size()) {
+				processorError = new InvalidRecordError(buffer.toString(), toString());
+			}
+
+			return true;
 		} catch (Exception e) {
 			throw new ProcessorError(e);
 		}
 	}
 
 	public List nextRecord() throws ProcessorError {
-		try {
-			StringBuffer record = new StringBuffer();
-			StringBuffer field = new StringBuffer();
-
-			List ret = new ArrayList();
-
-			int b = 0;
-			char ch = 0;
-			char lastCh = 0;
-
-			boolean quotedField = false;
-			boolean skipedCR = false;
-
-			while (true) {
-				b = inputStream.read();
-
-				if (b == -1) { //EOF
-					if (field.length() > 0) {
-						ret.add(field.toString());
-					}
-
-					if (ret.size() == 0) {
-						// net.java.sjtools.frameworks.recordProcessor.Processor.process stops when nextRecord returns null
-						ret = null;
-					}
-
-					break;
-				}
-
-				ch = (char) b;
-
-				record.append(ch);
-
-				if (!quotedField && (lastCh == '\r' || skipedCR) && ch != '\n') {
-					skipedCR = false;
-					field.append('\r');
-				}
-
-				if (!quotedField || lastCh == quote) {
-					if (ch == '\r') {
-						skipedCR = true;
-						continue;
-					}
-
-					if (ch == separator || ch == '\n') {
-						ret.add(field.toString());
-						field = new StringBuffer();
-
-						quotedField = false;
-						lastCh = 0;
-
-						if (ch == '\n') {
-							break;
-						}
-
-						continue;
-					}
-				}
-
-				if (ch == quote) {
-					if (!quotedField) {
-						if (field.length() == 0) {
-							quotedField = true;
-							continue;
-						}
-					}
-
-					if (quotedField) {
-						if (lastCh == quote) {
-							field.append(ch);
-							lastCh = 0;
-						} else {
-							lastCh = ch;
-						}
-
-						continue;
-					} else {
-						throw new InvalidRecordError(record.toString(), toString());
-					}
-				}
-
-				lastCh = ch;
-
-				if (quotedField || ch != '\r') {
-					field.append(ch);
-				}
-			}
-
-			if (ret != null && elementCount != null && elementCount.intValue() != ret.size()) {
-				throw new InvalidRecordError(record.toString(), toString());
-			}
-
-			return ret;
-		} catch (ProcessorError e) {
-			throw e;
-		} catch (Exception e) {
-			throw new ProcessorError(e);
+		// Caso tenha ocorrido algum erro no processamento dos campos, lançamos a excepção
+		if (processorError != null) {
+			throw processorError;
 		}
+
+		return record;
 	}
 
 	public String toString() {
 		return "CSVSplitter(" + elementCount + ", " + separator + ", " + quote + ", " + skipHeader + ")";
 	}
+
 }
