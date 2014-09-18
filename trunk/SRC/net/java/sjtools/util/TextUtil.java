@@ -29,8 +29,9 @@ import net.java.sjtools.config.error.ConfigurationError;
 import net.java.sjtools.formater.ToString;
 
 public class TextUtil {
+
 	private static final String DEFAULT_INCLUDE_PACKAGE = "defaultIncludePackage";
-	
+
 	public static final int ALLIGN_CENTER = 0;
 	public static final int ALLIGN_LEFT = -1;
 	public static final int ALLIGN_RIGHT = 1;
@@ -232,13 +233,23 @@ public class TextUtil {
 		}
 
 		if (obj.getClass().isArray()) {
-			return toString((Object[]) obj);
+			Object[] array = null;
+
+			if (obj.getClass().getComponentType().isPrimitive()) {
+				// Transformar um array de primitivos num array de objectos
+				array = BeanUtil.primitiveArrayToObjectArray(obj);
+			} else {
+				// Cast simples para array de objectos
+				array = (Object[]) obj;
+			}
+
+			return toString(array);
 		}
 
 		if (ToString.existFormater(obj.getClass())) {
 			return ToString.toString(obj, includePackage);
 		}
-		
+
 		if (obj.getClass().getPackage() != null) {
 			String packageName = obj.getClass().getPackage().getName();
 
@@ -279,7 +290,7 @@ public class TextUtil {
 			return text.toUpperCase();
 		}
 	}
-	
+
 	public static boolean isDefaultIncludePackage() {
 		try {
 			return SJToolsConfigReader.getInstance().getBoolean(DEFAULT_INCLUDE_PACKAGE, true);

@@ -464,7 +464,7 @@ public class BeanUtil {
 					try {
 						method = obj.getClass().getMethod(methodName, primitive);
 					} catch (NoSuchMethodException e2) {}
-				}				
+				}
 			}
 
 			if (method == null) {
@@ -483,7 +483,7 @@ public class BeanUtil {
 							try {
 								method = obj.getClass().getMethod(methodName, primitive);
 							} catch (NoSuchMethodException e2) {}
-						}	
+						}
 					}
 				}
 			}
@@ -548,4 +548,25 @@ public class BeanUtil {
 	public static Object getPropertyValue(MethodCache cache, Object obj, String propertyName) throws Exception {
 		return getPropertyValue(new BeanUtil(obj, cache), propertyName);
 	}
+
+	public static Object[] primitiveArrayToObjectArray(Object primitiveArray) {
+		Object[] array = null;
+
+		int length = Array.getLength(primitiveArray);
+
+		if (length == 0) {
+			array = new Object[0];
+		} else {
+			Class type = Array.get(primitiveArray, 0).getClass();
+
+			array = (Object[]) Array.newInstance(type, length);
+
+			for (int i = 0; i < length; i++) {
+				array[i] = Array.get(primitiveArray, i);
+			}
+		}
+
+		return array;
+	}
+
 }
