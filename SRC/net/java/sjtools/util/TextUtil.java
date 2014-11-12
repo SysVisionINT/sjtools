@@ -150,9 +150,12 @@ public class TextUtil {
 
 		StringBuffer buffer = new StringBuffer();
 
+		boolean notFirst = false;
 		for (Iterator i = list.iterator(); i.hasNext();) {
-			if (buffer.length() != 0) {
+			if (notFirst) {
 				buffer.append(", ");
+			} else {
+				notFirst = true;
 			}
 
 			buffer.append(toString(i.next(), includePackage));
