@@ -19,6 +19,7 @@
  */
 package net.java.sjtools.xml;
 
+import java.io.File;
 import java.io.InputStream;
 
 import javax.xml.parsers.SAXParser;
@@ -56,7 +57,9 @@ public class SimpleParser {
     }
     
     public Object parse(String fileName) throws Exception {
-        reader.parse(new InputSource(fileName));
+    	File file = new File(fileName);
+
+        reader.parse(new InputSource(file.toURI().toASCIIString()));
 
         return handler.getRootElement();
     }
@@ -65,5 +68,5 @@ public class SimpleParser {
         reader.parse(new InputSource(iStream));
 
         return handler.getRootElement();
-    }    
+	}
 }
