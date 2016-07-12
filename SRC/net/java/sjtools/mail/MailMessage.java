@@ -1,7 +1,7 @@
 /*
  * SJTools - SysVision Java Tools
  * 
- * Copyright (C) 2006 SysVision - Consultadoria e Desenvolvimento em Sistemas de Inform·tica, Lda.  
+ * Copyright (C) 2006 SysVision - Consultadoria e Desenvolvimento em Sistemas de Inform√°tica, Lda.  
  * 
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -130,7 +130,7 @@ public class MailMessage implements Serializable {
 	}
 
 	public void addBCC(InternetAddress bcc) {
-		this.cc.add(bcc);
+		this.bcc.add(bcc);
 	}
 	
 	public void setBCC(String bcc) throws AddressException {
@@ -142,7 +142,7 @@ public class MailMessage implements Serializable {
 	}	
 	
 	public boolean isBCCEmpty() {
-		return cc.isEmpty();
+		return bcc.isEmpty();
 	}
 
 	public String getSubject() {
